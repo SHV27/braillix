@@ -236,3 +236,39 @@ Veto any of these with one word:
 1. **Nemeth, not Bharati maths braille**, for the reason in D2.1 — with the swap point built in.
 2. **No Python, no server** — the whole product is a static web app (D2.2).
 3. **GitHub repo private for now** — going public is his call per the Charter (D1.2).
+
+---
+
+## D3 · Calls made during the build
+
+- **D3.1 (Arc 2)** — **Braillix parses SRE's enriched MathML with its own ~230-line XML reader**
+  (`app/src/core/xml.ts`) instead of a DOM library. Measured on this machine: `jsdom` takes **50 s**
+  to load and `linkedom` **15 s**, either of which would make `npm run verify` slow enough that
+  people stop running it — and a gate nobody runs is not a gate. The input is one library's
+  well-formed output, not arbitrary XML, and the reader is itself covered by 25 tests including
+  every malformed case. Both dependencies were uninstalled.
+- **D3.2 (Arc 2)** — **`toEnriched` returns a string under Node and a live DOM element in a
+  browser.** Coercing with `String(value)` produced the literal text `[object Element]`, silently
+  disabling structural navigation *only in the browser* — passing every unit test. Now handled in
+  one place (`stringifyEnriched`) with its own tests for both shapes. This is the exact class of
+  bug the project cannot afford on 22 August.
+- **D3.3 (Arc 2)** — **Folding must pay for itself.** A fold costs the reader a step, so it has to
+  buy something. `2a` folds to ⠿⠿ — two markers and no information; `a+b` folds to ⠿⠬⠿, no shorter
+  than ⠁⠬⠃. The rule is now: fold only if at least one structural cell survives AND the result is
+  strictly shorter than the real braille. Otherwise show the true braille and say why on screen.
+  Found by testing real expressions, not by reasoning.
+- **D3.4 (Arc 2)** — **Playwright always builds and serves fresh** (`reuseExistingServer: false`).
+  A reused preview server holding an older `dist` produced a confusing false failure. A slower gate
+  that tells the truth beats a fast one that does not.
+- **D3.5 (Arc 2)** — **The store is exposed as `window.__braillix`.** Braillix has a class of bug
+  that only appears in a real browser (D3.2), and being able to read the engine's actual output on
+  the machine that is misbehaving is worth more than an empty global namespace. It exposes no
+  secrets and writes nothing.
+- **D3.6 (Arc 2)** — The Cell Atlas was pulled forward from Arc 3 into Arc 1. It is cheap, it is
+  the artefact the hardware team needs to check cam wiring, and it proves the profile mapping
+  visually. Pulling work *earlier* does not violate a frozen acceptance list; adding unplanned work
+  would, so this is logged rather than done silently.
+- **D3.7 (Arc 2)** — **Operational gotcha, cost us one debugging cycle twice:** this environment's
+  Bash heredoc strips backslashes, so a spec file written that way turned `\frac{1}{2a}` into the
+  literal text `rac12a` and produced a completely misleading test failure. Any file containing
+  LaTeX is written with the Write tool, or uses `String.raw`.

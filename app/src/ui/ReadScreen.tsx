@@ -1,16 +1,18 @@
 /**
- * The Read screen — the walking skeleton's whole reason for existing.
+ * The Read screen.
  *
  * Type an expression, watch the correct Nemeth dots appear on however many cells the display has,
  * and see the cam numbers that would go on the wire. Everything visible here is real: no mock
  * data, no placeholder braille.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { useBraillix } from '../store';
 import { SIMULATOR_MAX_CELLS, SIMULATOR_MIN_CELLS } from '../config';
+import { FULL_CELL } from '../core/braille';
 import { BrailleCell } from './BrailleCell';
 import { DisplayStrip } from './DisplayStrip';
+import { ReaderPanel } from './ReaderPanel';
 import './ReadScreen.css';
 
 /** One pre-loaded example so the first thing a new user sees is a working display, not a blank. */
@@ -29,15 +31,19 @@ export function ReadScreen() {
   const latex = useBraillix((s) => s.latex);
   const setLatex = useBraillix((s) => s.setLatex);
   const translation = useBraillix((s) => s.translation);
-  const translating = useBraillix((s) => s.translating);
   const profile = useBraillix((s) => s.profile);
   const setCellCount = useBraillix((s) => s.setCellCount);
   const frame = useBraillix((s) => s.frame);
   const windowStart = useBraillix((s) => s.windowStart);
   const setWindowStart = useBraillix((s) => s.setWindowStart);
   const sre = useBraillix((s) => s.capabilities.sre);
+  const activeCells = useBraillix((s) => s.activeCells);
+  const foldedChildCells = useBraillix((s) => s.foldedChildCells);
+  const enterFoldAt = useBraillix((s) => s.enterFoldAt);
+  const announcement = useBraillix((s) => s.announcement);
+  const mode = useBraillix((s) => s.mode);
 
-  // Law 7 of the pipeline: taste of success before any input is demanded.
+  // Taste of success before any input is demanded.
   useEffect(() => {
     if (sre.state === 'ready' && latex === '') setLatex(OPENING_EXAMPLE);
   }, [sre.state, latex, setLatex]);
@@ -45,15 +51,8 @@ export function ReadScreen() {
   const issues = translation?.issues ?? [];
   const parseIssue = issues.find((i) => i.kind === 'parse');
 
-  const total = translation?.cells.length ?? 0;
+  const total = activeCells.length;
   const canScroll = total > profile.cellCount;
-
-  const announcement = useMemo(() => {
-    if (translating) return 'Translating…';
-    if (parseIssue) return `Could not read that expression: ${parseIssue.message}`;
-    if (!translation || total === 0) return 'Nothing to read yet.';
-    return `${total} braille cells. Showing ${frame.label}.`;
-  }, [translating, parseIssue, translation, total, frame.label]);
 
   return (
     <div className="read">
@@ -110,6 +109,8 @@ export function ReadScreen() {
               {issue.fix && <span className="notice__fix">{issue.fix}</span>}
             </p>
           ))}
+
+        <ReaderPanel />
       </section>
 
       <section className="read__display" aria-labelledby="display-heading">
@@ -139,15 +140,26 @@ export function ReadScreen() {
         </p>
 
         <div className="cellrow" data-testid="cell-row">
-          {frame.cells.map((dots, index) => (
-            <BrailleCell
-              key={index}
-              dots={dots}
-              cam={frame.cam[index]}
-              index={windowStart + index}
-              active={frame.cursorCell === index}
-            />
-          ))}
+          {frame.cells.map((dots, index) => {
+            const runIndex = windowStart + index;
+            const isFold = mode === 'explore' && dots === FULL_CELL && foldedChildCells.includes(runIndex);
+            return (
+              <span key={index} className={isFold ? 'cellwrap is-fold' : 'cellwrap'}>
+                <BrailleCell
+                  dots={dots}
+                  cam={frame.cam[index]}
+                  index={runIndex}
+                  active={frame.cursorCell === index}
+                  onClick={isFold ? () => enterFoldAt(runIndex) : undefined}
+                />
+                {isFold && (
+                  <span className="cellwrap__tag" aria-hidden="true">
+                    step in
+                  </span>
+                )}
+              </span>
+            );
+          })}
         </div>
 
         <div className="scroller">

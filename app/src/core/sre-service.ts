@@ -137,7 +137,31 @@ export function toEnrichedMathml(mathml: string): Promise<string> {
   return enqueue(async () => {
     // Enrichment is modality-independent, but SRE still needs *a* loaded configuration.
     await applyMode({ kind: 'braille' });
-    const enriched = api.toEnriched(mathml);
-    return typeof enriched === 'string' ? enriched : String(enriched);
+    return stringifyEnriched(api.toEnriched(mathml));
   });
+}
+
+/**
+ * SRE returns different things from `toEnriched` depending on where it is running: a string under
+ * Node, but a live DOM element in a browser. A naive `String(value)` turns the browser case into
+ * the literal text "[object Element]", which silently disables structural navigation — exactly
+ * the kind of failure that passes every unit test and then breaks in front of an audience.
+ */
+export function stringifyEnriched(value: unknown): string {
+  if (typeof value === 'string') return value;
+  if (value == null) return '';
+
+  const element = value as { outerHTML?: string; nodeType?: number };
+  if (typeof element.outerHTML === 'string') return element.outerHTML;
+
+  if (typeof element.nodeType === 'number' && typeof XMLSerializer !== 'undefined') {
+    try {
+      return new XMLSerializer().serializeToString(value as Node);
+    } catch {
+      /* fall through to the string coercion below */
+    }
+  }
+
+  const text = String(value);
+  return text.startsWith('<') ? text : '';
 }

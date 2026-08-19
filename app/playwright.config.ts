@@ -25,7 +25,10 @@ export default defineConfig({
   webServer: {
     command: 'npm run build && npm run preview',
     url: 'http://127.0.0.1:4173',
-    reuseExistingServer: !process.env.CI,
+    // Always build and serve fresh. Reusing a server that is holding an older dist produced a
+    // genuinely confusing false failure once already; a slower gate that tells the truth is
+    // worth more than a fast one that does not.
+    reuseExistingServer: false,
     timeout: 180_000,
     stdout: 'ignore',
     stderr: 'pipe',

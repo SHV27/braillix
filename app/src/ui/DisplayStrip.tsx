@@ -10,15 +10,16 @@
 import { useBraillix } from '../store';
 import { maskToDots, maskToUnicode } from '../core/braille';
 import { toCam } from '../core/profile';
+import { cellsToUnicode } from '../core/translate';
 import './DisplayStrip.css';
 
 export function DisplayStrip() {
-  const translation = useBraillix((s) => s.translation);
+  const activeCells = useBraillix((s) => s.activeCells);
   const profile = useBraillix((s) => s.profile);
   const windowStart = useBraillix((s) => s.windowStart);
   const setWindowStart = useBraillix((s) => s.setWindowStart);
 
-  const cells = translation?.cells ?? [];
+  const cells = activeCells;
 
   if (cells.length === 0) {
     return (
@@ -49,7 +50,7 @@ export function DisplayStrip() {
       </div>
 
       <p className="evidence__unicode" lang="en" data-testid="braille-unicode">
-        {translation?.unicode}
+        {cellsToUnicode(cells)}
       </p>
 
       <div className="evidence__scroll">
