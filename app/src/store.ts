@@ -1,11 +1,11 @@
 /**
  * The single application store.
  *
- * Five facts have exactly one owner here, per CLAUDE.md Law 5:
+ * These facts have exactly one owner here, per CLAUDE.md Law 5:
  *   · the display profile (how many cells, how they are wired)
  *   · the current translation and its semantic tree
  *   · the run of braille currently being read (whole expression, or one node of it)
- *   · what the hardware is believed to be showing (`DisplayState`)
+ *   · the link to the display, and through it what the hardware is believed to be showing
  *   · the state of every optional capability
  *
  * Nothing else in the app may recompute any of these.
@@ -13,12 +13,12 @@
 
 import { create } from 'zustand';
 import { DEFAULT_SIMULATED_CELLS } from './config';
-import { DisplayState, describePlan, type RefreshPlan } from './core/scheduler';
 import { renderFrame, windowFollowingCursor, type Frame } from './core/frame';
 import { simulatedProfile, type BitOrder, type DisplayProfile } from './core/profile';
 import { initSre, type SpeechLocale } from './core/sre-service';
 import { translateLatex, type Translation } from './core/translate';
-import type { DotMask } from './core/braille';
+import { BLANK, dotsToMask, type DotMask, type DotNumber } from './core/braille';
+import type { RefreshPlan } from './core/scheduler';
 import {
   breadcrumb,
   buildTree,
@@ -31,6 +31,10 @@ import {
   type SemNode,
   type SemTree,
 } from './core/tree';
+import { DisplayLink } from './transport/link';
+import { HttpPodTransport } from './transport/httppod';
+import { WebSerialTransport, webSerialSupported } from './transport/webserial';
+import { TransportError, type ButtonEvent, type TransportStatus } from './transport/types';
 import { cancelSpeech, speak, speechAvailable, voiceFor, whenVoicesReady } from './ui/speech';
 
 /* ------------------------------------------------------------------ capabilities */
@@ -56,12 +60,12 @@ const INITIAL_CAPABILITIES: CapabilityMap = {
   speech: { state: 'checking', label: 'Speech' },
   recognition: { state: 'checking', label: 'Recognition' },
   usb: { state: 'checking', label: 'USB display' },
-  pod: { state: 'unavailable', label: 'Wi-Fi pod', reason: 'not connected', fix: 'Connect from the Hardware screen.' },
+  pod: { state: 'unavailable', label: 'Display', reason: 'simulated', fix: 'Connect real hardware on the Hardware screen.' },
 };
 
 /* ------------------------------------------------------------------ view + settings */
 
-export type ViewId = 'read' | 'atlas';
+export type ViewId = 'read' | 'hardware' | 'atlas';
 
 /**
  * How the display is being driven.
@@ -82,10 +86,25 @@ interface BraillixState {
   view: ViewId;
   setView: (view: ViewId) => void;
 
+  /* --- the display --- */
   profile: DisplayProfile;
   setCellCount: (count: number) => void;
   setBitOrder: (order: BitOrder) => void;
   setReversed: (reversed: boolean) => void;
+
+  /* --- the link to hardware --- */
+  linkStatus: TransportStatus;
+  linkLabel: string;
+  linkFirmware: string | null;
+  linkError: string | null;
+  linkFix: string | null;
+  connectUsb: () => Promise<void>;
+  connectPods: (hosts: string[]) => Promise<void>;
+  switchToSimulator: () => Promise<void>;
+  homeDisplay: () => Promise<void>;
+  /** Raise exactly one dot on every cell — the calibration test for cam bit order. */
+  testDot: (dot: DotNumber | null) => Promise<void>;
+  testingDot: DotNumber | null;
 
   latex: string;
   translation: Translation | null;
@@ -97,19 +116,15 @@ interface BraillixState {
   setMode: (mode: ReadMode) => void;
   tree: SemTree | null;
   cursorId: string | null;
-  /** Cell indices within `activeCells` that stand for a folded child, left to right. */
   foldedChildCells: readonly number[];
+  foldReason: string | null;
   breadcrumb: string;
   nodeLabel: string;
-  /** Why the current node is NOT folded, when it is not. Null when it is folded. */
-  foldReason: string | null;
-  /** True when the reader asked to see the current node in full. */
   expanded: boolean;
   toggleExpanded: () => void;
   goSibling: (direction: -1 | 1) => void;
   goChild: () => void;
   goParent: () => void;
-  /** Enter the folded child shown at `cellIndex`, if there is one. */
   enterFoldAt: (cellIndex: number) => void;
   canGo: { left: boolean; right: boolean; in: boolean; out: boolean };
 
@@ -121,7 +136,6 @@ interface BraillixState {
   setWindowStart: (start: number) => void;
   setCursor: (cursor: number | null) => void;
 
-  /** What the display shows right now. Derived only here. */
   frame: Frame;
   plan: RefreshPlan | null;
   planSummary: string;
@@ -139,31 +153,51 @@ interface BraillixState {
   bootstrap: () => Promise<void>;
 }
 
-/** Not part of the reactive state: it is a belief about physical hardware, not a view model. */
-const displayState = new DisplayState();
+/**
+ * The link is not reactive state: it is a live connection with listeners and a belief about
+ * physical hardware. The store holds exactly one, and replaces it when the transport changes.
+ */
+let link: DisplayLink | null = null;
 
 const NO_CELLS: DotMask[] = [];
 
 export const useBraillix = create<BraillixState>((set, get) => {
-  /** Recompute the frame and the motor plan. The one place either is derived. */
-  function project(
+  /** Compute the frame for the current state. The one place a Frame is derived. */
+  function frameFor(
     patch: Partial<Pick<BraillixState, 'profile' | 'activeCells' | 'windowStart' | 'cursor'>> = {},
-  ) {
+  ): Frame {
     const state = { ...get(), ...patch };
-    const frame = renderFrame(state.profile, {
+    return renderFrame(state.profile, {
       cells: state.activeCells,
       windowStart: state.windowStart,
       cursor: state.cursor,
     });
-    const plan = displayState.plan(frame.cam);
-    displayState.commit(plan); // the simulator always accepts, so belief == reality here
-    return { ...patch, frame, plan, planSummary: describePlan(plan) };
   }
 
-  function currentNode(): SemNode | null {
-    const { tree, cursorId } = get();
-    if (!tree || !cursorId) return null;
-    return tree.nodes.get(cursorId) ?? null;
+  /**
+   * Send the frame to whatever display is attached and report what it cost.
+   *
+   * Deliberately fire-and-forget from the caller's point of view: a slow or sulking pod must never
+   * make the interface unresponsive, and a failed push shows up as a visible error rather than as
+   * a hang.
+   */
+  function pushFrame(frame: Frame): void {
+    if (!link) return;
+    void link.push(frame.cam).then((report) => {
+      set({
+        plan: report.plan,
+        planSummary: report.summary,
+        linkError: report.error ?? null,
+        linkFix: report.fix ?? null,
+      });
+    });
+  }
+
+  /** Apply a patch, recompute the frame, and drive the display. */
+  function project(patch: Partial<Pick<BraillixState, 'profile' | 'activeCells' | 'windowStart' | 'cursor'>> = {}) {
+    const frame = frameFor(patch);
+    pushFrame(frame);
+    return { ...patch, frame };
   }
 
   function movement(tree: SemTree | null, cursorId: string | null) {
@@ -182,27 +216,20 @@ export const useBraillix = create<BraillixState>((set, get) => {
     if (!tree || !translation) return;
 
     const rendering = await renderNode(translation.enriched, node, { fold: !expanded });
-    const cells = rendering.cells;
-    const foldedChildCells = rendering.childCellIndex;
-    const foldReason = rendering.folded ? null : (rendering.reason ?? null);
-
     if (get().cursorId !== node.id) return; // the reader moved on while we were translating
 
     const label = describeNode(tree, node);
-    const crumbs = breadcrumb(tree, node.id);
-    const announcement =
-      options.announce === false
-        ? get().announcement
-        : `${label}. ${cells.length} cell${cells.length === 1 ? '' : 's'}.`;
-
     set({
       nodeLabel: label,
-      breadcrumb: crumbs,
-      foldedChildCells,
-      foldReason,
+      breadcrumb: breadcrumb(tree, node.id),
+      foldedChildCells: rendering.childCellIndex,
+      foldReason: rendering.folded ? null : (rendering.reason ?? null),
       canGo: movement(tree, node.id),
-      announcement,
-      ...project({ activeCells: cells, windowStart: 0, cursor: null }),
+      announcement:
+        options.announce === false
+          ? get().announcement
+          : `${label}. ${rendering.cells.length} cell${rendering.cells.length === 1 ? '' : 's'}.`,
+      ...project({ activeCells: rendering.cells, windowStart: 0, cursor: null }),
     });
 
     if (settings.speechOn && options.announce !== false) {
@@ -217,6 +244,52 @@ export const useBraillix = create<BraillixState>((set, get) => {
     void showNode(node);
   }
 
+  /** Pod buttons drive the same navigation as the arrow keys — see docs/PROTOCOL.md §5. */
+  function handlePodButton(event: ButtonEvent): void {
+    const { mode } = get();
+    if (mode !== 'explore') {
+      // In whole-expression mode the buttons page the display, which is the conventional behaviour.
+      const { windowStart, profile, activeCells } = get();
+      if (event.button === 'prev') get().setWindowStart(Math.max(0, windowStart - profile.cellCount));
+      if (event.button === 'next') {
+        get().setWindowStart(Math.min(windowStart + profile.cellCount, Math.max(0, activeCells.length - 1)));
+      }
+      if (event.button === 'select') get().sayCurrent();
+      return;
+    }
+    if (event.button === 'prev') get().goSibling(-1);
+    else if (event.button === 'next') get().goSibling(1);
+    else if (event.long) get().goParent();
+    else get().goChild();
+  }
+
+  /** Swap in a new display link, adopting the calibration settings the user already chose. */
+  async function adopt(next: DisplayLink, capability: Capability): Promise<void> {
+    const previous = link;
+    link = next;
+    if (previous) await previous.close().catch(() => {});
+
+    next.onButton(handlePodButton);
+    next.onStatus((status, reason) => {
+      set({ linkStatus: status, linkError: reason ?? null });
+    });
+
+    const { profile } = get();
+    const nextProfile = next.profile(profile);
+
+    set({
+      profile: nextProfile,
+      linkStatus: next.status,
+      linkLabel: next.transport.label,
+      linkFirmware: next.chain.firmware ?? null,
+      linkError: null,
+      linkFix: null,
+      announcement: `Display: ${nextProfile.cellCount} cell${nextProfile.cellCount === 1 ? '' : 's'}, ${next.transport.label}.`,
+      ...project({ profile: nextProfile }),
+    });
+    get().setCapability('pod', capability);
+  }
+
   const initialProfile = simulatedProfile(DEFAULT_SIMULATED_CELLS);
 
   return {
@@ -225,34 +298,125 @@ export const useBraillix = create<BraillixState>((set, get) => {
 
     profile: initialProfile,
     setCellCount: (count) => {
-      const { profile } = get();
-      const next = simulatedProfile(count, {
-        bitOrder: profile.bitOrder,
-        reversed: profile.reversed,
-        homeIndex: profile.homeIndex,
-      });
-      displayState.invalidate(); // the display changed shape — we know nothing about it now
+      if (!link) return;
+      try {
+        link.resize(count);
+      } catch (err) {
+        set({ linkError: err instanceof Error ? err.message : String(err) });
+        return;
+      }
+      const next = link.profile(get().profile);
       set({
+        profile: next,
         announcement: `Display is now ${count} cell${count === 1 ? '' : 's'}.`,
         ...project({ profile: next }),
       });
     },
     setBitOrder: (order) => {
       const { profile } = get();
-      displayState.invalidate();
-      set(project({ profile: simulatedProfile(profile.cellCount, { ...profile, bitOrder: order }) }));
+      const next = simulatedProfile(profile.cellCount, { ...profile, bitOrder: order });
+      link?.invalidate(); // the wire meaning of every cell changed
+      set({ profile: next, ...project({ profile: next }) });
     },
     setReversed: (reversed) => {
       const { profile } = get();
-      displayState.invalidate();
-      set(project({ profile: simulatedProfile(profile.cellCount, { ...profile, reversed }) }));
+      const next = simulatedProfile(profile.cellCount, { ...profile, reversed });
+      link?.invalidate();
+      set({ profile: next, ...project({ profile: next }) });
+    },
+
+    /* --- the link --- */
+    linkStatus: 'disconnected',
+    linkLabel: 'simulated',
+    linkFirmware: null,
+    linkError: null,
+    linkFix: null,
+    testingDot: null,
+
+    switchToSimulator: async () => {
+      const next = await DisplayLink.simulated(get().profile.cellCount);
+      await adopt(next, {
+        state: 'ready',
+        label: 'Display',
+        reason: 'simulated — no hardware attached',
+      });
+    },
+
+    connectUsb: async () => {
+      if (!webSerialSupported()) {
+        set({
+          linkError: 'Web Serial is not supported in this browser',
+          linkFix: 'Use Chrome or Edge on a desktop, or connect over Wi-Fi.',
+        });
+        return;
+      }
+      const transport = new WebSerialTransport();
+      try {
+        const chain = await transport.connect();
+        await adopt(new DisplayLink(transport, chain), {
+          state: 'ready',
+          label: 'Display',
+          reason: `${chain.cellCount} cells over USB · ${chain.firmware ?? 'unknown firmware'}`,
+        });
+      } catch (err) {
+        set({
+          linkError: err instanceof Error ? err.message : String(err),
+          linkFix: err instanceof TransportError ? (err.fix ?? null) : null,
+        });
+      }
+    },
+
+    connectPods: async (hosts) => {
+      const cleaned = hosts.map((h) => h.trim()).filter(Boolean);
+      if (cleaned.length === 0) {
+        set({ linkError: 'enter at least one pod address', linkFix: 'For example 192.168.1.42' });
+        return;
+      }
+      try {
+        const transport = new HttpPodTransport({ hosts: cleaned });
+        const chain = await transport.connect();
+        await adopt(new DisplayLink(transport, chain), {
+          state: 'ready',
+          label: 'Display',
+          reason: `${chain.cellCount} cells over Wi-Fi · ${chain.pods.length} pod${chain.pods.length === 1 ? '' : 's'}`,
+        });
+      } catch (err) {
+        set({
+          linkError: err instanceof Error ? err.message : String(err),
+          linkFix: err instanceof TransportError ? (err.fix ?? null) : null,
+        });
+      }
+    },
+
+    homeDisplay: async () => {
+      if (!link) return;
+      await link.home();
+      set({ announcement: 'Every cell homed to blank.', ...project() });
+    },
+
+    /**
+     * Calibration: raise exactly one dot on every cell.
+     *
+     * This is the ten-second answer to the one thing the hardware handoff flags as unconfirmed —
+     * whether dot 1 really drives cam track 0. Press "dot 1"; if the physical cell raises a
+     * different dot, fix the mapping here rather than re-flashing anything.
+     */
+    testDot: async (dot) => {
+      const { profile } = get();
+      const mask = dot === null ? BLANK : dotsToMask([dot]);
+      const cells = new Array<DotMask>(profile.cellCount).fill(mask);
+      set({
+        testingDot: dot,
+        announcement: dot === null ? 'Test pattern cleared.' : `Raising dot ${dot} on every cell.`,
+        ...project({ activeCells: cells, windowStart: 0, cursor: null }),
+      });
     },
 
     latex: '',
     translation: null,
     translating: false,
     setLatex: (latex) => {
-      set({ latex, translating: true });
+      set({ latex, translating: true, testingDot: null });
       void translateLatex(latex).then((translation) => {
         if (get().latex !== latex) return; // a newer keystroke already won
 
@@ -275,7 +439,6 @@ export const useBraillix = create<BraillixState>((set, get) => {
           ...project({ activeCells: translation.cells, windowStart: 0, cursor: null }),
         });
 
-        // In explore mode the display should show the root node, folded — not the whole run.
         if (get().mode === 'explore' && tree && rootId) {
           void showNode(tree.nodes.get(rootId)!, { announce: false });
         }
@@ -309,24 +472,24 @@ export const useBraillix = create<BraillixState>((set, get) => {
     expanded: false,
     toggleExpanded: () => {
       set({ expanded: !get().expanded });
-      const node = currentNode();
-      if (node && get().mode === 'explore') void showNode(node);
+      const { tree, cursorId, mode } = get();
+      if (mode === 'explore' && tree && cursorId) {
+        const node = tree.nodes.get(cursorId);
+        if (node) void showNode(node);
+      }
     },
 
     goSibling: (direction) => {
       const { tree, cursorId } = get();
-      if (!tree || !cursorId) return;
-      moveTo(sibling(tree, cursorId, direction));
+      if (tree && cursorId) moveTo(sibling(tree, cursorId, direction));
     },
     goChild: () => {
       const { tree, cursorId } = get();
-      if (!tree || !cursorId) return;
-      moveTo(firstChild(tree, cursorId));
+      if (tree && cursorId) moveTo(firstChild(tree, cursorId));
     },
     goParent: () => {
       const { tree, cursorId } = get();
-      if (!tree || !cursorId) return;
-      moveTo(parentOf(tree, cursorId));
+      if (tree && cursorId) moveTo(parentOf(tree, cursorId));
     },
     enterFoldAt: (cellIndex) => {
       const { tree, cursorId, foldedChildCells } = get();
@@ -369,36 +532,25 @@ export const useBraillix = create<BraillixState>((set, get) => {
       set((state) => ({ settings: { ...state.settings, ...patch } }));
       if (patch.speechLocale) {
         const voice = voiceFor(patch.speechLocale);
+        const language = patch.speechLocale === 'hi' ? 'Hindi' : 'English';
         get().setCapability('speech', {
           state: voice.available ? 'ready' : 'degraded',
           label: 'Speech',
-          reason: voice.available
-            ? `${patch.speechLocale === 'hi' ? 'Hindi' : 'English'} · ${voice.name ?? 'system voice'}`
-            : `no ${patch.speechLocale === 'hi' ? 'Hindi' : 'English'} voice installed on this machine`,
-          fix: voice.available ? undefined : 'Install the language pack in Windows settings, or switch language.',
+          reason: voice.available ? `${language} · ${voice.name ?? 'system voice'}` : `no ${language} voice on this machine`,
+          fix: voice.available ? undefined : 'Install the language pack in your OS settings, or switch language.',
         });
       }
     },
     sayCurrent: () => {
-      const { settings, mode, translation, tree, cursorId } = get();
-      if (!settings.speechOn) return;
-      if (mode === 'explore' && tree && cursorId) {
-        const node = tree.nodes.get(cursorId);
-        if (node) {
-          void speakNode(node, settings.speechLocale).then((text) =>
-            speak(`${describeNode(tree, node)}. ${text}`, settings.speechLocale, settings.speechRate),
-          );
-        }
-        return;
-      }
-      if (translation && tree) {
-        const root = tree.nodes.get(tree.rootId);
-        if (root) {
-          void speakNode(root, settings.speechLocale).then((text) =>
-            speak(text, settings.speechLocale, settings.speechRate),
-          );
-        }
-      }
+      const { settings, mode, tree, cursorId } = get();
+      if (!settings.speechOn || !tree) return;
+      const id = mode === 'explore' && cursorId ? cursorId : tree.rootId;
+      const node = tree.nodes.get(id);
+      if (!node) return;
+      void speakNode(node, settings.speechLocale).then((text) => {
+        const prefix = mode === 'explore' ? `${describeNode(tree, node)}. ` : '';
+        speak(`${prefix}${text}`, settings.speechLocale, settings.speechRate);
+      });
     },
 
     announcement: '',
@@ -406,6 +558,9 @@ export const useBraillix = create<BraillixState>((set, get) => {
     /** Probe every optional capability once, at startup, and report each honestly. */
     bootstrap: async () => {
       const { setCapability } = get();
+
+      // The simulated display is the baseline: the product must be complete with nothing attached.
+      if (!link) await get().switchToSimulator();
 
       const sreStatus = await initSre();
       setCapability(
@@ -438,10 +593,9 @@ export const useBraillix = create<BraillixState>((set, get) => {
         });
       }
 
-      const usbOk = typeof navigator !== 'undefined' && 'serial' in navigator;
       setCapability(
         'usb',
-        usbOk
+        webSerialSupported()
           ? { state: 'ready', label: 'USB display', reason: 'Web Serial available' }
           : {
               state: 'unavailable',

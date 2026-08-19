@@ -272,3 +272,17 @@ Veto any of these with one word:
   Bash heredoc strips backslashes, so a spec file written that way turned `\frac{1}{2a}` into the
   literal text `rac12a` and produced a completely misleading test failure. Any file containing
   LaTeX is written with the Write tool, or uses `String.raw`.
+- **D3.8 (Arc 3)** — **`/show` accepts both a full frame and a sparse `updates` list.** The handoff
+  specifies the full form; the sparse form was added because a 40-cell display where one cell
+  changed should not send 40 numbers. Full is used whenever the display state is not trustworthy —
+  a diff against an unknown baseline is a guess. Firmware and emulator implement both.
+- **D3.9 (Arc 3)** — **Shortest-arc rotation lives in the CELL firmware**, not the laptop, because
+  the cell is the only part of the system that knows where it currently is. The laptop-side
+  scheduler computes the same arithmetic to *report* what motion costs. Both copies are noted in
+  each other's comments so they cannot silently diverge.
+- **D3.10 (Arc 3)** — **USB is the recommended demo transport**, not Wi-Fi. The brief says the room's
+  network may not cooperate; Web Serial needs no network at all. Wi-Fi remains fully implemented
+  per handoff §7, and the simulator is never second-class.
+- **D3.11 (Arc 3)** — The status-strip capability tooltips were anchored to their left edge, which
+  pushed the page 61 px sideways at 1440. Anchored to the right and the strip clips on X only.
+  Caught by the "no horizontal overflow" assertion in the appearance test, not by looking.

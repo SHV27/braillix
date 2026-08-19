@@ -1,4 +1,8 @@
+/* overflow-x: clip (not hidden) so the tooltips above can still escape vertically while the
+   strip can never push the page sideways. */
 .strip {
+  overflow-x: clip;
+  overflow-y: visible;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -105,10 +109,13 @@
 .cap__fix {
   position: absolute;
   bottom: calc(100% + var(--s2));
-  left: 0;
+  /* Anchored to the badge's RIGHT edge: these sit at the right end of the strip, so a tooltip
+     must grow inwards. Anchoring left pushed the page 61px sideways at 1440. */
+  right: 0;
+  left: auto;
   z-index: 5;
   width: max-content;
-  max-width: 280px;
+  max-width: min(280px, 40vw);
   padding: var(--s2) var(--s3);
   border-radius: var(--radius);
   background: var(--ink-200);
