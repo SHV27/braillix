@@ -1,0 +1,33 @@
+node_modules/
+dist/
+dist-ssr/
+.vite/
+coverage/
+*.local
+
+# Secrets never live in files (CLAUDE.md · studio-security). These lines are a backstop.
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# OCR weights are downloaded, never committed (DECISIONS.md D2.4 — AGPL-3.0, and >GitHub size limits)
+app/public/models/
+
+# SRE locale data is copied in at install time from node_modules
+app/public/sre/
+
+# Test output
+app/test-results/
+app/playwright-report/
+app/screenshots/*.png
+!app/screenshots/.gitkeep
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/*
+!.vscode/extensions.json
