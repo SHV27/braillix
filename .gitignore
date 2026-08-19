@@ -15,8 +15,9 @@ coverage/
 # OCR weights are downloaded, never committed (DECISIONS.md D2.4 — AGPL-3.0, and >GitHub size limits)
 app/public/models/
 
-# SRE locale data is copied in at install time from node_modules
+# Copied in at install time from node_modules by app/scripts/copy-sre-assets.mjs
 app/public/sre/
+app/public/ort/
 
 # Test output
 app/test-results/
