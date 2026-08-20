@@ -56,6 +56,14 @@ export interface MixedLine {
   readonly segments: readonly RenderedSegment[];
   /** Every segment's cells, in order, separated by blanks, with the switch indicators in place. */
   readonly cells: readonly DotMask[];
+  /**
+   * Which braille code each cell of `cells` is written in, one entry per cell.
+   *
+   * Built here rather than worked out again by the interface, because the interface used to label
+   * every cell "Nemeth" and tell a teacher that a Bharati ⠋ meant "letter g" when it meant ग.
+   * One authority for one fact (CLAUDE.md Law 5).
+   */
+  readonly codes: readonly BrailleCode[];
   /** True when the line contains words as well as maths — the only case that needs indicators. */
   readonly mixed: boolean;
 }
@@ -65,11 +73,81 @@ export const NEMETH_OPEN: readonly DotMask[] = [dotsToMask([4, 5, 6]), dotsToMas
 /** BANA's Nemeth Code terminator: dots 4-5-6, then dots 1-5-6. */
 export const NEMETH_CLOSE: readonly DotMask[] = [dotsToMask([4, 5, 6]), dotsToMask([1, 5, 6])];
 
-/** Characters that make a token mathematics whatever else it contains. */
-const MATHS_CHARS = /[0-9+\-*/^=<>()[\]{}|%°₹\\÷×±≤≥≠≈∞√]/;
+/**
+ * Characters that make a token mathematics whatever else it contains.
+ *
+ * The underscore is on this list because of `S_n = n/2 (2a + (n-1)d)`, the sum of an arithmetic
+ * progression. Without it, `S_n` looked like an ordinary word, went to the text half, and left the
+ * equals sign stranded at the front of the mathematics — which then read as a fraction with `=n` on
+ * top. Every cell was correct Nemeth for the expression it was given; the expression was wrong two
+ * steps earlier. A subscript is not a word.
+ */
+const MATHS_CHARS = /[0-9+\-*/^_=<>()[\]{}|%°₹\\÷×±≤≥≠≈∞√]/;
 
 /** A token made only of operators — `+`, `=`, `<=`. What binds two things into one expression. */
 const OPERATOR_ONLY = /^[+\-*/^_=<>:|×÷±≤≥≠≈]+$/;
+
+/**
+ * Unit abbreviations, which belong to the mathematics and not to the sentence.
+ *
+ * `12.5 cm` was being cut in two — the number in Nemeth, the unit in literary braille, with switch
+ * indicators between them. That is not how a measurement is written: Nemeth keeps the unit inside
+ * the expression, as the plain letters c and m. Two characters, no ceremony.
+ */
+const UNITS = new Set([
+  'cm',
+  'mm',
+  'km',
+  'kg',
+  'mg',
+  'ml',
+  'kl',
+  'cc',
+  'sq',
+  'ft',
+  'hr',
+  'hrs',
+  'min',
+  'sec',
+  'am',
+  'pm',
+  'ha',
+  'kw',
+]);
+
+/**
+ * Short English words that are never mathematics, however they are surrounded.
+ *
+ * This list exists because of one line: `25% of 80 = 20`. "of" is two letters with mathematics on
+ * both sides, so the rule below promoted it — and it reached the display as the variables o times
+ * f. A teacher would never have known; the dots looked perfectly plausible.
+ *
+ * Kept deliberately short, and every word on it checked against the ones that ARE mathematics in an
+ * Indian classroom: "in" is set membership, "by" is division, "into" is multiplication, "to" is an
+ * arrow. None of those appear here. A word earns its place only by being unambiguous.
+ */
+const NEVER_MATHS = new Set([
+  'of',
+  'is',
+  'are',
+  'was',
+  'were',
+  'the',
+  'and',
+  'an',
+  'as',
+  'at',
+  'on',
+  'be',
+  'do',
+  'if',
+  'it',
+  'we',
+  'so',
+  'my',
+  'us',
+  'no',
+]);
 
 /**
  * How confidently a token belongs to the mathematics.
@@ -84,10 +162,12 @@ function strengthOf(token: string): Strength {
   const bare = token.replace(/[.,;:!?।]+$/, '');
   if (!bare) return 'weak'; // a lone punctuation mark: the colon in "2 : 3", a stray dash
   if (hasIndic(bare)) return 'text'; // Nemeth has no cells for any Indian script, so never maths
+  if (NEVER_MATHS.has(bare.toLowerCase())) return 'text'; // decided outright, before any neighbour can vote
   if (MATHS_CHARS.test(bare)) return 'maths';
   if (/^[A-Za-z]$/.test(bare)) return 'maths'; // a single letter is a variable
   if (/^[A-Z]{2,}$/.test(bare)) return 'maths'; // ABC — a geometry label, not a word
   if (isMathWord(bare)) return 'maths'; // sin, theta, Rs
+  if (UNITS.has(bare.toLowerCase())) return 'maths'; // cm, kg, min
   if (/^[A-Za-z]{2}$/.test(bare)) return 'weak'; // ab, or of
   return 'text';
 }
@@ -134,7 +214,7 @@ export function splitLine(line: string, overrides: Readonly<Record<string, Segme
   const segments: Segment[] = [];
   for (let i = 0; i < tokens.length; i += 1) {
     const previous = segments[segments.length - 1];
-    if (previous && previous.kind === kinds[i]) {
+    if (previous && joinable(previous, { kind: kinds[i], text: tokens[i] })) {
       segments[segments.length - 1] = { kind: previous.kind, text: `${previous.text} ${tokens[i]}` };
     } else {
       segments.push({ kind: kinds[i], text: tokens[i] });
@@ -147,13 +227,28 @@ export function splitLine(line: string, overrides: Readonly<Record<string, Segme
   const merged: Segment[] = [];
   for (const segment of corrected) {
     const previous = merged[merged.length - 1];
-    if (previous && previous.kind === segment.kind) {
+    if (previous && joinable(previous, segment)) {
       merged[merged.length - 1] = { kind: segment.kind, text: `${previous.text} ${segment.text}` };
     } else {
       merged.push(segment);
     }
   }
   return merged;
+}
+
+/**
+ * Can these two runs share a segment?
+ *
+ * Same kind is not enough. A segment is written in ONE braille code, and “Ravi के पास” is two:
+ * the Latin word is Grade-1 literary braille and the Hindi is Bharati. Merging them sent the whole
+ * thing to the Bharati translator, which has no cell for a Latin r and dropped it — a Hinglish
+ * question quietly losing half its words. So a change of script ends a segment, exactly as a change
+ * between words and mathematics does.
+ */
+function joinable(previous: Segment, next: Segment): boolean {
+  if (previous.kind !== next.kind) return false;
+  if (previous.kind === 'maths') return true;
+  return hasIndic(previous.text) === hasIndic(next.text);
 }
 
 async function renderSegment(segment: Segment, standalone: boolean): Promise<RenderedSegment> {
@@ -230,12 +325,19 @@ export async function translateMixed(
   const rendered = await Promise.all(segments.map((segment) => renderSegment(segment, standalone)));
 
   const cells: DotMask[] = [];
+  const codes: BrailleCode[] = [];
   for (const [index, segment] of rendered.entries()) {
-    if (index > 0) cells.push(BLANK);
-    cells.push(...segment.cells);
+    if (index > 0) {
+      cells.push(BLANK);
+      codes.push(segment.code); // the blank between two runs belongs to the run it introduces
+    }
+    for (const cell of segment.cells) {
+      cells.push(cell);
+      codes.push(segment.code);
+    }
   }
 
-  return { segments: rendered, cells, mixed };
+  return { segments: rendered, cells, codes, mixed };
 }
 
 /** Does this line contain anything that is not mathematics? Cheap check, no translation. */

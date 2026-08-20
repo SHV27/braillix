@@ -18,7 +18,7 @@ import { simulatedProfile, type BitOrder, type DisplayProfile } from './core/pro
 import { initSre, toSpeechText } from './core/sre-service';
 import { toLatex, type MathInputIssue } from './core/mathinput';
 import { modelStatus } from './recognise/status';
-import { hasWords, translateMixed, type MixedLine, type SegmentKind } from './core/mixed';
+import { hasWords, translateMixed, type BrailleCode, type MixedLine, type SegmentKind } from './core/mixed';
 import { latexToMathml, translateLatex, type Translation } from './core/translate';
 import { BLANK, dotsToMask, type DotMask, type DotNumber } from './core/braille';
 import type { RefreshPlan } from './core/scheduler';
@@ -153,6 +153,14 @@ interface BraillixState {
 
   /** The braille run currently on the display — whole expression or one node. */
   activeCells: readonly DotMask[];
+  /**
+   * Which braille code each of those cells is written in, or null when the whole run is Nemeth.
+   *
+   * Only the evidence table needs this, and it needs it badly: without it, every cell of a Hindi
+   * question was labelled with its Nemeth meaning, so a teacher reading the table was told that ⠛
+   * meant "letter g" when it meant ग.
+   */
+  cellCodes: readonly BrailleCode[] | null;
 
   windowStart: number;
   cursor: number | null;
@@ -266,6 +274,7 @@ export const useBraillix = create<BraillixState>((set, get) => {
         options.announce === false
           ? get().announcement
           : translate('say.node', { label, count: rendering.cells.length }),
+      cellCodes: null,
       ...project({ activeCells: rendering.cells, windowStart: 0, cursor: null }),
     });
 
@@ -445,6 +454,7 @@ export const useBraillix = create<BraillixState>((set, get) => {
       set({
         testingDot: null,
         announcement,
+        cellCodes: null,
         ...project({ activeCells: [...cells], windowStart: 0, cursor: null }),
       });
     },
@@ -456,6 +466,7 @@ export const useBraillix = create<BraillixState>((set, get) => {
       set({
         testingDot: dot,
         announcement: dot === null ? translate('say.testCleared') : translate('say.testDot', { dot }),
+        cellCodes: null,
         ...project({ activeCells: cells, windowStart: 0, cursor: null }),
       });
     },
@@ -520,6 +531,7 @@ export const useBraillix = create<BraillixState>((set, get) => {
             foldReason: null,
             mode: 'whole',
             announcement: translate('say.cells', { count: line.cells.length }),
+            cellCodes: line.codes,
             ...project({ activeCells: line.cells, windowStart: 0, cursor: null }),
           });
         });
@@ -557,6 +569,7 @@ export const useBraillix = create<BraillixState>((set, get) => {
           announcement: translation.issues.some((i) => i.kind === 'parse')
             ? translate('board.parseFailed')
             : translate('say.cells', { count: translation.cells.length }),
+          cellCodes: null,
           ...project({ activeCells: translation.cells, windowStart: 0, cursor: null }),
         });
 
@@ -582,6 +595,7 @@ export const useBraillix = create<BraillixState>((set, get) => {
           foldedChildCells: [],
           foldReason: null,
           announcement: translate('say.whole', { count: translation.cells.length }),
+          cellCodes: null,
           ...project({ activeCells: translation.cells, windowStart: 0, cursor: null }),
         });
       }
@@ -626,6 +640,7 @@ export const useBraillix = create<BraillixState>((set, get) => {
     canGo: { left: false, right: false, in: false, out: false },
 
     activeCells: NO_CELLS,
+    cellCodes: null,
 
     windowStart: 0,
     cursor: null,

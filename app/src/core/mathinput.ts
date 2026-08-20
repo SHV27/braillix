@@ -436,32 +436,47 @@ class Parser {
    *
    * `/` turns everything accumulated so far into a numerator. That is the rule that makes `2x/3`
    * mean what a teacher means by it, and it is why this is not simply a binary operator.
+   *
+   * But "everything so far" stops at an explicit multiplication sign. A teacher writing
+   * `3/4 x 2/5` means two fractions multiplied, not one fraction stacked inside another — so the
+   * × acts as a wall, and only the factors written since it become the numerator:
+   *
+   *     3/4 x 2/5   →   \frac{3}{4} \times \frac{2}{5}      (not \frac{\frac{3}{4}\times 2}{5})
+   *     2x/3        →   \frac{2x}{3}                        (no × written, so nothing is walled off)
+   *     n(n+1)/2    →   \frac{n(n+1)}{2}                    (juxtaposition is not an explicit ×)
+   *
+   * `wall` holds everything up to and including the last explicit multiplication; `factors` holds
+   * what has been written since. The product is the two of them joined.
    */
   #product(): string {
-    let latex = this.#unary();
+    let wall = '';
+    let factors = this.#unary();
+    const multiply = (symbol: string) => {
+      wall = cat(cat(wall, factors), symbol);
+      factors = this.#unary();
+    };
     for (;;) {
       if (this.#atOp('/')) {
         this.#take();
         const denominator = this.#unary();
-        latex = `\\frac{${unwrapBrackets(latex) || '{}'}}{${unwrapBrackets(denominator) || '{}'}}`;
+        factors = `\\frac{${unwrapBrackets(factors) || '{}'}}{${unwrapBrackets(denominator) || '{}'}}`;
         continue;
       }
       if (this.#atOp('*', '\\times', '\\div', '\\cdot')) {
         const op = this.#take()!;
-        const symbol = op.text === '*' ? '\\times' : op.text;
-        latex = cat(cat(latex, symbol), this.#unary());
+        multiply(op.text === '*' ? '\\times' : op.text);
         continue;
       }
       if (this.#isCrossX()) {
-        this.#take(); // "3 x 4" — a number, a lone spaced x, a number: that is a multiplication sign
-        latex = cat(cat(latex, '\\times'), this.#unary());
+        this.#take(); // "3 x 4", "1/2 x b x h" — a lone spaced x between two operands is a cross
+        multiply('\\times');
         continue;
       }
       if (this.#startsTerm()) {
-        latex = cat(latex, this.#unary()); // implicit multiplication: 3x, 2(x+1), a b
+        factors = cat(factors, this.#unary()); // implicit multiplication: 3x, 2(x+1), a b
         continue;
       }
-      return latex;
+      return cat(wall, factors);
     }
   }
 
@@ -473,13 +488,25 @@ class Parser {
     return token.kind === 'number' || token.kind === 'name' || token.kind === 'open' || token.kind === 'rupee' || token.kind === 'latex';
   }
 
-  /** The letter x, spaced, with a number on each side — a teacher's handwritten multiplication. */
+  /**
+   * The letter x, spaced, with an operand on each side — a teacher's handwritten multiplication.
+   *
+   * `3 x 4` was the easy case. The one that matters in a classroom is `1/2 x b x h`, the area of a
+   * triangle, where the operands either side are letters rather than numbers. What keeps this from
+   * eating real variables is that all three conditions must hold at once: the x stands alone with
+   * spaces around it, something that can be multiplied comes before it, and something that can be
+   * multiplied comes after. `y = m x + c` fails the last one — `+` is not an operand — so the x
+   * there stays a variable, which is what it is.
+   */
   #isCrossX(): boolean {
     const token = this.#peek();
     if (!token || token.kind !== 'name' || token.text !== 'x' || !token.spaced) return false;
     const previous = this.#tokens[this.#index - 1];
     const next = this.#peek(1);
-    return previous?.kind === 'number' && next?.kind === 'number' && next.spaced === true;
+    if (!previous || !next || next.spaced !== true) return false;
+    const before = previous.kind === 'number' || previous.kind === 'name' || previous.kind === 'close';
+    const after = next.kind === 'number' || next.kind === 'name' || next.kind === 'open';
+    return before && after;
   }
 
   #unary(): string {
@@ -667,7 +694,11 @@ class Parser {
         const op = this.#take()!;
         head = `${head}${op.text}${braced(this.#script(op.text === '^'))}`;
       }
-      const argument = this.#startsTerm() ? this.#power() : '';
+      // `sin x / x` is (sin x) over x — a trig function binds only the factor next to it. `lim` is
+      // the opposite: `lim_{x to 0} sin x / x` is the limit OF the quotient, and reading it any
+      // other way gives 0/x, which is not what anybody wrote. So the limit takes the whole product.
+      const wide = lower === 'lim';
+      const argument = this.#startsTerm() ? (wide ? this.#product() : this.#power()) : '';
       return cat(head, argument);
     }
 

@@ -19,6 +19,14 @@ export interface SyllabusEntry {
   readonly source: string;
   /** Plain English for the report, so the table can be read by someone who does not read LaTeX. */
   readonly says: string;
+  /**
+   * Set only where the line genuinely contains words as well as mathematics.
+   *
+   * It is an assertion, not a note. Every line without it must reach the display as ONE run of
+   * Nemeth — which is how `S_n = n/2 (2a + (n-1)d)` was caught being cut in half, with `S_n` sent
+   * to the text side as though it were a word.
+   */
+  readonly words?: true;
 }
 
 export interface SyllabusTopic {
@@ -55,7 +63,7 @@ export const SYLLABUS: readonly SyllabusTopic[] = [
       { source: '3/4 x 2/5', says: 'multiplying fractions' },
       { source: '(x+1)/(x-1)', says: 'an algebraic fraction' },
       { source: '50%', says: 'a percentage' },
-      { source: '25% of 80 = 20', says: 'percentage of a quantity' },
+      { source: '25% of 80 = 20', says: 'percentage of a quantity', words: true },
       { source: 'Rs 250', says: 'money' },
       { source: '2 : 3', says: 'a ratio' },
     ],
@@ -149,13 +157,137 @@ export const SYLLABUS: readonly SyllabusTopic[] = [
     ],
   },
   {
+    topic: 'Polynomials and identities',
+    classes: '8–10',
+    entries: [
+      { source: 'p(x) = x^3 - 3x^2 + 5x - 3', says: 'a cubic polynomial' },
+      { source: '(a-b)^2 = a^2 - 2ab + b^2', says: 'the second identity' },
+      { source: '(a+b)(a-b) = a^2 - b^2', says: 'the difference of two squares' },
+      { source: 'a^3 + b^3 = (a+b)(a^2 - ab + b^2)', says: 'the sum of two cubes' },
+      { source: 'x^2 - (a+b)x + ab', says: 'a factorised quadratic' },
+      { source: '2x + 3y = 12', says: 'a linear equation in two variables' },
+      { source: 'x/a + y/b = 1', says: 'the intercept form' },
+      { source: 'a_1/a_2 = b_1/b_2', says: 'a condition on two lines' },
+    ],
+  },
+  {
+    topic: 'Indices and number theory',
+    classes: '7–10',
+    entries: [
+      { source: 'x^0 = 1', says: 'anything to the power zero' },
+      { source: '2^3 x 3^2 = 72', says: 'a product of powers' },
+      { source: 'a^m x a^n = a^(m+n)', says: 'the first law of indices' },
+      { source: '(a^m)^n = a^(mn)', says: 'a power of a power' },
+      { source: 'a^-n = 1/a^n', says: 'a negative index' },
+      { source: '1.5 x 10^8', says: 'standard form' },
+    ],
+  },
+  {
+    topic: 'Coordinate geometry',
+    classes: '9–11',
+    entries: [
+      { source: 'y = mx + c', says: 'a straight line' },
+      { source: 'm = (y_2 - y_1)/(x_2 - x_1)', says: 'the slope of a line' },
+      { source: 'sqrt((x_2 - x_1)^2 + (y_2 - y_1)^2)', says: 'the distance formula' },
+      { source: '(x_1 + x_2)/2', says: 'a midpoint coordinate' },
+      { source: 'x^2 + y^2 = r^2', says: 'a circle at the origin' },
+      { source: 'ax + by + c = 0', says: 'the general form of a line' },
+    ],
+  },
+  {
+    topic: 'Mensuration',
+    classes: '7–10',
+    entries: [
+      { source: '2(l + b)', says: 'the perimeter of a rectangle' },
+      { source: '6 a^2', says: 'the surface area of a cube' },
+      { source: 'l x b x h', says: 'the volume of a cuboid' },
+      { source: '4/3 pi r^3', says: 'the volume of a sphere' },
+      { source: '1/3 pi r^2 h', says: 'the volume of a cone' },
+      { source: '2 pi r h', says: 'the curved surface of a cylinder' },
+      { source: 'pi r l', says: 'the curved surface of a cone' },
+      { source: '4 pi r^2', says: 'the surface area of a sphere' },
+    ],
+  },
+  {
+    topic: 'Arithmetic progressions',
+    classes: '10–11',
+    entries: [
+      { source: 'a_n = a + (n-1)d', says: 'the nth term' },
+      { source: 'S_n = n/2 (2a + (n-1)d)', says: 'the sum of n terms' },
+      { source: 'S_n = n/2 (a + l)', says: 'the sum, given the last term' },
+      { source: 'a, a+d, a+2d', says: 'the start of a progression' },
+    ],
+  },
+  {
+    topic: 'More trigonometry',
+    classes: '10–12',
+    entries: [
+      { source: 'sin 30 degrees = 1/2', says: 'a standard value' },
+      { source: 'tan theta = sin theta / cos theta', says: 'the quotient identity' },
+      { source: 'sec^2 theta - tan^2 theta = 1', says: 'a Pythagorean identity' },
+      { source: '1 + cot^2 theta = cosec^2 theta', says: 'the third identity' },
+      { source: 'sin (A + B) = sin A cos B + cos A sin B', says: 'the addition formula' },
+      { source: '2 sin A cos A', says: 'the double angle' },
+    ],
+  },
+  {
+    topic: 'Statistics and probability',
+    classes: '8–12',
+    entries: [
+      { source: '0 <= P <= 1', says: 'the range of a probability' },
+      { source: 'P = 1/6', says: 'the probability of one face of a die' },
+      { source: '(sum x)/n', says: 'the mean' },
+      { source: 'sigma^2', says: 'the variance' },
+      { source: '2.5 + 3.5 + 4.5', says: 'class marks being added' },
+      { source: 'x - 45.5', says: 'a deviation from the mean' },
+    ],
+  },
+  {
+    topic: 'Complex numbers and matrices',
+    classes: '11–12',
+    entries: [
+      { source: 'i^2 = -1', says: 'the imaginary unit' },
+      { source: 'z = a + ib', says: 'a complex number' },
+      { source: '|z| = sqrt(a^2 + b^2)', says: 'its modulus' },
+      { source: 'ad - bc', says: 'a two-by-two determinant' },
+      { source: '2 x 2', says: 'the order of a matrix' },
+    ],
+  },
+  {
+    topic: 'More calculus',
+    classes: '11–12',
+    entries: [
+      { source: 'dy/dx = 2x', says: 'a derivative with a value' },
+      { source: 'n x^(n-1)', says: 'the power rule' },
+      { source: 'x^(n+1)/(n+1)', says: 'the integral of a power' },
+      { source: 'lim_{h -> 0} (f - g)/h', says: 'the first principle' },
+      { source: 'int_{a}^{b} f', says: 'a definite integral' },
+    ],
+  },
+  {
+    topic: 'Units, money and measurement',
+    classes: '5–9',
+    entries: [
+      { source: 'Rs 1,250', says: 'money with a thousands comma' },
+      { source: '12.5 cm', says: 'a length' },
+      { source: '60%', says: 'a percentage on its own' },
+      { source: '5 km + 300 m', says: 'two units added' },
+      { source: '90 degrees', says: 'a right angle' },
+    ],
+  },
+  {
     topic: 'Questions with words in them',
     classes: 'all',
     entries: [
-      { source: 'Find the value of 2x + 5 = 15', says: 'an English word problem' },
-      { source: 'दो संख्याओं का योग 12 है', says: 'a Hindi word problem' },
-      { source: 'The area is pi r^2', says: 'words around an expression' },
-      { source: 'एक कोण 45 degrees का है', says: 'Hindi with an angle in it' },
+      { source: 'Find the value of 2x + 5 = 15', says: 'an English word problem', words: true },
+      { source: 'दो संख्याओं का योग 12 है', says: 'a Hindi word problem', words: true },
+      { source: 'The area is pi r^2', says: 'words around an expression', words: true },
+      { source: 'एक कोण 45 degrees का है', says: 'Hindi with an angle in it', words: true },
+      { source: 'The perimeter is 2(l + b)', says: 'a formula introduced by words', words: true },
+      { source: 'দুটি সংখ্যার যোগফল 12', says: 'a Bengali word problem', words: true },
+      { source: 'ஒரு கோணம் 45 degrees', says: 'a Tamil word problem', words: true },
+      { source: 'ਦੋ ਸੰਖਿਆਵਾਂ ਦਾ ਜੋੜ 12', says: 'a Gurmukhi word problem', words: true },
+      { source: 'రెండు సంఖ్యల మొత్తం 12', says: 'a Telugu word problem', words: true },
     ],
   },
 ];

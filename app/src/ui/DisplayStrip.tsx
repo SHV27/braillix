@@ -8,10 +8,13 @@
  */
 
 import { useBraillix } from '../store';
-import { maskToDots, maskToUnicode } from '../core/braille';
+import { maskToDots, maskToUnicode, type DotMask } from '../core/braille';
 import { toCam } from '../core/profile';
 import { cellsToUnicode } from '../core/translate';
 import { NEMETH_MEANINGS } from '../core/nemeth-meanings';
+import { bharatiMeaning } from '../core/bharatiback';
+import { literalMeaning } from '../core/literalback';
+import type { BrailleCode } from '../core/mixed';
 import { useT } from './i18n';
 import './DisplayStrip.css';
 
@@ -20,6 +23,7 @@ export function DisplayStrip() {
   const activeCells = useBraillix((s) => s.activeCells);
   const profile = useBraillix((s) => s.profile);
   const windowStart = useBraillix((s) => s.windowStart);
+  const cellCodes = useBraillix((s) => s.cellCodes);
   const setWindowStart = useBraillix((s) => s.setWindowStart);
 
   const cells = activeCells;
@@ -45,7 +49,10 @@ export function DisplayStrip() {
           {t('display.braille')}
         </h2>
         <p className="evidence__count num">
-          {cells.length === 1 ? t('evidence.countOne') : t('evidence.count', { count: cells.length })}
+          {t(cells.length === 1 ? 'evidence.countOne' : 'evidence.count', {
+            count: cells.length,
+            codes: codesOnTheStrip(cellCodes, t),
+          })}
         </p>
       </div>
 
@@ -83,7 +90,7 @@ export function DisplayStrip() {
                   </td>
                   <td className="num">{maskToDots(mask).join('-') || '—'}</td>
                   {/* The column that lets a teacher who does not read Nemeth follow the line. */}
-                  <td className="wire__meaning">{NEMETH_MEANINGS[mask]}</td>
+                  <td className="wire__meaning">{meaningOf(mask, cellCodes?.[index] ?? 'nemeth')}</td>
                   <td className="num wire__cam">{toCam(profile, mask)}</td>
                 </tr>
               );
@@ -95,4 +102,32 @@ export function DisplayStrip() {
       <p className="evidence__foot">{t('evidence.foot')}</p>
     </section>
   );
+}
+
+
+/**
+ * What this cell means, in the code it is actually written in.
+ *
+ * The strip used to reach for the Nemeth table whatever was on the display, so a Hindi question was
+ * annotated as though it were mathematics — ⠛ described as "letter g" when it is ग, and ⠼ as
+ * "numeric indicator" when it is ण. Each code has its own reading, and each is shown.
+ */
+function meaningOf(mask: DotMask, code: BrailleCode): string {
+  const braille = maskToUnicode(mask);
+  if (code === 'bharati') return bharatiMeaning(braille);
+  if (code === 'literary') return literalMeaning(braille);
+  return NEMETH_MEANINGS[mask];
+}
+
+/** The codes actually present on the strip, named in the order a reader meets them. */
+function codesOnTheStrip(codes: readonly BrailleCode[] | null, t: ReturnType<typeof useT>): string {
+  const names: Record<BrailleCode, string> = {
+    nemeth: t('strip.nemeth'),
+    bharati: t('strip.bharati'),
+    literary: t('strip.literary'),
+  };
+  if (!codes || codes.length === 0) return names.nemeth;
+  const present: BrailleCode[] = [];
+  for (const code of codes) if (!present.includes(code)) present.push(code);
+  return present.map((code) => names[code]).join(' + ');
 }

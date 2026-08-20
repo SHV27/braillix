@@ -93,17 +93,31 @@ describe('reading real words', () => {
 
 describe('what it will not guess at', () => {
   it('reports a letter that has no equivalent instead of rendering a neighbour', () => {
-    // Bengali khanda ta and Gurmukhi addak exist in one script only. The arithmetic lands on a
-    // Devanagari code point the braille table does not know — and that must be a gap, not a guess.
-    for (const orphan of ['ৎ', 'ੱ', 'ൺ']) {
+    // Gurmukhi's addak doubles the consonant after it and is a construction no other script here
+    // shares. The arithmetic lands it on a Devanagari code point that is not a letter — and that
+    // must be a gap, not a guess. Inventing a plausible cell for it would be the worst outcome
+    // available: a child reading a word that was never written.
+    for (const orphan of ['ੱ', 'ୱ']) {
       const result = indicToBraille(orphan);
       expect(result.unsupported.length, `${orphan} should be reported`).toBeGreaterThan(0);
     }
   });
 
+  it('knows the letters where the parallel breaks but the meaning does not', () => {
+    // Bengali khanda ta is a ত with its vowel taken away. Malayalam's chillu letters are the same
+    // construction. Both are written in Bharati as the consonant plus a halant, which is what they
+    // are — so they translate, rather than being reported as gaps in an ordinary word.
+    expect(indicToBraille('ৎ').unsupported).toEqual([]);
+    expect(braille('ৎ')).toBe(braille('त्'));
+    expect(indicToBraille('ൺ').unsupported).toEqual([]);
+    expect(braille('ൻ')).toBe(braille('न्'));
+    // Gurmukhi's tippi is the nasal Devanagari writes with anusvara.
+    expect(braille('ਪੰਜਾਬੀ')).toBe(braille('पंजाबी'));
+  });
+
   it('still renders the rest of the line when one character is unknown', () => {
-    const result = indicToBraille('গণিত ৎ গণিত');
-    expect(result.unsupported).toContain('ৎ');
+    const result = indicToBraille('গণিত ੱ গণিত');
+    expect(result.unsupported).toContain('ੱ');
     expect(result.cells.length).toBeGreaterThan(8);
   });
 

@@ -44,10 +44,10 @@ arc plan first.
   NIEPVD maths notation has no open machine-readable table. What changed is that the *language*
   half now exists (`core/bharati.ts`), so the seam is real rather than theoretical — a maths table
   would slot in beside it. Would need someone with the printed NIEPVD code to author it.
-- **More Indian languages.** The Bharati tables cover nine scripts; Braillix implements Devanagari.
-  Marathi and Nepali would work today (same script); Bengali, Gujarati, Punjabi, Tamil, Telugu,
-  Kannada, Malayalam and Oriya each need their own letter table plus a font subset. The interface
-  translation table is the other half — `ui/i18n.ts` is keyed for it, `LANGS` is a list.
+- **More Indian languages.** ~~The Bharati tables cover nine scripts; Braillix implements
+  Devanagari.~~ **Built on 20 Aug** — all nine scripts, through `core/indic.ts`, and all nine read
+  back. What remains parked is the *interface* translation: `ui/i18n.ts` is keyed for it and `LANGS`
+  is a list, so a Bengali or Tamil interface is a table of strings, not a change of shape.
 - **A second reading of a photograph.** When the recogniser judges its own answer "check this one",
   it could re-run with different preprocessing and offer both readings. Cheap (about a second) and
   a real accuracy gain on bad handwriting. Not built: it needs its own measurement before it can be
@@ -71,3 +71,23 @@ arc plan first.
   properly needs a set of genuinely hard photographs — real pencil, real classroom light — which is
   a morning at a school, not an afternoon at a keyboard. Until then the interface claims only what
   it does: a second opinion, offered, never asserted.
+
+
+## Parked after arc 11 (20 August 2026, night)
+
+- **A Nemeth alphabet check that does not depend on us.** The round trip proves the grammar; the
+  alphabet is checked against published tables in `nemeth.test.ts`, which is a table somebody on this
+  project typed in. The strongest version would diff our output against liblouis's `nemeth.ctb`
+  directly. Not built: it needs liblouis at build time, and the app must stay dependency-light.
+- **A back-reader for the Bharati *maths* code**, if the NIEPVD maths table ever becomes available.
+  It would slot in beside the other three; `checkSegment()` is the seam.
+- **Teaching the canonical printer more LaTeX.** Anything it does not know reports "cannot be
+  checked" rather than agreeing, which is the safe direction — but every command taught is a line of
+  the syllabus that gains a verdict. `\binom`, `\begin{matrix}` and `\overline` are the three most
+  likely to come up in classes 11–12.
+- **Showing the verdict in Teach mode and on the printed sheet.** The Board has it; a teacher
+  running a lesson cannot see it without going back. Deliberately not built yet: Teach mode is one
+  question, full screen, and adding a panel to it needs a design pass rather than a component.
+- **A "why does it differ?" view.** Today a mismatch shows both readings. Showing *where* they
+  diverge — the first cell whose meaning changed — would turn a report into a diagnosis. Small, and
+  genuinely useful the first time somebody hits a real one.

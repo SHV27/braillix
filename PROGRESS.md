@@ -8,8 +8,8 @@ Repo: **github.com/SHV27/braillix** · Live: **https://braillix.vercel.app**
 
 ## Where we are
 
-**Ten arcs built and closed.** Arcs 1–6 built the instrument; arcs 7–10 built the classroom around
-it and shipped it.
+**Eleven arcs built and closed.** Arcs 1–6 built the instrument; arcs 7–10 built the classroom around
+it and shipped it; arc 11 made it prove its own work.
 
 | Arc | State |
 |---|---|
@@ -23,20 +23,24 @@ it and shipped it.
 | 8 · The Classroom (worksheets, teaching, students, records, mirror mode) | ✅ closed |
 | 9 · Trust (syllabus accuracy, self-check, embosser file, printed sheet) | ✅ closed |
 | 10 · Ship (installable offline app, deployed and verified) | ✅ closed |
+| 11 · The Proof (the pipeline reads its own braille back) | ✅ closed |
 
 ## The one next action
 
 Nothing is blocking. Read `docs/DEMO.md` and rehearse the nine-minute run once — it is written in
-the order the product should be shown, with what to say. If more building is wanted, promote a
-parked idea from `NOTES.md` into a new arc rather than starting anything ad hoc.
+the order the product should be shown, with what to say, and it now has a place for the strongest
+thing in the product: the **What the dots say** panel on the Board, where a second engine reads the
+braille back and the teacher sees the two agree. If more building is wanted, promote a parked idea
+from `NOTES.md` into a new arc rather than starting anything ad hoc.
 
 ## Gate status
 
 | Gate | Result |
 |---|---|
-| Unit tests | **516 passing** |
-| Journey tests | **118 passing** across board / reader / hardware / recognition / practice / class / offline / screens / a11y |
-| Syllabus accuracy | **69 of 69** lines translate cleanly — `npm run accuracy`, evidence in `docs/ACCURACY.md` |
+| Unit tests | **647 passing** |
+| Journey tests | **127 passing** across board / read-back / reader / hardware / recognition / practice / class / offline / screens / a11y |
+| Syllabus accuracy | **133 of 133** lines translate cleanly **and read back correctly** — `npm run accuracy`, evidence in `docs/ACCURACY.md` |
+| Round trip | every segment of every syllabus line, in all three braille codes, read back by an engine that never saw the input |
 | Lighthouse (deployed) | **accessibility 100 · best practices 100 · SEO 100**, zero failed audits |
 | Deployed LCP / CLS | **349 ms / 0.00** |
 | The deployed site itself | `npm run check:deployed` — 17 checks against the live URL, all green |
@@ -54,6 +58,10 @@ parked idea from `NOTES.md` into a new arc rather than starting anything ad hoc.
 - **The core engine** (`app/src/core/`): natural maths → LaTeX → MathML → Nemeth → dots → cam →
   frame, plus Bharati Braille for all nine Indian scripts, the mixed words-and-maths splitter, the semantic
   tree, folding, and the motion-minimising scheduler. Pure: no React, no I/O.
+- **The proof** (`readback.ts` · `bharatiback.ts` · `literalback.ts` · `canonical.ts` ·
+  `roundtrip.ts`): three engines that read braille cells and say what they mean, sharing no code with
+  the forward path, plus the one function that compares and returns **agrees · differs · cannot be
+  checked**. Used by the tests, by `docs/ACCURACY.md`, by the self-check, and by the Board screen.
 - **The transports** (`app/src/transport/`): simulator, USB (Web Serial), Wi-Fi pods — chained or
   mirrored — one interface, one protocol, tested against a real emulator.
 - **The classroom** (`app/src/class/`): worksheets, students, records; localStorage with a file for

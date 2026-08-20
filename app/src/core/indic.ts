@@ -55,6 +55,34 @@ const BLOCKS: readonly Block[] = [
 
 const BLOCK_SIZE = 0x80;
 
+/**
+ * Where the parallel genuinely breaks, and what the letter actually is.
+ *
+ * A handful of characters sit at offsets their neighbours do not share, because the script needed
+ * something the others did not. The arithmetic lands them on Devanagari code points that are not
+ * letters at all, so without this table they would be reported as gaps in perfectly ordinary words.
+ *
+ * Every entry here is a statement about what the character *means*, not a convenience:
+ *
+ *   ੰ  Gurmukhi tippi     — nasalisation. The same sound Devanagari writes with anusvara ं.
+ *   ৎ  Bengali khanda ta  — a ত with its vowel removed: त plus halant, exactly.
+ *   ൺൻർൽൾൿ Malayalam chillus — ണ ന ര ല ള क with their vowels removed. Same construction.
+ *
+ * What is deliberately NOT here: Gurmukhi's addak ੱ, which doubles the consonant after it and has
+ * no single Devanagari equivalent. It stays a reported gap, because inventing a cell for it would
+ * be a guess wearing the clothes of a translation.
+ */
+const EXCEPTIONS: Readonly<Record<string, string>> = {
+  'ੰ': 'ं', // tippi → anusvara
+  'ৎ': 'त्', // khanda ta → त्
+  'ൺ': 'ण्', // ൺ → ण्
+  'ൻ': 'न्', // ൻ → न्
+  'ർ': 'र्', // ർ → र्
+  'ൽ': 'ल्', // ൽ → ल्
+  'ൾ': 'ळ्', // ൾ → ळ्
+  'ൿ': 'क्', // ൿ → क्
+};
+
 export function scriptOf(char: string): IndicScript | null {
   const code = char.codePointAt(0);
   if (code === undefined) return null;
@@ -136,9 +164,13 @@ export function transliterate(text: string): Transliteration {
       out += char;
       continue;
     }
-    const mapped = String.fromCodePoint(0x0900 + (code - block.base));
+    const mapped = EXCEPTIONS[char] ?? String.fromCodePoint(0x0900 + (code - block.base));
     out += mapped;
-    if (!origin.has(mapped)) origin.set(mapped, char);
+    // One source character can become two Devanagari ones — a chillu is a consonant plus a halant.
+    // Both remember where they came from, so a gap in either names what the teacher typed.
+    for (const part of mapped) {
+      if (!origin.has(part)) origin.set(part, char);
+    }
   }
   return { text: out, origin };
 }

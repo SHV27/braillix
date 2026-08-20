@@ -17,6 +17,8 @@
 import { translateLatex, cellsToUnicode } from './translate';
 import { toLatex } from './mathinput';
 import { devanagariToBraille } from './bharati';
+import { checkRoundTrip } from './roundtrip';
+import { unicodeStringToMasks } from './braille';
 import { modelStatus } from '../recognise/status';
 import type { StringKey } from '../ui/i18n';
 
@@ -25,6 +27,7 @@ export type CheckState = 'pass' | 'warn' | 'fail';
 export type CheckId =
   | 'engine'
   | 'nemeth'
+  | 'readback'
   | 'bharati'
   | 'offline'
   | 'storage'
@@ -97,6 +100,41 @@ async function checkNemeth(): Promise<CheckResult> {
         detail: { key: 'check.nemethWrong', vars: { got: braille || '—', want: KNOWN_QUADRATIC } },
         fix: { key: 'check.dontUse' },
       };
+}
+
+/**
+ * Does the round-trip check work on THIS machine, and does it still have teeth?
+ *
+ * Two halves, and the second is the one that matters. Confirming that correct braille reads back
+ * correctly is easy; a checker that had quietly degraded into a function returning "agrees" would
+ * pass that half every time. So this also hands it braille it KNOWS is broken — the same quadratic
+ * with its baseline indicator taken out, which makes the superscript swallow the rest of the
+ * equation — and requires the answer "differs". A check that cannot fail is not a check.
+ */
+async function checkReadback(): Promise<CheckResult> {
+  const latex = toLatex('x^2 + 3x + 2 = 0').latex;
+  const result = await translateLatex(latex);
+  const good = checkRoundTrip(latex, result.cells);
+  if (good.verdict !== 'agrees') {
+    return {
+      id: 'readback',
+      state: 'fail',
+      detail: { key: 'check.readbackWrong', vars: { got: good.reading || '—', want: good.expected } },
+      fix: { key: 'check.dontUse' },
+    };
+  }
+
+  const broken = checkRoundTrip(latex, unicodeStringToMasks(KNOWN_QUADRATIC.replace('⠐', '')).cells);
+  if (broken.verdict === 'agrees') {
+    return {
+      id: 'readback',
+      state: 'fail',
+      detail: { key: 'check.readbackBlunt' },
+      fix: { key: 'check.dontUse' },
+    };
+  }
+
+  return { id: 'readback', state: 'pass', detail: { key: 'check.readbackOk', vars: { reading: good.reading } } };
 }
 
 function checkBharati(): CheckResult {
@@ -192,15 +230,17 @@ export interface SelfCheckInput {
 
 /** Run everything. Never throws: a check that cannot run reports that it could not run. */
 export async function runSelfCheck(input: SelfCheckInput): Promise<CheckResult[]> {
-  const [engine, nemeth, offline, recognition] = await Promise.all([
+  const [engine, nemeth, readback, offline, recognition] = await Promise.all([
     checkEngine(),
     checkNemeth(),
+    checkReadback(),
     checkOffline(),
     checkRecognition(),
   ]);
   return [
     engine,
     nemeth,
+    readback,
     checkBharati(),
     offline,
     checkStorage(),

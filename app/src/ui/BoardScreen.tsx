@@ -20,6 +20,7 @@ import { DisplayStrip } from './DisplayStrip';
 import { MathKeypad, insertAtCaret } from './MathKeypad';
 import { MathPreview } from './MathPreview';
 import { QuestionStrip } from './QuestionStrip';
+import { ReadbackPanel } from './ReadbackPanel';
 import { AddToWorksheet } from './AddToWorksheet';
 import { FirstRun } from './FirstRun';
 import { ReaderPanel } from './ReaderPanel';
@@ -151,6 +152,8 @@ export function BoardScreen() {
             ) : (
               <MathPreview latex={latex} label={spokenText} size="large" placeholder={t('board.print.empty')} />
             )}
+
+            <ReadbackPanel />
 
             <AddToWorksheet source={source} />
 

@@ -12,6 +12,7 @@ import { NEMETH_CLOSE, NEMETH_OPEN, hasWords, splitLine, translateMixed } from '
 import { cellsToUnicode, translateLatex } from './translate';
 import { initSre } from './sre-service';
 import { toLatex } from './mathinput';
+import { checkSegment } from './roundtrip';
 
 beforeAll(async () => {
   const status = await initSre();
@@ -118,5 +119,32 @@ describe('translating a mixed line', () => {
     for (const line of ['', '   ', '?????', '\\frac{1}{', 'क ्', '1/0', '।।।']) {
       await expect(translateMixed(line), line).resolves.toBeTruthy();
     }
+  });
+});
+
+describe('a line that changes script half way through', () => {
+  it('does not send Latin words to the Bharati translator', async () => {
+    // "Ravi ke paas 5 seb" is how a great many Indian classrooms actually write. Before this was
+    // fixed, the Latin word and the Hindi one shared a segment, the whole segment went to Bharati,
+    // and every Latin letter was dropped on the floor — half the question, gone, silently.
+    const line = await translateMixed('Ravi के पास 5 सेब');
+    const codes = line.segments.map((segment) => segment.code);
+    expect(codes).toContain('literary');
+    expect(codes).toContain('bharati');
+    expect(line.segments.flatMap((segment) => segment.issues)).toEqual([]);
+  });
+
+  it('reads every part of such a line back correctly', async () => {
+    const line = await translateMixed('Ravi के पास 5 सेब');
+    for (const segment of line.segments) {
+      const result = checkSegment(segment.kind, segment.text, segment.latex, segment.cells);
+      expect(result.verdict, `${segment.text}: dots say “${result.reading}”`).toBe('agrees');
+    }
+  });
+
+  it('keeps a run of one script together', async () => {
+    // The rule is "a change of script ends a segment", not "every word is its own segment".
+    const line = await translateMixed('दो संख्याओं का योग 12 है');
+    expect(line.segments.filter((segment) => segment.code === 'bharati').length).toBe(2);
   });
 });

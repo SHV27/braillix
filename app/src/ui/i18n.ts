@@ -64,6 +64,24 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
     'Write it as you would say it: 1/2, sqrt(9), x^2, 2 <= x, 45 degrees. LaTeX works too.',
     'जैसे बोलते हैं वैसे लिखिए: 1/2, sqrt(9), x^2, 2 <= x, 45 degrees. LaTeX भी चलता है।',
   ],
+  /* ---- the read-back check ---- */
+  'readback.title': ['What the dots say', 'डॉट्स क्या कह रहे हैं'],
+  'readback.agrees': ['Matches what you typed', 'आपने जो लिखा, वही है'],
+  'readback.differs': ['Does NOT match what you typed', 'आपने जो लिखा, यह वह नहीं है'],
+  'readback.unchecked.detail': [
+    'This one uses something the checker does not understand yet, so it cannot confirm the dots. The braille is still on the display — have someone who reads braille look at it before a student does.',
+    'इसमें कुछ ऐसा है जिसे जाँचने वाला अभी समझता नहीं, इसलिए वह डॉट्स की पुष्टि नहीं कर सका। ब्रेल डिस्प्ले पर मौजूद है — विद्यार्थी को देने से पहले किसी ब्रेल पढ़ने वाले से देखवा लीजिए।',
+  ],
+  'readback.unchecked': ['Cannot be checked', 'जाँचा नहीं जा सका'],
+  'readback.differs.detail': [
+    'The dots do not say what you wrote. You wrote {expected}. Please do not send this to a student — tell us the expression and it will be fixed.',
+    'डॉट्स वह नहीं कह रहे जो आपने लिखा। आपने {expected} लिखा था। कृपया इसे विद्यार्थी को न भेजें — हमें यह व्यंजक बताइए, इसे ठीक किया जाएगा।',
+  ],
+  'readback.how': [
+    'Read back from the dots themselves by engines that never saw what you typed — one for each braille code on the line. When the two readings agree, the braille is carrying your question.',
+    'यह पढ़ाई डॉट्स से ही की गई है, ऐसे इंजनों द्वारा जिन्होंने आपका लिखा कभी देखा ही नहीं — पंक्ति की हर ब्रेल लिपि के लिए एक। जब दोनों पढ़ाइयाँ मिलती हैं, तब ब्रेल आपका प्रश्न सही ले जा रही है।',
+  ],
+
   'board.print': ['How it reads in print', 'छपाई में ऐसा दिखता है'],
   'board.print.empty': ['Type something and it appears here', 'कुछ लिखिए, वह यहाँ दिखेगा'],
   'board.examples': ['Examples', 'उदाहरण'],
@@ -204,6 +222,7 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   ],
   'check.engine': ['The maths engine', 'गणित इंजन'],
   'check.nemeth': ['Nemeth translation', 'नेमेथ अनुवाद'],
+  'check.readback': ['Reading the dots back', 'डॉट्स को वापस पढ़ना'],
   'check.bharati': ['Hindi braille', 'हिन्दी ब्रेल'],
   'check.offline': ['Works without the internet', 'बिना इंटरनेट काम करना'],
   'check.storage': ['Saving your work', 'आपका काम सहेजना'],
@@ -230,6 +249,18 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   ],
   'check.nemethOk': ['A quadratic is {count} cells, and every one matches.', 'एक द्विघात {count} सेल का है, और हर सेल मेल खाती है।'],
   'check.nemethWrong': ['A quadratic translated to {got}, and it should be {want}.', 'द्विघात {got} में बदला, जबकि होना चाहिए {want}।'],
+  'check.readbackOk': [
+    'The dots read back as {reading} — and the checker still catches braille that is wrong.',
+    'डॉट्स वापस {reading} पढ़े गए — और जाँचने वाला गलत ब्रेल अब भी पकड़ लेता है।',
+  ],
+  'check.readbackWrong': [
+    'The dots read back as {got}, but should say {want}. Do not use this machine for a lesson.',
+    'डॉट्स {got} पढ़े गए, जबकि {want} होना चाहिए। इस मशीन को पाठ के लिए इस्तेमाल न करें।',
+  ],
+  'check.readbackBlunt': [
+    'The checker accepted braille that is deliberately broken, so its verdicts cannot be relied on.',
+    'जाँचने वाले ने जानबूझकर बिगाड़ी गई ब्रेल भी स्वीकार कर ली, इसलिए उसके निर्णय पर भरोसा नहीं किया जा सकता।',
+  ],
   'check.bharatiOk': ['गणित is {braille}, as the Bharati table says.', 'गणित {braille} है, जैसा भारती तालिका कहती है।'],
   'check.bharatiWrong': [
     'गणित translated to {got}, and it should be {want}. Hindi words would be wrong on the display.',
@@ -693,8 +724,11 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   ],
 
   /* ---- the evidence table ---- */
-  'evidence.count': ['{count} cells · Nemeth', '{count} सेल · नेमेथ'],
-  'evidence.countOne': ['1 cell · Nemeth', '1 सेल · नेमेथ'],
+  'evidence.count': ['{count} cells · {codes}', '{count} सेल · {codes}'],
+  'evidence.countOne': ['1 cell · {codes}', '1 सेल · {codes}'],
+  'strip.nemeth': ['Nemeth', 'नेमेथ'],
+  'strip.bharati': ['Bharati', 'भारती'],
+  'strip.literary': ['Grade 1', 'ग्रेड 1'],
   'evidence.empty': [
     'Nothing translated yet. Write an expression — or pick an example — and every cell, dot and cam number will be listed here.',
     'अभी कुछ अनूदित नहीं हुआ। कोई व्यंजक लिखिए — या उदाहरण चुनिए — और हर सेल, डॉट और कैम नंबर यहाँ दिखेगा।',

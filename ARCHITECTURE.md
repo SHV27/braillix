@@ -215,3 +215,38 @@ runtime, and the app reports recognition as unavailable rather than pretending. 
 worth remembering: **anything that must work on the public site has to be in the precache list**,
 and `npm run check:deployed` asserts the ones that matter against the live URL. A local build
 passing proves only that the local build passes.
+
+---
+
+## Amendment after arc 11 (20 August 2026, night)
+
+**11. The pipeline is now a loop, and the loop is the evidence.** `core/readback.ts` runs the
+translation backwards: cells in, maths out. `core/canonical.ts` prints the LaTeX that went in into
+the same plain form, and `core/roundtrip.ts` is the single authority that compares them and returns
+one of three verdicts. Everything that shows a verdict — the syllabus tests, `docs/ACCURACY.md`,
+the Board screen — calls that one function.
+
+Three rules for anyone extending it:
+
+- **The two directions must never share code.** The moment `readback.ts` imports anything from the
+  forward path, the agreement stops being evidence and becomes a tautology. It imports `braille.ts`
+  (the dot-mask primitives) and nothing else from `core/`.
+- **A gap in the checker is never a pass.** `unchecked` exists so that a cell the reader has no rule
+  for, or a LaTeX command the printer does not know, produces "cannot be checked" rather than
+  "agrees". Adding a rule is welcome; making an unknown default to agreement is a defect.
+- **What agreement proves is bounded, and the bound is written down.** The two directions share the
+  *alphabet* — both believe a Nemeth 5 is dots 2-6 — so round-tripping cannot discover an alphabet
+  error. That is `nemeth.test.ts`'s job, against published tables. What the round trip proves is the
+  *grammar*: indicators, levels, groupings, closures. Say so wherever the claim is made.
+
+**12. The code on a cell is data, not an assumption.** `MixedLine.codes` gives one `BrailleCode`
+per cell, produced by the same function that produced the cells. Anything that describes a cell —
+the evidence table today, a tooltip or an export tomorrow — reads that array rather than assuming
+Nemeth. The bug it fixes had been on screen since arc 7: a Hindi question annotated cell by cell
+with its *mathematical* meaning, confidently and wrongly.
+
+And one thing the arc taught about the limits of the loop: a round trip validates LaTeX → cells, so
+it will happily agree about braille that faithfully carries a *wrong expression*. `S_n = n/2 (…)`
+round-tripped perfectly while missing its `S_n`. The guard for that is upstream and different in
+kind — `syllabus.test.ts` now asserts the shape of the split, and that every digit and capital the
+teacher typed survives to the reading. **Two checks, because there are two ways to be wrong.**

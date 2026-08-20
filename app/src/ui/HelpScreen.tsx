@@ -21,6 +21,7 @@ import './HelpScreen.css';
 const CHECK_LABEL: Record<CheckId, StringKey> = {
   engine: 'check.engine',
   nemeth: 'check.nemeth',
+  readback: 'check.readback',
   bharati: 'check.bharati',
   offline: 'check.offline',
   storage: 'check.storage',

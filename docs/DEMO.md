@@ -127,6 +127,41 @@ Point at the three chips under the box.
 
 ---
 
+## The one to slow down for: **What the dots say**
+
+Scroll to the panel under the print preview and put a finger on it.
+
+> "Here is the thing I would most want a head teacher to see. Almost nobody teaching maths at a
+> school for the blind reads braille — they are maths teachers. So when a row of dots appears, they
+> have no way to tell a correct cell from a plausible one, and every tool in this space asks them to
+> take that on trust.
+>
+> This panel does not. The dots on the display go to a **second engine that reads braille** — it has
+> never seen what was typed, it does not know the LaTeX, it shares no code with the translator. All
+> it does is say what a braille reader would say those dots mean. And then we put the two side by
+> side."
+
+Type `(-b +- sqrt(b^2 - 4ac))/(2a)` and let them read `(-b±√(b^(2)-4ac))/(2a)` off the panel.
+
+> "There are three verdicts, not two. Agrees, differs, and **cannot be checked** — that third one
+> fires whenever the checker meets something it does not know, because a hole in the checker must
+> never look like a clean bill of health."
+
+Then type `\binom{n}{k}` to show it happening.
+
+Then the Hindi question again.
+
+> "And it is not just the maths. There is a reader for every braille code on the line — Nemeth for
+> the mathematics, Bharati for the words, Grade-1 for English. The whole question is checked, or it
+> is not a verdict."
+
+**If somebody asks whether this ever caught anything:** yes, on the first run, in code that had
+passed every gate we had. `25% of 80` was reaching the display as *o times f* — an English word read
+as two variables. `1/2 x b x h`, the area of a triangle, was arriving as four variables with no
+multiplication in it anywhere. Both are in `ARC_PLAN.md` under Arc 11, with five more.
+
+---
+
 ## 4 · Any number of cells (30 sec)
 
 Drag the **Cells** slider: 1 → 4 → 12.

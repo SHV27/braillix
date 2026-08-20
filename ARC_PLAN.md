@@ -156,3 +156,42 @@ Acceptance (frozen):
 - [x] First-run guide that teaches the product in under a minute, skippable, never patronising
 - [x] Deployed publicly, with the deployed build verified — not just the local one
 - [x] `npm run verify` green; screenshots of every screen at three widths; docs current
+
+## Arc 11 — THE PROOF
+*The pipeline checks its own work, and a teacher who cannot read braille can check it too.*
+
+Every arc up to here ran the translation one way: maths in, dots out. Which meant that if the dots
+were wrong, nothing in the system would ever notice — the tests could only ask whether a
+translation *happened*. And it meant a teacher, who almost certainly does not read braille, was
+being asked to take the most important thing in the product entirely on trust.
+
+Acceptance (frozen):
+- [x] A second engine that reads Nemeth cells and says what they mean, written from the opposite
+      end and sharing no code with the forward path
+- [x] A canonical printer for the LaTeX that went in, so the two readings can be compared exactly
+- [x] Three verdicts, never two: agrees · differs · **cannot be checked**, so a gap in the checker
+      can never be mistaken for a clean bill of health
+- [x] Mutation tests that break the braille on purpose — a missing baseline indicator, a superscript
+      written as a subscript, a dropped numeric indicator — and prove the check catches each
+- [x] The round trip asserted over the whole syllabus, and printed in `docs/ACCURACY.md`
+- [x] Syllabus corpus doubled, and every line marked as pure maths or as words-and-maths, so a line
+      being silently cut in half is a test failure
+- [x] The verdict on screen, in both languages, saying plainly what it did and did not check
+- [x] A back-reader for **every** braille code Braillix writes — Nemeth, Bharati and Grade-1 English
+      — so a whole question is verified, not the convenient half of it
+- [x] `fold()`: the distinctions Bharati genuinely cannot carry, written down, applied to both sides
+- [x] The self-check screen runs the verifier, AND feeds it deliberately broken braille to prove it
+      still catches things on this machine
+- [x] Every defect the check found, fixed
+
+What it found, on the first run, in code that had passed every previous gate:
+- `25% of 80` reached the display as *o times f* — an English word read as two variables
+- `1/2 x b x h` — the area of a triangle — read as four variables, no multiplication anywhere
+- `lim_{x -> 0} sin x / x` became (lim sin x)/x, which is a different limit and a wrong one
+- `3/4 x 2/5` became a compound fraction instead of two fractions multiplied
+- `S_n = n/2 (2a + (n-1)d)` lost its `S_n` to the text half, leaving `=n` as a numerator
+- `12.5 cm` was cut in two, with braille-code switch indicators around the unit
+- Gurmukhi's tippi, Bengali's khanda ta and Malayalam's chillu letters were reported as gaps in
+  ordinary words
+- `Ravi के पास 5 सेब` — a Hinglish question — lost every Latin letter, because the Latin word and the
+  Hindi one shared a segment and the whole segment went to the Bharati translator

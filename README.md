@@ -70,6 +70,32 @@ Oriya, Tamil, Telugu, Kannada or Malayalam reads exactly as the Devanagari one d
 and ಗಣಿತ all reach the fingers as ⠛⠼⠊⠞. Where a script has a letter the others do not, Braillix
 **says so** rather than rendering something near it.
 
+**It checks its own work, in front of you.** Almost every teacher who will use Braillix cannot read
+braille — that is the ordinary situation in a school for the blind, where a maths teacher is a maths
+teacher first. So the dots on the display are handed to a **second engine that reads braille and has
+never seen the input**, and what it says is put on screen next to what was typed:
+
+```
+you typed        (-b +- sqrt(b^2 - 4ac))/(2a)
+on the cells     ⠹⠤⠃⠬⠤⠜⠃⠘⠆⠐⠤⠲⠁⠉⠻⠌⠆⠁⠼
+the dots say     (-b±√(b^(2)-4ac))/(2a)          ← read back from the dots alone
+```
+
+There is one back-reader for every braille code Braillix writes — Nemeth for the mathematics,
+Bharati for the nine Indian scripts, Grade-1 for English words — so a whole question is checked and
+not the convenient half of it. A Telugu question comes back as Devanagari, because that is what the
+cells actually carry:
+
+```
+రెండు సంఖ్యల మొత్తం 12  →  ⠗⠢⠰⠫⠥ ⠎⠰⠨⠈⠽⠇ ⠍⠭⠞⠈⠞⠰ ⠸⠩ ⠼⠂⠆ ⠸⠱  →  रॆंडु संख्यल मॊत्तं 12
+```
+
+And there are three verdicts, not two. The third is **"cannot be checked"** — because a cell the
+reader has no rule for must never look like a clean bill of health. Running all of this over the
+syllabus is what found the bugs listed in `ARC_PLAN.md` under Arc 11, including `25% of 80` reaching
+the display as *o times f*, and `1/2 x b x h` — the area of a triangle — arriving as four variables
+with no multiplication in it anywhere.
+
 **A class, not just a display.** Worksheets a teacher writes and keeps, a Teach mode that puts each
 question on the display in turn, students with their own records, a printable sheet with print and
 braille together, and a `.brf` file for an embosser. All of it on the laptop, moving between

@@ -295,9 +295,11 @@ test('says when a character has no braille cell, and renders the rest anyway', a
   await page.goto('/');
   await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
 
-  await page.getByTestId('latex-input').fill('গণিত ৎ গণিত');
+  // Gurmukhi's addak, which doubles the consonant after it. No other script here has the idea, and
+  // no single Bharati cell means it — so it is reported, by the symbol the teacher actually typed.
+  await page.getByTestId('latex-input').fill('গণিত ੱ গণিত');
   await expect(page.getByTestId('input-issue')).toHaveCount(1, { timeout: 10_000 });
-  await expect(page.getByTestId('input-issue')).toContainText('ৎ');
+  await expect(page.getByTestId('input-issue')).toContainText('ੱ');
   // The rest of the line still reached the cells.
   await expect(page.getByTestId('braille-unicode')).toContainText('⠛⠼⠊⠞');
 });

@@ -508,3 +508,66 @@ Run before calling this shipped. Result: **nothing to rotate, nothing to hide, n
 - **D11.4** — The maths parser is no longer run over a line that contains words. It was, for the
   print preview, and it complained about every letter of every word: a perfectly good Bengali
   question arrived under sixteen warnings. A question's issues come from its segments.
+- **D12.1** — The translation is verified by reading it back, not by trusting it. A second engine
+  parses the Nemeth cells with its own grammar and says what they mean; agreement with the input is
+  the evidence. It shares no code with the forward path, because agreement between one engine and
+  itself proves nothing.
+- **D12.2** — Three verdicts, not two. `unchecked` fires whenever the reader meets a cell it has no
+  rule for or the printer meets a LaTeX command it does not know. Collapsing that into "agrees"
+  would turn a hole in the checker into a guarantee about the braille — the exact inversion this
+  whole mechanism exists to prevent.
+- **D12.3** — The verdict is shown to the teacher, not just to the test suite. Nearly every teacher
+  who will use Braillix cannot read braille; without this panel they are asked to trust the most
+  important output in the product. On a mixed line it says "the maths matches", not "matches what
+  you typed", because only the maths was checked.
+- **D12.4** — The maths parser no longer treats a lone spaced `x` between two *numbers* as the only
+  cross. Any two operands qualify, which is what makes `1/2 x b x h` the area of a triangle rather
+  than four variables. `y = m x + c` still keeps its x, because `+` is not an operand.
+- **D12.5** — `/` takes as its numerator everything since the last explicit multiplication sign, not
+  everything since the start of the product. `3/4 x 2/5` is two fractions multiplied; `2x/3` is
+  still one fraction. Juxtaposition is not an explicit sign, so `n(n+1)/2` is unchanged.
+- **D12.6** — `lim` binds the whole product that follows it; the trigonometric functions bind only
+  the next factor. `lim_{x to 0} sin x / x` is the limit of the quotient — reading it the other way
+  gives 0/x, which is a different and false statement.
+- **D12.7** — A short list of English words is never mathematics whatever surrounds it, and a short
+  list of unit abbreviations always is. Both lists were written from failures, not from imagination,
+  and both exclude every word that IS mathematics in an Indian classroom — "in" is membership, "by"
+  is division, "into" is multiplication.
+- **D12.8** — The underscore counts as a mathematics character in the splitter. A subscript is not
+  a word, and treating `S_n` as one cost the expression its subject.
+- **D12.9** — Where the Unicode Indic parallel genuinely breaks — Gurmukhi's tippi, Bengali's khanda
+  ta, Malayalam's chillu letters — an explicit table maps the character to what it actually *is*
+  (a nasal, a consonant plus halant). Gurmukhi's addak stays a reported gap, because no honest
+  single equivalent exists, and a plausible guess is worse than a visible hole.
+- **D12.10** — Every syllabus line declares whether it contains words. A line of pure mathematics
+  that arrives at the display in more than one piece is now a test failure, not a surprise.
+- **D12.11** — There are three back-readers, one per braille code on a line: Nemeth, Bharati and
+  Grade-1 English. The verdict covers the whole question or it is not a verdict. `checkSegment()` is
+  the one entry point, and it decides which reader runs the same way `mixed.ts` decided which writer
+  ran — so the two decisions cannot drift apart.
+- **D12.12** — Bharati Braille genuinely cannot express some distinctions: ॅ and ॆ share a cell, so
+  do ऽ and ँ, so do ऋ and ऱ, and a matra is written as the whole vowel so को and कओ are the same two
+  cells. `fold()` in `bharatiback.ts` collapses exactly those and nothing else, and is applied to
+  both sides. It is the written-down statement of what the code loses — not a convenience, and the
+  place to look first if a verdict ever seems too generous.
+- **D12.13** — A Bharati reading always comes back as Devanagari, whatever script was typed. The
+  cells carry no trace of the script — that is the whole point of Bharati — so the comparison is
+  against the transliterated source. A Telugu question reading back as Devanagari is the system
+  working, not a bug.
+- **D12.14** — Inside a word, ⠼ is the letter ण; at the start of one it opens a number. There is no
+  other way to read गणित (⠛⠼⠊⠞), and it is the one place the reader uses position to settle a letter.
+- **D12.15** — A change of script ends a segment. Two adjacent word-tokens are only merged when
+  they are in the same braille code, because "Ravi के पास 5 सेब" is Grade-1 for the Latin and Bharati
+  for the Hindi — and merging them sent the whole run to the Bharati translator, which dropped every
+  Latin letter. Half a question, gone, with no warning. Found by the 300-character overflow test,
+  which is the second time a pathological input has exposed an ordinary-classroom bug.
+- **D12.16** — The evidence table reads each cell in the code that cell is actually written in.
+  It used to reach for the Nemeth table whatever was on the display, so every cell of a Hindi
+  question was annotated as mathematics — ⠛ described as "letter g" when it means ग, ⠼ as "numeric
+  indicator" when it means ण. `MixedLine.codes` carries one code per cell from the translator that
+  knows, and the count line names the codes present ("31 cells · Bharati + Nemeth") instead of
+  asserting Nemeth.
+- **D12.17** — Where a single cell means two things, the table shows both (`ओ / ो`, `ण · number
+  sign`). Bharati is a six-dot code carrying a script with more distinctions than sixty-four, so
+  the ambiguity is real; picking one reading and printing it as fact would teach something false
+  half the time.
