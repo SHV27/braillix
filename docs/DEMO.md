@@ -105,6 +105,20 @@ Press **Read this on the display →**.
 *(If you have a camera and good light, use **Choose a photo** instead. The samples exist so the demo
 never depends on the room.)*
 
+> **All six samples read correctly** — measured, not assumed, by `e2e/samples.spec.ts`:
+>
+> | Sample | Reads as |
+> |---|---|
+> | Quadratic | `x^{2} + 3 x + 2 = 0` |
+> | Fraction | `\frac{22}{7}` |
+> | Square root | `\sqrt{144} = 12` |
+> | Pythagoras | `a^{2} + b^{2} = c^{2}` |
+> | Summation | `\sum_{i = 1}^{n} i` |
+> | Handwritten | `x^{2} + 5 x = 6` |
+>
+> So pick any of them with confidence — including the handwriting-style one. Re-run
+> `npx playwright test e2e/samples.spec.ts` the night before if you want to watch it happen.
+
 ---
 
 ## 4 · It teaches braille, braille-first (1 min)
