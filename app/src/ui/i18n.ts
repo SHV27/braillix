@@ -294,8 +294,8 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
 
   'help.about': ['About Braillix', 'ब्रेलिक्स के बारे में'],
   'help.aboutText': [
-    'Braillix turns mathematics into braille and drives a refreshable display, on however many cells it has — one or forty. It has no account, no server and no API key, and everything it does works with the network unplugged. Nemeth is used for the mathematics and Bharati Braille for Hindi words; both are cited in the repository.',
-    'ब्रेलिक्स गणित को ब्रेल में बदलता है और रिफ्रेशेबल डिस्प्ले चलाता है — चाहे उसमें एक सेल हो या चालीस। इसमें न कोई खाता है, न सर्वर, न कोई API कुंजी, और यह सब कुछ नेटवर्क के बिना करता है। गणित के लिए नेमेथ और हिन्दी शब्दों के लिए भारती ब्रेल — दोनों के स्रोत रिपॉज़िटरी में दर्ज हैं।',
+    'Braillix turns mathematics into braille and drives a refreshable display, on however many cells it has — one or forty. It has no account, no server and no API key, and everything it does works with the network unplugged. Nemeth is used for the mathematics; the words around it are written in Bharati Braille, which is the same for all nine Indian scripts — Devanagari, Bengali, Gurmukhi, Gujarati, Oriya, Tamil, Telugu, Kannada and Malayalam. Both tables are cited in the repository.',
+    'ब्रेलिक्स गणित को ब्रेल में बदलता है और रिफ्रेशेबल डिस्प्ले चलाता है — चाहे उसमें एक सेल हो या चालीस। इसमें न कोई खाता है, न सर्वर, न कोई API कुंजी, और यह सब कुछ नेटवर्क के बिना करता है। गणित के लिए नेमेथ; आसपास के शब्द भारती ब्रेल में, जो नौ भारतीय लिपियों के लिए एक ही है — देवनागरी, बांग्ला, गुरमुखी, गुजराती, ओड़िया, तमिल, तेलुगु, कन्नड़ और मलयालम। दोनों तालिकाओं के स्रोत रिपॉज़िटरी में दर्ज हैं।',
   ],
 
   /* ---- marking an answer ---- */

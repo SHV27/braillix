@@ -485,18 +485,31 @@ export const useBraillix = create<BraillixState>((set, get) => {
      * `toLatex` passes LaTeX through untouched, so this is safe for callers that already have it.
      */
     setSource: (text) => {
-      const parsed = toLatex(text);
+      /*
+       * A line with words in it is a textbook question, not an expression: it needs two braille
+       * codes and a visible boundary between them (core/mixed.ts). A line without words takes
+       * exactly the path it always has, so nothing that already worked can change.
+       *
+       * The maths parser is not run over a question at all. It used to be — for the print preview —
+       * and it complained about every letter of every word, so a perfectly good Bengali question
+       * arrived under sixteen warnings about characters it could not use in an expression. The
+       * issues that matter for a question come from its segments, which is where they are read from
+       * below.
+       */
+      const words = hasWords(text);
+      const parsed = words ? { latex: '', issues: [] } : toLatex(text);
       set({ source: text, latex: parsed.latex, inputIssues: parsed.issues, translating: true, testingDot: null });
 
-      // A line with words in it is a textbook question, not an expression: it needs two braille
-      // codes and a visible boundary between them (core/mixed.ts). A line without words takes
-      // exactly the path it always has, so nothing that already worked can change.
-      if (hasWords(text)) {
+      if (words) {
         void translateMixed(text, get().segmentOverrides).then((line) => {
           if (get().source !== text) return;
           set({
             translating: false,
             mixedLine: line,
+            // A character with no cell must be visible, whichever half of the line it was in.
+            inputIssues: line.segments
+              .flatMap((segment) => segment.issues)
+              .map((issue) => ({ message: issue.message, fix: issue.fix })),
             translation: null,
             tree: null,
             cursorId: null,

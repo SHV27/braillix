@@ -26,6 +26,7 @@
  */
 
 import { BLANK, dotsToMask, type DotMask } from './braille';
+import { detectScript, transliterate, type IndicScript } from './indic';
 
 /* ------------------------------------------------------------------ the tables */
 
@@ -123,6 +124,19 @@ const PREFIXED: Readonly<Record<string, readonly [prefix: number[], letter: stri
   ॠ: [[6], 'र'],
   ऌ: [[5], 'ल'],
   ॡ: [[6], 'ल'],
+};
+
+/**
+ * Three letters Unicode keeps whole rather than as a consonant plus a nukta.
+ *
+ * ऩ, ऱ and ऴ are single code points that NFC does not take apart, so the nukta rule below never
+ * sees them — and they are not obscure: they are Tamil's ன, ற and ழ, which is most of what makes
+ * Tamil Tamil. Cells from liblouis `devanagari.cti`: 5-1345, 5-1235 and 5-12356.
+ */
+const WHOLE_NUKTA: Readonly<Record<string, readonly (readonly number[])[]>> = {
+  'ऩ': [[5], [1, 3, 4, 5]],
+  'ऱ': [[5], [1, 2, 3, 5]],
+  'ऴ': [[5], [1, 2, 3, 5, 6]],
 };
 
 /** ऋ as a matra behaves like the independent vowel. */
@@ -271,6 +285,12 @@ export function devanagariToBraille(text: string): BharatiResult {
       }
     }
 
+    const whole = WHOLE_NUKTA[char];
+    if (whole) {
+      for (const dots of whole) push(dots);
+      continue;
+    }
+
     const prefixed = PREFIXED[char];
     if (prefixed) {
       push(prefixed[0]);
@@ -328,4 +348,24 @@ export function devanagariToBraille(text: string): BharatiResult {
 /** Does this text contain Devanagari at all? Used to choose a code, never to guess a language. */
 export function hasDevanagari(text: string): boolean {
   return /[ऀ-ॿ]/.test(text);
+}
+
+/**
+ * Any Indian script to Bharati Braille.
+ *
+ * Bengali, Gurmukhi, Gujarati, Oriya, Tamil, Telugu, Kannada and Malayalam are rewritten as their
+ * Devanagari equivalents first (`core/indic.ts`) and then go through exactly the table above —
+ * which is not a shortcut but the point of Bharati Braille: the same cell for the corresponding
+ * letter in every Indian script.
+ */
+export function indicToBraille(text: string): BharatiResult & { script: IndicScript | null } {
+  const script = detectScript(text);
+  const { text: devanagari, origin } = transliterate(text);
+  const result = devanagariToBraille(devanagari);
+  return {
+    cells: result.cells,
+    // Reported as the teacher wrote it, not as our arithmetic rewrote it.
+    unsupported: result.unsupported.map((char) => origin.get(char) ?? char),
+    script,
+  };
 }

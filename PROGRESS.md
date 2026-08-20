@@ -52,7 +52,7 @@ parked idea from `NOTES.md` into a new arc rather than starting anything ad hoc.
 
 - **Five screens**: Board · Practice · Class · Device · Help.
 - **The core engine** (`app/src/core/`): natural maths → LaTeX → MathML → Nemeth → dots → cam →
-  frame, plus Bharati Braille for Devanagari, the mixed words-and-maths splitter, the semantic
+  frame, plus Bharati Braille for all nine Indian scripts, the mixed words-and-maths splitter, the semantic
   tree, folding, and the motion-minimising scheduler. Pure: no React, no I/O.
 - **The transports** (`app/src/transport/`): simulator, USB (Web Serial), Wi-Fi pods — chained or
   mirrored — one interface, one protocol, tested against a real emulator.

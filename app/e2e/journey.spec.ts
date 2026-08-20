@@ -245,3 +245,59 @@ test.describe('nothing a teacher can type breaks it', () => {
     expect(problems, 'the console must stay clean, even under abuse').toEqual([]);
   });
 });
+
+/**
+ * Nine scripts, one braille.
+ *
+ * Bharati Braille unifies the Indian scripts: the corresponding letter is the same cell in all of
+ * them. That claim is only worth anything if a teacher can type in their own script and get it, so
+ * this types a question in Bengali and one in Devanagari and asserts that the number in the middle
+ * is the same Nemeth either way — and that neither line loses a character.
+ */
+test.describe('a question in any Indian script', () => {
+  test('reads Bengali, and marks the maths inside it the same way', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
+
+    await page.getByTestId('latex-input').fill('দুটি সংখ্যার যোগফল 12');
+    await expect(page.getByTestId('question-strip')).toBeVisible({ timeout: 10_000 });
+
+    // The words are Bharati, and the chip says which script they were written in.
+    await expect(page.getByTestId('question-strip')).toContainText('বাংলা');
+    // The maths is still Nemeth, still switched into and out of.
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠸⠩⠀⠼⠂⠆⠀⠸⠱');
+    // Nothing was dropped.
+    await expect(page.getByTestId('input-issue')).toHaveCount(0);
+  });
+
+  test('gives the same cells for the same word in two scripts', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
+
+    await page.getByTestId('latex-input').fill('गणित');
+    await expect(page.getByTestId('braille-unicode')).toHaveText('⠛⠼⠊⠞', { timeout: 10_000 });
+
+    await page.getByTestId('latex-input').fill('গণিত');
+    await expect(page.getByTestId('braille-unicode')).toHaveText('⠛⠼⠊⠞', { timeout: 10_000 });
+
+    await page.getByTestId('latex-input').fill('ಗಣಿತ');
+    await expect(page.getByTestId('braille-unicode')).toHaveText('⠛⠼⠊⠞', { timeout: 10_000 });
+  });
+});
+
+/**
+ * A dropped character has to be visible, whichever half of the line it was in.
+ *
+ * Bengali's khanda ta is one of the few letters no other Indian script has, so it has no cell in a
+ * unified table. The right behaviour is not to render something near it — it is to say so.
+ */
+test('says when a character has no braille cell, and renders the rest anyway', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
+
+  await page.getByTestId('latex-input').fill('গণিত ৎ গণিত');
+  await expect(page.getByTestId('input-issue')).toHaveCount(1, { timeout: 10_000 });
+  await expect(page.getByTestId('input-issue')).toContainText('ৎ');
+  // The rest of the line still reached the cells.
+  await expect(page.getByTestId('braille-unicode')).toContainText('⠛⠼⠊⠞');
+});

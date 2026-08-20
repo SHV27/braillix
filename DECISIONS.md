@@ -494,3 +494,17 @@ Run before calling this shipped. Result: **nothing to rotate, nothing to hide, n
 - **D10.11** — The Device screen is a teacher's screen first. Cam wiring, the test dot and the wire
   protocol sit behind one press labelled "Setting up the hardware": needed once, by whoever
   assembled the display, and never again. Offered, not hidden — and a test keeps those two apart.
+- **D11.1** — Bharati Braille is implemented for **all nine Indian scripts**, not just Devanagari,
+  through one transliteration step: the Unicode Indic blocks are laid out in parallel, so the same
+  offset is the same letter, and Bharati's founding purpose is that the same letter is the same
+  cell. Nine scripts cost one small file and no second table.
+- **D11.2** — Where the parallel lands on a Devanagari code point the braille table does not know —
+  Bengali's khanda ta, Gurmukhi's addak, Malayalam's chillu letters — the character is **reported**,
+  not rendered as its neighbour. A gap is visible; a wrong letter is not. And it is reported as the
+  teacher typed it, not as the Devanagari our arithmetic turned it into.
+- **D11.3** — ऩ, ऱ and ऴ get explicit entries (liblouis 5-1345, 5-1235, 5-12356). NFC keeps them
+  whole rather than as consonant-plus-nukta, so the nukta rule never sees them — and they are
+  Tamil's ன, ற and ழ, which is most of what makes Tamil Tamil.
+- **D11.4** — The maths parser is no longer run over a line that contains words. It was, for the
+  print preview, and it complained about every letter of every word: a perfectly good Bengali
+  question arrived under sixteen warnings. A question's issues come from its segments.

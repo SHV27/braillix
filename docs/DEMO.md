@@ -117,6 +117,14 @@ Point at the three chips under the box.
 > flips any part. And in the braille you can see where the code changes: ⠸⠩ opens the mathematics
 > and ⠸⠱ closes it, which is exactly what a braille reader is taught to expect."
 
+**Then type the same word in another script.** `গণিত`, and watch the chip say বাংলা.
+
+> "Bharati Braille was built in the 1950s to unify the Indian scripts, and it means it: क and ক and
+> ಗಣಿತ's ಕ are the same cell. A blind child in Kolkata and a blind child in Chennai read the same
+> dots; only the print differs. So this is all nine scripts — Devanagari, Bengali, Gurmukhi,
+> Gujarati, Oriya, Tamil, Telugu, Kannada, Malayalam — from one table. And where a script has a
+> letter the others do not, it says so rather than rendering something near it."
+
 ---
 
 ## 4 · Any number of cells (30 sec)

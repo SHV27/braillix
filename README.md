@@ -64,6 +64,12 @@ the two halves are written in different braille codes. Braillix cuts the line, s
 दो संख्याओं का योग 12 है  →  ⠙⠕ ⠎⠰⠨⠈⠽⠜⠕⠰ ⠅⠜ ⠽⠕⠛ ⠸⠩ ⠼⠂⠆ ⠸⠱ ⠓⠌
 ```
 
+**All nine Indian scripts, one braille.** Bharati Braille was built in the 1950s to unify them, and
+it means it: क ক ਕ ક କ க క ಕ ക are one cell, ⠅. So a question typed in Bengali, Gurmukhi, Gujarati,
+Oriya, Tamil, Telugu, Kannada or Malayalam reads exactly as the Devanagari one does — गणित and গণিত
+and ಗಣಿತ all reach the fingers as ⠛⠼⠊⠞. Where a script has a letter the others do not, Braillix
+**says so** rather than rendering something near it.
+
 **A class, not just a display.** Worksheets a teacher writes and keeps, a Teach mode that puts each
 question on the display in turn, students with their own records, a printable sheet with print and
 braille together, and a `.brf` file for an embosser. All of it on the laptop, moving between

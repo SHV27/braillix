@@ -10,6 +10,7 @@
 
 import { useBraillix } from '../store';
 import { MathPreview } from './MathPreview';
+import { endonymOf } from '../core/indic';
 import { useT, type StringKey } from './i18n';
 import './QuestionStrip.css';
 
@@ -36,7 +37,9 @@ export function QuestionStrip() {
             className={`qseg qseg--${segment.kind}`}
             data-testid={`segment-${segment.kind}`}
             title={t('mixed.flip')}
-            aria-label={`${segment.text} — ${t(CODE_LABEL[segment.code])}. ${t('mixed.flip')}`}
+            aria-label={`${segment.text} — ${
+              segment.script ? `Bharati ${endonymOf(segment.script)}` : t(CODE_LABEL[segment.code])
+            }. ${t('mixed.flip')}`}
             onClick={() => flipSegment(segment.text)}
           >
             <span className="qseg__body">
@@ -46,7 +49,11 @@ export function QuestionStrip() {
                 <span className="qseg__words">{segment.text}</span>
               )}
             </span>
-            <span className="qseg__code">{t(CODE_LABEL[segment.code])}</span>
+            <span className="qseg__code">
+              {/* The script's own name, where there is one: a Bengali teacher should see বাংলা,
+                  not a word for Bengali in a language they were not writing in. */}
+              {segment.script ? `Bharati · ${endonymOf(segment.script)}` : t(CODE_LABEL[segment.code])}
+            </span>
           </button>
         ))}
       </div>

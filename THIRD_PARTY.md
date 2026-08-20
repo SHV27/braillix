@@ -40,8 +40,11 @@ proven work is senior engineering and pretending otherwise is not.
 - **Standard Bharati Braille Codes** (DEPwD / NIEPVD, 4 January 2025) — the Indian standard for
   language braille, covering 13 languages across 9 scripts. Braillix implements the **Devanagari**
   letter, matra, nukta, digit and punctuation tables for the Hindi words in a maths question.
+  Braillix implements it for **all nine scripts** — Devanagari, Bengali, Gurmukhi, Gujarati, Oriya,
+  Tamil, Telugu, Kannada and Malayalam — through one table and the parallel layout of the Unicode
+  Indic blocks, which is exactly the unification the code was created to express.
   Its **mathematics** notation has no open machine-readable table, which is why Braillix ships
-  Nemeth for the maths with a documented swap point. See DECISIONS.md D2.1 and D7.3.
+  Nemeth for the maths with a documented swap point. See DECISIONS.md D2.1, D7.3 and D11.1.
 - **liblouis `tables/devanagari.cti`** (LGPL-2.1-or-later) — maintained for the National Institute
   for the Visually Handicapped, Dehradun. **Not vendored**: it was read as the authority for the
   nukta letters, the halant, the anusvara/visarga/chandrabindu and the digits, and our table in

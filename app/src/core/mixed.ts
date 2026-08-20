@@ -26,7 +26,8 @@
  */
 
 import { BLANK, dotsToMask, type DotMask } from './braille';
-import { devanagariToBraille, hasDevanagari } from './bharati';
+import { indicToBraille } from './bharati';
+import { hasIndic, type IndicScript } from './indic';
 import { textToLiteralBraille } from './literal';
 import { isMathWord, toLatex } from './mathinput';
 import { translateLatex, type TranslationIssue } from './translate';
@@ -43,6 +44,8 @@ export interface Segment {
 
 export interface RenderedSegment extends Segment {
   readonly code: BrailleCode;
+  /** Which Indian script the words are in, when they are in one. Shown, never inferred by the reader. */
+  readonly script?: IndicScript;
   readonly cells: readonly DotMask[];
   /** The LaTeX a maths segment became. Empty for text. Shown in the print preview. */
   readonly latex: string;
@@ -80,7 +83,7 @@ type Strength = 'maths' | 'text' | 'weak';
 function strengthOf(token: string): Strength {
   const bare = token.replace(/[.,;:!?।]+$/, '');
   if (!bare) return 'weak'; // a lone punctuation mark: the colon in "2 : 3", a stray dash
-  if (hasDevanagari(bare)) return 'text'; // Nemeth has no cells for it, so it is never maths
+  if (hasIndic(bare)) return 'text'; // Nemeth has no cells for any Indian script, so never maths
   if (MATHS_CHARS.test(bare)) return 'maths';
   if (/^[A-Za-z]$/.test(bare)) return 'maths'; // a single letter is a variable
   if (/^[A-Z]{2,}$/.test(bare)) return 'maths'; // ABC — a geometry label, not a word
@@ -172,11 +175,12 @@ async function renderSegment(segment: Segment, standalone: boolean): Promise<Ren
     };
   }
 
-  if (hasDevanagari(segment.text)) {
-    const result = devanagariToBraille(segment.text);
+  if (hasIndic(segment.text)) {
+    const result = indicToBraille(segment.text);
     return {
       ...segment,
       code: 'bharati',
+      script: result.script ?? undefined,
       latex: '',
       cells: result.cells,
       issues: result.unsupported.length
