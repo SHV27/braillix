@@ -316,8 +316,8 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   'check.fail': ['wrong', 'ग़लत'],
 
   'help.howTo': ['How to use it in a lesson', 'कक्षा में कैसे चलाएँ'],
-  'help.step1': ['Write the question on the Board. Check it in print — that is what the child will read.', 'बोर्ड पर सवाल लिखिए। छपाई में जाँच लीजिए — वही बच्चा पढ़ेगा।'],
-  'help.step2': ['Keep it in a worksheet, so tomorrow you press one button instead of typing again.', 'उसे वर्कशीट में रख लीजिए, ताकि कल दोबारा लिखने के बजाय एक बटन दबाना पड़े।'],
+  'help.step1': ['Write the question on the Board. Two things check it for you: it is shown in print, and “What the dots say” reads the braille back and tells you whether it matches.', 'बोर्ड पर सवाल लिखिए। दो चीज़ें उसे जाँचती हैं: वह छपाई में दिखता है, और “डॉट्स क्या कह रहे हैं” ब्रेल को वापस पढ़कर बताता है कि वह मेल खाती है या नहीं।'],
+  'help.step2': ['Keep it in a worksheet, so tomorrow you press one button instead of typing again. A whole numbered exercise can be pasted in at once — each line becomes a question.', 'उसे वर्कशीट में रख लीजिए, ताकि कल दोबारा लिखने के बजाय एक बटन दबाना पड़े। पूरा नंबर वाला अभ्यास एक साथ चिपकाया जा सकता है — हर पंक्ति एक प्रश्न बन जाती है।'],
   'help.step3': ['Press Teach. The arrow keys move through the questions; each one goes onto the display.', '“पढ़ाइए” दबाइए। तीर बटन सवालों में चलते हैं; हर सवाल डिस्प्ले पर चला जाता है।'],
   'help.step4': ['With one cell, use Explore structure — a long expression folds into a few cells you can step into.', 'एक ही सेल हो तो “रचना देखिए” चलाइए — लंबा व्यंजक कुछ सेल में सिमट जाता है, जिनमें अंदर जाया जा सकता है।'],
   'help.step5': ['Choose who is at the display on the Class screen, and their practice is kept against their name.', 'कक्षा स्क्रीन पर चुनिए कि डिस्प्ले पर कौन है, फिर उनका अभ्यास उन्हीं के नाम से रखा जाएगा।'],
@@ -330,8 +330,8 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
 
   'help.about': ['About Braillix', 'ब्रेलिक्स के बारे में'],
   'help.aboutText': [
-    'Braillix turns mathematics into braille and drives a refreshable display, on however many cells it has — one or forty. It has no account, no server and no API key, and everything it does works with the network unplugged. Nemeth is used for the mathematics; the words around it are written in Bharati Braille, which is the same for all nine Indian scripts — Devanagari, Bengali, Gurmukhi, Gujarati, Oriya, Tamil, Telugu, Kannada and Malayalam. Both tables are cited in the repository.',
-    'ब्रेलिक्स गणित को ब्रेल में बदलता है और रिफ्रेशेबल डिस्प्ले चलाता है — चाहे उसमें एक सेल हो या चालीस। इसमें न कोई खाता है, न सर्वर, न कोई API कुंजी, और यह सब कुछ नेटवर्क के बिना करता है। गणित के लिए नेमेथ; आसपास के शब्द भारती ब्रेल में, जो नौ भारतीय लिपियों के लिए एक ही है — देवनागरी, बांग्ला, गुरमुखी, गुजराती, ओड़िया, तमिल, तेलुगु, कन्नड़ और मलयालम। दोनों तालिकाओं के स्रोत रिपॉज़िटरी में दर्ज हैं।',
+    'Braillix turns mathematics into braille and drives a refreshable display, on however many cells it has — one or forty. It has no account, no server and no API key, and everything it does works with the network unplugged. Nemeth is used for the mathematics; the words around it are written in Bharati Braille, which is the same for all nine Indian scripts — Devanagari, Bengali, Gurmukhi, Gujarati, Oriya, Tamil, Telugu, Kannada and Malayalam. Both tables are cited in the repository. Nothing is taken on trust: the braille that reaches the display is read back by separate engines that never saw what was typed, and the two readings are compared in front of you.',
+    'ब्रेलिक्स गणित को ब्रेल में बदलता है और रिफ्रेशेबल डिस्प्ले चलाता है — चाहे उसमें एक सेल हो या चालीस। इसमें न कोई खाता है, न सर्वर, न कोई API कुंजी, और यह सब कुछ नेटवर्क के बिना करता है। गणित के लिए नेमेथ; आसपास के शब्द भारती ब्रेल में, जो नौ भारतीय लिपियों के लिए एक ही है — देवनागरी, बांग्ला, गुरमुखी, गुजराती, ओड़िया, तमिल, तेलुगु, कन्नड़ और मलयालम। दोनों तालिकाओं के स्रोत रिपॉज़िटरी में दर्ज हैं। यहाँ कुछ भी भरोसे पर नहीं छोड़ा गया: जो ब्रेल डिस्प्ले पर पहुँचती है, उसे अलग इंजन वापस पढ़ते हैं — जिन्होंने आपका लिखा कभी देखा ही नहीं — और दोनों पढ़ाईयाँ आपके सामने मिलाई जाती हैं।',
   ],
 
   /* ---- marking an answer ---- */

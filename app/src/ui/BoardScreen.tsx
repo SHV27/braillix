@@ -66,10 +66,20 @@ export function BoardScreen() {
   const [tab, setTab] = useState<SourceTab>('type');
   const field = useRef<HTMLTextAreaElement>(null);
 
-  // Taste of success before any input is demanded.
+  /*
+   * Taste of success before any input is demanded — ONCE.
+   *
+   * This used to depend on `source`, so every time the box became empty the example came back. Which
+   * meant the Clear button did nothing you could see, and deleting the last character by hand
+   * refilled the field under the teacher's cursor. An opening example is a greeting, not a rule
+   * about what the box may contain.
+   */
+  const greeted = useRef(false);
   useEffect(() => {
-    if (sre.state === 'ready' && source === '') setSource(OPENING_EXAMPLE);
-  }, [sre.state, source, setSource]);
+    if (greeted.current || sre.state !== 'ready') return;
+    greeted.current = true;
+    if (useBraillix.getState().source === '') setSource(OPENING_EXAMPLE);
+  }, [sre.state, setSource]);
 
   const issues = translation?.issues ?? [];
   const parseIssue = issues.find((issue) => issue.kind === 'parse');

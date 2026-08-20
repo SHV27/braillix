@@ -40,9 +40,9 @@ from `NOTES.md` into a new arc rather than starting anything ad hoc.
 
 | Gate | Result |
 |---|---|
-| Unit tests | **673 passing** |
-| Journey tests | **133 passing** across board / read-back / reader / hardware / recognition / practice / class / offline / screens / a11y |
-| Syllabus accuracy | **148 of 148** lines translate cleanly **and read back correctly** — `npm run accuracy`, evidence in `docs/ACCURACY.md` |
+| Unit tests | **675 passing** |
+| Journey tests | **134 passing** across board / read-back / reader / hardware / recognition / practice / class / offline / screens / a11y |
+| Syllabus accuracy | **149 of 149** lines translate cleanly **and read back correctly** — `npm run accuracy`, evidence in `docs/ACCURACY.md` |
 | Round trip | every segment of every syllabus line, in all three braille codes, read back by an engine that never saw the input |
 | Lighthouse (deployed) | **accessibility 100 · best practices 100 · SEO 100**, zero failed audits |
 | Deployed LCP / CLS | **349 ms / 0.00** |

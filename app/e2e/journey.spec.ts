@@ -291,6 +291,34 @@ test.describe('a question in any Indian script', () => {
  * Bengali's khanda ta is one of the few letters no other Indian script has, so it has no cell in a
  * unified table. The right behaviour is not to render something near it — it is to say so.
  */
+/**
+ * Clear must clear.
+ *
+ * The Board greets a new user with one worked example, so the first thing anybody sees is a working
+ * display rather than an empty box. That greeting used to re-fire every time the field became empty
+ * — so pressing Clear put the example straight back, and deleting the last character by hand
+ * refilled the field under the teacher's cursor. A greeting is not a rule about what the box may
+ * contain.
+ */
+test('the Clear button clears, and the example does not come back', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByTestId('latex-input')).toHaveValue('x^2 + 3x + 2 = 0', { timeout: 20_000 });
+
+  await page.getByTestId('latex-input').fill('2x + 5 = 15');
+  await page.getByTestId('clear-board').click();
+  await expect(page.getByTestId('latex-input')).toHaveValue('');
+
+  // Still empty a moment later: nothing is racing to refill it.
+  await page.waitForTimeout(600);
+  await expect(page.getByTestId('latex-input')).toHaveValue('');
+
+  // And typing then deleting by hand leaves it empty too.
+  await page.getByTestId('latex-input').fill('7');
+  await page.getByTestId('latex-input').fill('');
+  await page.waitForTimeout(600);
+  await expect(page.getByTestId('latex-input')).toHaveValue('');
+});
+
 test('says when a character has no braille cell, and renders the rest anyway', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });

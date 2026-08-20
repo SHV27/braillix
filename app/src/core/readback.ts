@@ -180,8 +180,14 @@ class Reader {
   private unknown: string[] = [];
   /** Open superscript/subscript groups, innermost last. */
   private levels: string[] = [];
-  /** Open fractions, innermost last. `complex` ones are written with the ⠠ prefix. */
-  private fractions: ('simple' | 'complex')[] = [];
+  /**
+   * Open fractions, innermost last, each holding how many ⠠ prefixes its cells carry.
+   *
+   * Nemeth marks a fraction that CONTAINS a fraction with ⠠ on all three of its cells, one for
+   * each level of nesting: ⠹ is a plain fraction, ⠠⠹ contains one, ⠠⠠⠹ contains that. It was
+   * written here as a two-valued kind, which was enough for `3/4 x 2/5` and gave up at `1/2/3/4/5`.
+   */
+  private fractions: number[] = [];
   /** Open radicals and limit groups — everything ⠻ can close. */
   private groups: Group[] = [];
   /** True between the ⠣ of a radical index and the ⠜ that follows it. */
@@ -264,25 +270,16 @@ class Reader {
           this.last = 'other';
           return 1;
         }
-        return this.closeFraction('simple');
+        return this.closeFraction(0);
 
       case '⠹':
-        this.fractions.push('simple');
-        this.out.push('(');
-        this.last = 'other';
-        return 1;
+        return this.openFraction(0);
 
       case '⠌':
-        if (this.fractions[this.fractions.length - 1] === 'simple') {
-          this.out.push(')/(');
-          this.last = 'other';
-          return 1;
-        }
-        this.unknown.push(cell);
-        return 1;
+        return this.fractionLine(0);
 
       case '⠠':
-        return this.capitalOrComma(next);
+        return this.dotSix(i);
 
       case '⠘':
       case '⠰':
@@ -350,19 +347,15 @@ class Reader {
   }
 
   /**
-   * ⠠ is three different things: the prefix of a complex fraction, a capital letter, and the comma
-   * inside a number written the Indian way. The cell after it decides which.
-   */
-  /**
-   * ⠨⠠ then a letter is a capital Greek letter — the same two cells as the lowercase one with
-   * the capital sign wedged in the middle. Only Σ was tabled, because only Σ had turned up; the
-   * rest are the same rule and were waiting to be met as gaps.
+   * ⠨⠠ then a letter is a capital Greek letter — the same two cells as the lowercase one with the
+   * capital sign wedged in the middle. Only Σ was tabled, because only Σ had turned up; the rest are
+   * the same rule and were waiting to be met as gaps.
    */
   private greekCapital(i: number): number {
     const letter = this.cells[i + 2] ?? '';
-    const lower = SYMBOLS.find(([sequence]) => sequence === `⠨${letter}`)?.[1];
+    const lower = SYMBOLS.find(([sequence]) => sequence === `\u2828${letter}`)?.[1];
     if (!lower) {
-      this.unknown.push('⠨⠠');
+      this.unknown.push('\u2828\u2820');
       return 2;
     }
     this.out.push(lower.toUpperCase());
@@ -370,47 +363,65 @@ class Reader {
     return 3;
   }
 
-  private capitalOrComma(next: string): number {
-    if (next === '⠹') {
-      this.fractions.push('complex');
-      this.out.push('(');
-      this.last = 'other';
-      return 2;
-    }
-    if (next === '⠌' && this.fractions[this.fractions.length - 1] === 'complex') {
-      this.out.push(')/(');
-      this.last = 'other';
-      return 2;
-    }
-    if (next === '⠼') {
-      return this.closeFraction('complex') + 1;
-    }
-    if (next in LETTERS) {
-      this.out.push(LETTERS[next].toUpperCase());
+  /**
+   * ⠠ is several things, and how many of them are in a row decides which.
+   *
+   *   a run of ⠠ before ⠹ ⠌ or ⠼   the marks of a fraction nested that many levels deep
+   *   one ⠠ before a letter            a capital
+   *   one ⠠ otherwise                  the comma — in a lakh, in a set, between the terms of a series
+   */
+  private dotSix(i: number): number {
+    let run = 0;
+    while (this.cells[i + run] === '\u2820') run += 1;
+    const after = this.cells[i + run] ?? '';
+
+    if (after === '\u2839') return run + this.openFraction(run);
+    if (after === '\u280c') return run + this.fractionLine(run);
+    if (after === '\u283c') return run + this.closeFraction(run);
+
+    if (run === 1 && after in LETTERS) {
+      this.out.push(LETTERS[after].toUpperCase());
       this.last = 'letter';
       return 2;
     }
     // Everything else is the comma: dot 6, whether it is grouping a lakh (⠂⠠⠴⠴⠠⠴⠴⠴), separating
     // the members of a set (⠂⠠⠆⠠⠒), or separating the terms of a progression, where it is followed
     // by a space rather than by a digit — which is how this rule came to be written.
-    if (next in DIGITS || next === '⠀' || next === '') {
+    if (run === 1 && (after in DIGITS || after === '\u2800' || after === '')) {
       this.out.push(',');
       this.last = 'other';
       return 1;
     }
-    this.unknown.push('⠠');
+    this.unknown.push('\u2820'.repeat(run));
+    return run;
+  }
+
+  private openFraction(level: number): number {
+    this.fractions.push(level);
+    this.out.push('(');
+    this.last = 'other';
     return 1;
   }
 
-  private closeFraction(kind: 'simple' | 'complex'): number {
-    if (this.fractions[this.fractions.length - 1] === kind) {
+  private fractionLine(level: number): number {
+    if (this.fractions[this.fractions.length - 1] === level) {
+      this.out.push(')/(');
+      this.last = 'other';
+      return 1;
+    }
+    this.unknown.push('\u280c');
+    return 1;
+  }
+
+  private closeFraction(level: number): number {
+    if (this.fractions[this.fractions.length - 1] === level) {
       this.fractions.pop();
       this.out.push(')');
       this.last = 'other';
       return 1;
     }
-    // A closing cell with nothing open. Say so rather than dropping it.
-    this.unknown.push(kind === 'simple' ? '⠼' : '⠠⠼');
+    // A closing cell with nothing open at this level. Say so rather than dropping it.
+    this.unknown.push('\u283c');
     return 1;
   }
 

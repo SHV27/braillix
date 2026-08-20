@@ -226,4 +226,7 @@ Acceptance (frozen):
 - [x] A probe of sixty-five realistic classroom expressions: **65 agree, 0 differ, 0 unchecked**
 - [x] Gurmukhi's addak translated properly, so Punjabi words with a doubled consonant are right
 - [x] Nothing in the reader maps to the empty string — a cell is read or reported, never swallowed
-- [x] The corpus grown to 148 lines across 21 topics, all round-tripping
+- [x] The corpus grown to 149 lines across 21 topics, all round-tripping
+- [x] A hostile pass over every screen: 43 malformed expressions, corrupt class files, a bad pod
+      address, walking off both ends of a lesson — **zero console errors**, and two real defects
+      found and fixed (Clear did not clear; fractions nested deeper than one level were unreadable)

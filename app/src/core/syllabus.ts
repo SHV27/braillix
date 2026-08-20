@@ -61,6 +61,7 @@ export const SYLLABUS: readonly SyllabusTopic[] = [
       { source: '22/7', says: 'twenty-two sevenths' },
       { source: '2/3 + 1/6 = 5/6', says: 'adding fractions' },
       { source: '3/4 x 2/5', says: 'multiplying fractions' },
+      { source: '1/2/3/4/5', says: 'fractions nested four deep' },
       { source: '(x+1)/(x-1)', says: 'an algebraic fraction' },
       { source: '50%', says: 'a percentage' },
       { source: '25% of 80 = 20', says: 'percentage of a quantity', words: true },

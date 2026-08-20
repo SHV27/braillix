@@ -43,6 +43,14 @@ describe('reading Nemeth back as ordinary maths', () => {
     expect(read('⠠⠹⠹⠒⠌⠲⠼⠈⠡⠆⠠⠌⠢⠠⠼')).toBe('((3)/(4)×2)/(5)');
   });
 
+  it('reads fractions nested as deep as they go', () => {
+    // One ⠠ per level of nesting. `1/2/3/4/5` reaches three, and the reader used to know only one —
+    // it read the expression correctly by luck and reported nine cells it had no rule for.
+    const deep = '⠠⠠⠠⠹⠠⠠⠹⠠⠹⠹⠂⠌⠆⠼⠠⠌⠒⠠⠼⠠⠠⠌⠲⠠⠠⠼⠠⠠⠠⠌⠢⠠⠠⠠⠼';
+    expect(read(deep)).toBe('((((1)/(2))/(3))/(4))/(5)');
+    expect(readBackUnicode(deep).unknown).toEqual([]);
+  });
+
   it('reads a radical, with and without an index', () => {
     expect(read('⠜⠔⠻')).toBe('√(9)');
     expect(read('⠣⠒⠜⠆⠶⠻')).toBe('√[3](27)');

@@ -628,3 +628,10 @@ Run before calling this shipped. Result: **nothing to rotate, nothing to hide, n
   rejects the true is as broken as one that accepts the false.
 - **D14.7** — `bar(x)` and `mean(x)` are input words, because that is how a statistics teacher writes
   the mean, and the braille for it is now something the checker can vouch for.
+- **D14.8** — The opening example loads once, not whenever the box is empty. It depended on
+  `source`, so Clear put the example straight back and deleting the last character refilled the
+  field under the teacher's cursor. A greeting is not a rule about what the box may contain.
+- **D14.9** — A fraction's nesting level is a number, not a two-valued kind. Nemeth writes one ⠠ per
+  level on all three of a fraction's cells, and the reader knew only about one — so `1/2/3/4/5` came
+  out right by luck while reporting nine cells it had no rule for. Found by a hostile pass, not by a
+  test that already existed.
