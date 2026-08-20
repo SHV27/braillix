@@ -10,6 +10,7 @@
 
 import temml from 'temml';
 import { BLANK, unicodeStringToMasks, type DotMask } from './braille';
+import { latexToPlainText, textToLiteralBraille } from './literal';
 import { toEnrichedMathml, toNemeth, toSpeechText, type SpeechLocale } from './sre-service';
 
 export interface TranslationIssue {
@@ -29,6 +30,12 @@ export interface Translation {
   /** The same thing as a Unicode braille string, for copy/paste and for tests. */
   readonly unicode: string;
   readonly issues: readonly TranslationIssue[];
+  /**
+   * Set when the braille on the cells is NOT Nemeth. 'literal' means the maths engine was
+   * unavailable and this is Grade-1 literary braille of the plain text. The interface must say so:
+   * a display quietly showing a different braille code is worse than one that stops.
+   */
+  readonly degraded?: 'literal';
 }
 
 /** temml signals some failures inside its output rather than by throwing. Detect those too. */
@@ -105,12 +112,26 @@ export async function translateLatex(latex: string): Promise<Translation> {
   try {
     unicode = await toNemeth(mathml);
   } catch (err) {
+    // The maths engine is gone. Rather than a blank display, fall back to LITERARY braille of the
+    // plain text — which is not Nemeth and cannot express a fraction, so the caller is told loudly
+    // and the UI says which code is on the cells. A display that keeps working in the wrong code
+    // without saying so would be far worse than one that stops.
+    const plain = latexToPlainText(latex);
+    const fallback = textToLiteralBraille(plain);
     issues.push({
       kind: 'engine',
-      message: `Nemeth translation failed: ${err instanceof Error ? err.message : String(err)}`,
-      fix: 'Reload the page; if it persists the maths engine assets may be missing from /sre/mathmaps.',
+      message: `The maths engine is unavailable (${err instanceof Error ? err.message : String(err)}). Showing plain Grade-1 braille of "${plain}" instead — this is NOT Nemeth and cannot express fractions or powers.`,
+      fix: 'Reload the page; if it persists, run `npm install` again — the locale files in public/sre/mathmaps may be missing.',
     });
-    return { latex, mathml, enriched: '', cells: [], unicode: '', issues };
+    return {
+      latex,
+      mathml,
+      enriched: '',
+      cells: fallback.cells,
+      unicode: cellsToUnicode(fallback.cells),
+      issues,
+      degraded: 'literal',
+    };
   }
 
   const { cells, unknown } = unicodeStringToMasks(unicode);

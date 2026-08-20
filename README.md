@@ -48,6 +48,19 @@ corrected is recognition you cannot trust.
 **Learn, practise, get feedback** — braille-first, with answers entered in six-key braille rather
 than picked from a list.
 
+
+---
+
+## What it looks like
+
+| | |
+|---|---|
+| **Read** — one cell, a whole quadratic, and the cam number for every dot | ![Read](docs/screenshots/read.png) |
+| **Explore structure** — the quadratic formula folded to five cells, ⠹ ⠿ ⠌ ⠿ ⠼ | ![Reader](docs/screenshots/reader.png) |
+| **Practice** — braille-first drills, answers written in six-key Perkins entry | ![Practice](docs/screenshots/practice.png) |
+| **Hardware** — the discovered chain, and the cam calibration that de-risks demo day | ![Hardware](docs/screenshots/hardware.png) |
+| **Cell atlas** — all 64 cam positions, printable, for holding against the physical cam | ![Atlas](docs/screenshots/atlas.png) |
+
 ## Why it is built this way
 
 The school we took the prototype to told us something specific: reading a whole expression through
@@ -93,6 +106,8 @@ hardware bit arithmetic escapes its one permitted file.
 | `firmware/` | ESP32 pod and muscle-cell sketches, written to the same protocol. |
 | `tools/` | The virtual pod emulator, and the model fetcher. |
 | `docs/` | The hardware handoff, the wire protocol, the integration notes. |
+
+Demo runbook: [`docs/DEMO.md`](docs/DEMO.md) — seven minutes, with what to say.
 
 Project documents: [`CLAUDE.md`](CLAUDE.md) (the rules) · [`ARCHITECTURE.md`](ARCHITECTURE.md) ·
 [`RESEARCH.md`](RESEARCH.md) · [`DECISIONS.md`](DECISIONS.md) · [`ARC_PLAN.md`](ARC_PLAN.md) ·

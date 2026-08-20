@@ -433,6 +433,18 @@ export const useBraillix = create<BraillixState>((set, get) => {
         const tree = buildTree(translation.enriched);
         const rootId = tree?.rootId ?? null;
 
+        // If the maths engine died, the cells now carry LITERARY braille, not Nemeth. Say so in
+        // the status strip as well as inline — a display quietly showing a different braille code
+        // is the most dangerous kind of silent failure this product could have.
+        if (translation.degraded === 'literal') {
+          get().setCapability('sre', {
+            state: 'degraded',
+            label: 'Maths engine',
+            reason: 'unavailable — cells show Grade-1 literary braille, NOT Nemeth',
+            fix: 'Reload; if it persists run `npm install` again to restore public/sre/mathmaps.',
+          });
+        }
+
         set({
           translating: false,
           translation,
