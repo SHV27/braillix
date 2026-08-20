@@ -181,7 +181,9 @@ export function RecogniseScreen() {
                   accept="image/*"
                   capture="environment"
                   className="visually-hidden"
-                  name="image" data-testid="file-input"
+                  name="image"
+                  aria-label="Choose a photo of an equation"
+                  data-testid="file-input"
                   onChange={(event) => onFile(event.target.files?.[0])}
                 />
                 <button type="button" className="btn" onClick={() => fileInput.current?.click()}>

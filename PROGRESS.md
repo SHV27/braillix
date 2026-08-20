@@ -8,7 +8,7 @@ Repo: **github.com/SHV27/braillix** (private — going public is Shaurya's call,
 
 ## Where we are
 
-**All six arcs are built. Arc 6 (Certification) is closing.**
+**All six arcs are built and closed.** The software is demo-ready.
 
 | Arc | State |
 |---|---|
@@ -17,19 +17,19 @@ Repo: **github.com/SHV27/braillix** (private — going public is Shaurya's call,
 | 3 · The Seam (transports, firmware, calibration) | ✅ closed |
 | 4 · The Eye (on-device recognition) | ✅ closed |
 | 5 · The Practice Loop (braille-first drills) | ✅ closed |
-| 6 · Certification | in progress — see next action |
+| 6 · Certification | ✅ closed |
 
 ## The one next action
 
-Run `npm run verify` end to end, commit, and do the fresh-clone check
-(`git clone` into a clean folder → `npm ci` → `npm run dev`) to prove a teammate can run it cold.
+Nothing is blocking. Hand docs/DEMO.md to Shaurya to rehearse; or promote one parked idea from
+NOTES.md into a new arc.
 
 ## Gate status
 
 | Gate | Result |
 |---|---|
-| Unit tests | **278+ passing** (golden Nemeth, all 26 letters + 10 digits cross-checked against the engine, XML reader, protocol conformance, six-key entry, feedback) |
-| Journey tests | **60+ passing** across read / reader / hardware / recognition / practice / offline / screens |
+| Unit tests | **278 passing** (golden Nemeth, all 26 letters + 10 digits cross-checked against the engine, XML reader, protocol conformance, six-key entry, feedback) |
+| Journey tests | **83 passing** across read / reader / hardware / recognition / practice / offline / screens |
 | Lighthouse accessibility | **100** |
 | Lighthouse best practices | **100** |
 | LCP | **650 ms** (target < 2.5 s) |
@@ -37,6 +37,9 @@ Run `npm run verify` end to end, commit, and do the fresh-clone check
 | Console errors/warnings | **zero**, asserted in the journey tests |
 | Offline | **passes with every external request blocked** |
 | Horizontal overflow | none, asserted at 390 / 834 / 1440 on every screen |
+| Keyboard only | every screen tabbable, no traps, reader fully operable |
+| Screen-reader structure | landmarks, one h1 per screen, every control named, live regions |
+| Fresh clone | clone + npm ci + 278 tests pass on a cold machine (21 MB repo) |
 
 ## What exists
 
