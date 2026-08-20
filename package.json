@@ -20,6 +20,7 @@
     "verify": "npm run typecheck && npm run lint && npm run test && npm run e2e",
     "fetch:model": "node tools/fetch-model.mjs",
     "pod": "node tools/virtual-pod/virtual-pod.mjs",
-    "lint:dead": "node tools/find-dead-exports.mjs"
+    "lint:dead": "node tools/find-dead-exports.mjs",
+    "accuracy": "node tools/accuracy.mjs"
   }
 }
