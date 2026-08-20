@@ -10,12 +10,20 @@
  * here guesses at meaning, it only offers the ordinary written forms of the same expression.
  */
 
+import { toLatex } from '../core/mathinput';
+
 /** Candidate LaTeX readings of a typed answer, most literal first. */
 export function interpretAnswer(text: string): string[] {
   const trimmed = text.trim();
   if (!trimmed) return [];
 
   const candidates = new Set<string>([trimmed]);
+
+  // Whatever the Board accepts, an answer box accepts: `1/2`, `sqrt 9`, `2 <= x`, `45 degrees`.
+  // A student should never be marked wrong for writing their answer the way the app taught them
+  // to write the question.
+  const natural = toLatex(trimmed).latex;
+  if (natural) candidates.add(natural);
 
   for (const rewrite of [asFraction, asRoot, asPower]) {
     for (const candidate of [...candidates]) {

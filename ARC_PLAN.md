@@ -108,51 +108,51 @@ minutes and twelve children. Research that changed the design is in `RESEARCH.md
 *Nobody should have to type a backslash to teach a child a fraction.*
 
 Acceptance (frozen):
-- [ ] Natural maths input: `1/2`, `sqrt(9)`, `x^2`, `2 <= x`, `pi`, `30 degrees`, `Rs 250` all parse
+- [x] Natural maths input: `1/2`, `sqrt(9)`, `x^2`, `2 <= x`, `pi`, `30 degrees`, `Rs 250` all parse
       without a single LaTeX command, with a test per form
-- [ ] A maths keypad: every template a school-maths teacher needs, inserted at the caret, keyboard
+- [x] A maths keypad: every template a school-maths teacher needs, inserted at the caret, keyboard
       reachable, with the caret landing in the first slot
-- [ ] **Rendered maths preview** — the expression as it appears in the textbook, next to the braille,
+- [x] **Rendered maths preview** — the expression as it appears in the textbook, next to the braille,
       so a sighted teacher can verify accuracy without reading dots or LaTeX
-- [ ] Bharati Braille (Devanagari) module, verified against the published table, with tests
-- [ ] Mixed lines: Hindi/English words **and** maths in one run of cells, each segment labelled with
+- [x] Bharati Braille (Devanagari) module, verified against the published table, with tests
+- [x] Mixed lines: Hindi/English words **and** maths in one run of cells, each segment labelled with
       the code it is written in — no silent code switching
-- [ ] The whole interface in Hindi as well as English, switchable in one control, persisted
-- [ ] Information architecture rebuilt in a teacher's words: Board · Practice · Class · Device · Help
+- [x] The whole interface in Hindi as well as English, switchable in one control, persisted
+- [x] Information architecture rebuilt in a teacher's words: Board · Practice · Class · Device · Help
 
 ## Arc 8 — THE CLASSROOM
 *One teacher, one laptop, several displays, twelve children, forty minutes.*
 
 Acceptance (frozen):
-- [ ] Worksheets: create, name, order, and edit a list of items; items come from typing, the keypad,
+- [x] Worksheets: create, name, order, and edit a list of items; items come from typing, the keypad,
       a photo, or the built-in library
-- [ ] Worksheets and students persist locally; export and import as a plain file so they move
+- [x] Worksheets and students persist locally; export and import as a plain file so they move
       between laptops with no network and no account
-- [ ] Teach mode: one item at a time, full screen, print maths + braille + the display in sync,
+- [x] Teach mode: one item at a time, full screen, print maths + braille + the display in sync,
       driven by keyboard or by the pod buttons
-- [ ] Students: a roster, per-student practice records, a class progress table
-- [ ] Records export as CSV and as a printable report
-- [ ] **Mirror mode**: several pods, every one showing the same content — a class reading together
-- [ ] Every one of these works with nothing plugged in
+- [x] Students: a roster, per-student practice records, a class progress table
+- [x] Records export as CSV and as a printable report
+- [x] **Mirror mode**: several pods, every one showing the same content — a class reading together
+- [x] Every one of these works with nothing plugged in
 
 ## Arc 9 — TRUST
 *Accuracy that is measured and shown, not claimed.*
 
 Acceptance (frozen):
-- [ ] Nemeth golden vectors extended to the full school syllabus surface (trigonometry, logs,
+- [x] Nemeth golden vectors extended to the full school syllabus surface (trigonometry, logs,
       indices, surds, inequalities, sets, integrals, Greek letters, degrees, currency, percent),
       every one cited to a published table
-- [ ] A translation accuracy report printed by `npm run accuracy`, committed as evidence
-- [ ] Self-check screen: the teacher presses one button and sees what works on this machine and
+- [x] A translation accuracy report printed by `npm run accuracy`, committed as evidence
+- [x] Self-check screen: the teacher presses one button and sees what works on this machine and
       what does not, with the fix for each
-- [ ] Recognition: confidence shown, corrections easy, and the correction loop verified end to end
-- [ ] BRF export so a worksheet can go to an embosser, and a printable print+braille handout
+- [x] Recognition: confidence shown, corrections easy, and the correction loop verified end to end
+- [x] BRF export so a worksheet can go to an embosser, and a printable print+braille handout
 
 ## Arc 10 — SHIP
 *It has to survive a school's Wi-Fi, a strange laptop, and a panel.*
 
 Acceptance (frozen):
-- [ ] Installable offline app (PWA): opened once, works forever with the network off
-- [ ] First-run guide that teaches the product in under a minute, skippable, never patronising
-- [ ] Deployed publicly, with the deployed build verified — not just the local one
-- [ ] `npm run verify` green; screenshots of every screen at three widths; docs current
+- [x] Installable offline app (PWA): opened once, works forever with the network off
+- [x] First-run guide that teaches the product in under a minute, skippable, never patronising
+- [x] Deployed publicly, with the deployed build verified — not just the local one
+- [x] `npm run verify` green; screenshots of every screen at three widths; docs current

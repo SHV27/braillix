@@ -6,9 +6,10 @@
  * anything else makes sense; then the operators; then the structures that turn a line of symbols
  * into an expression.
  *
- * Every item is defined by its LaTeX, and the expected braille is produced by the same engine that
- * drives the hardware. Nothing is hand-typed as dot patterns, so a lesson can never drift out of
- * agreement with what the display would actually show.
+ * Every item is defined by what a person would type, and the expected braille is produced by the
+ * same engine that drives the hardware and the same input parser that reads the Board. Nothing is
+ * hand-typed as dot patterns, so a lesson can never drift out of agreement with what the display
+ * would actually show — and a teacher's own worksheet can be a drill without a second code path.
  *
  * Every word a student reads is written in **both languages**, in the same place, so a Hindi
  * lesson can never quietly fall back to English half way down the page. `lessons.test.ts` fails
@@ -20,8 +21,12 @@ import type { Bilingual } from '../ui/i18n';
 export type DrillKind = 'read' | 'write';
 
 export interface LessonItem {
-  /** The maths, as LaTeX. */
-  readonly latex: string;
+  /**
+   * The maths, written the way the Board accepts it — LaTeX, natural maths, or a question with
+   * words in it. It goes through exactly the same translation as anything a teacher types, which
+   * is what lets a worksheet be a drill.
+   */
+  readonly source: string;
   /** What to tell the student when they get it wrong. One specific fact, not encouragement. */
   readonly hint: Bilingual;
 }
@@ -51,12 +56,12 @@ export const LESSONS: readonly Lesson[] = [
         'इसीलिए गिनती करते समय भी गणित की ब्रेल आम ब्रेल से अलग दिखती है।',
     ],
     items: [
-      { latex: '1', hint: ['1 is the letter a moved down: dot 2 instead of dot 1.', '1 यानी अक्षर a नीचे खिसका हुआ: डॉट 1 की जगह डॉट 2।'] },
-      { latex: '2', hint: ['2 is the letter b moved down: dots 2-3.', '2 यानी अक्षर b नीचे खिसका हुआ: डॉट 2-3।'] },
-      { latex: '3', hint: ['3 is the letter c moved down: dots 2-5.', '3 यानी अक्षर c नीचे खिसका हुआ: डॉट 2-5।'] },
-      { latex: '5', hint: ['5 is the letter e moved down: dots 2-6.', '5 यानी अक्षर e नीचे खिसका हुआ: डॉट 2-6।'] },
-      { latex: '7', hint: ['7 is the letter g moved down: dots 2-3-5-6.', '7 यानी अक्षर g नीचे खिसका हुआ: डॉट 2-3-5-6।'] },
-      { latex: '0', hint: ['0 is the letter j moved down: dots 3-5-6.', '0 यानी अक्षर j नीचे खिसका हुआ: डॉट 3-5-6।'] },
+      { source: '1', hint: ['1 is the letter a moved down: dot 2 instead of dot 1.', '1 यानी अक्षर a नीचे खिसका हुआ: डॉट 1 की जगह डॉट 2।'] },
+      { source: '2', hint: ['2 is the letter b moved down: dots 2-3.', '2 यानी अक्षर b नीचे खिसका हुआ: डॉट 2-3।'] },
+      { source: '3', hint: ['3 is the letter c moved down: dots 2-5.', '3 यानी अक्षर c नीचे खिसका हुआ: डॉट 2-5।'] },
+      { source: '5', hint: ['5 is the letter e moved down: dots 2-6.', '5 यानी अक्षर e नीचे खिसका हुआ: डॉट 2-6।'] },
+      { source: '7', hint: ['7 is the letter g moved down: dots 2-3-5-6.', '7 यानी अक्षर g नीचे खिसका हुआ: डॉट 2-3-5-6।'] },
+      { source: '0', hint: ['0 is the letter j moved down: dots 3-5-6.', '0 यानी अक्षर j नीचे खिसका हुआ: डॉट 3-5-6।'] },
     ],
   },
   {
@@ -70,9 +75,9 @@ export const LESSONS: readonly Lesson[] = [
         'विराम-चिह्न पढ़े जा सकते हैं।',
     ],
     items: [
-      { latex: '4', hint: ['Two cells: the numeric indicator ⠼, then the dropped 4.', 'दो सेल: संख्या-सूचक ⠼, फिर नीचे खिसका 4।'] },
-      { latex: '42', hint: ['One indicator serves the whole number, not one per digit.', 'पूरी संख्या के लिए एक ही सूचक काफ़ी है, हर अंक के लिए नहीं।'] },
-      { latex: '100', hint: ['Still one indicator — then 1, 0, 0.', 'फिर भी एक ही सूचक — उसके बाद 1, 0, 0।'] },
+      { source: '4', hint: ['Two cells: the numeric indicator ⠼, then the dropped 4.', 'दो सेल: संख्या-सूचक ⠼, फिर नीचे खिसका 4।'] },
+      { source: '42', hint: ['One indicator serves the whole number, not one per digit.', 'पूरी संख्या के लिए एक ही सूचक काफ़ी है, हर अंक के लिए नहीं।'] },
+      { source: '100', hint: ['Still one indicator — then 1, 0, 0.', 'फिर भी एक ही सूचक — उसके बाद 1, 0, 0।'] },
     ],
   },
   {
@@ -86,10 +91,10 @@ export const LESSONS: readonly Lesson[] = [
         'क्योंकि समीकरण में हर चिह्न का अपना अर्थ होता है।',
     ],
     items: [
-      { latex: 'a', hint: ['a is dot 1 — the first cell in braille.', 'a यानी डॉट 1 — ब्रेल की पहली सेल।'] },
-      { latex: 'x', hint: ['x is dots 1-3-4-6.', 'x यानी डॉट 1-3-4-6।'] },
-      { latex: 'n', hint: ['n is dots 1-3-4-5.', 'n यानी डॉट 1-3-4-5।'] },
-      { latex: 'y', hint: ['y is dots 1-3-4-5-6.', 'y यानी डॉट 1-3-4-5-6।'] },
+      { source: 'a', hint: ['a is dot 1 — the first cell in braille.', 'a यानी डॉट 1 — ब्रेल की पहली सेल।'] },
+      { source: 'x', hint: ['x is dots 1-3-4-6.', 'x यानी डॉट 1-3-4-6।'] },
+      { source: 'n', hint: ['n is dots 1-3-4-5.', 'n यानी डॉट 1-3-4-5।'] },
+      { source: 'y', hint: ['y is dots 1-3-4-5-6.', 'y यानी डॉट 1-3-4-5-6।'] },
     ],
   },
   {
@@ -101,9 +106,9 @@ export const LESSONS: readonly Lesson[] = [
       'जोड़ ⠬ (डॉट 3-4-6) है। घटा ⠤ (डॉट 3-6) है। दोनों अंकों की तरह सेल में नीचे बैठते हैं।',
     ],
     items: [
-      { latex: '1+1', hint: ['Indicator, 1, plus, 1 — the plus does not restart the number.', 'सूचक, 1, जोड़, 1 — जोड़ का चिह्न संख्या दोबारा शुरू नहीं करता।'] },
-      { latex: '5-2', hint: ['Minus is dots 3-6 — just the right-hand column of the plus.', 'घटा यानी डॉट 3-6 — जोड़ के चिह्न का सिर्फ़ दायाँ स्तंभ।'] },
-      { latex: 'a+b', hint: ['Letters need no indicator; the plus is still dots 3-4-6.', 'अक्षरों को सूचक नहीं चाहिए; जोड़ फिर भी डॉट 3-4-6 है।'] },
+      { source: '1+1', hint: ['Indicator, 1, plus, 1 — the plus does not restart the number.', 'सूचक, 1, जोड़, 1 — जोड़ का चिह्न संख्या दोबारा शुरू नहीं करता।'] },
+      { source: '5-2', hint: ['Minus is dots 3-6 — just the right-hand column of the plus.', 'घटा यानी डॉट 3-6 — जोड़ के चिह्न का सिर्फ़ दायाँ स्तंभ।'] },
+      { source: 'a+b', hint: ['Letters need no indicator; the plus is still dots 3-4-6.', 'अक्षरों को सूचक नहीं चाहिए; जोड़ फिर भी डॉट 3-4-6 है।'] },
     ],
   },
   {
@@ -120,9 +125,9 @@ export const LESSONS: readonly Lesson[] = [
         'समीकरण अपेक्षा से चौड़ा हो जाता है।',
     ],
     items: [
-      { latex: '1=1', hint: ['Space, ⠨⠅, space. The spaces are real cells and they matter.', 'खाली जगह, ⠨⠅, खाली जगह। ये खाली जगहें असली सेल हैं और मायने रखती हैं।'] },
-      { latex: 'x=2', hint: ['x, space, equals, space, then the number with its indicator.', 'x, खाली जगह, बराबर, खाली जगह, फिर सूचक के साथ संख्या।'] },
-      { latex: '2+3=5', hint: ['Seven cells in all — count the spaces around the equals.', 'कुल सात सेल — बराबर के आसपास की खाली जगहें भी गिनिए।'] },
+      { source: '1=1', hint: ['Space, ⠨⠅, space. The spaces are real cells and they matter.', 'खाली जगह, ⠨⠅, खाली जगह। ये खाली जगहें असली सेल हैं और मायने रखती हैं।'] },
+      { source: 'x=2', hint: ['x, space, equals, space, then the number with its indicator.', 'x, खाली जगह, बराबर, खाली जगह, फिर सूचक के साथ संख्या।'] },
+      { source: '2+3=5', hint: ['Seven cells in all — count the spaces around the equals.', 'कुल सात सेल — बराबर के आसपास की खाली जगहें भी गिनिए।'] },
     ],
   },
   {
@@ -136,9 +141,9 @@ export const LESSONS: readonly Lesson[] = [
         'दो दिशाओं में लगती है; ब्रेल में सिर्फ़ एक पंक्ति है, इसलिए वह कोष्ठक की तरह लिखी जाती है।',
     ],
     items: [
-      { latex: '\\frac{a}{b}', hint: ['Five cells: open, a, line, b, close.', 'पाँच सेल: खोलना, a, रेखा, b, बंद करना।'] },
-      { latex: '\\frac{1}{2}', hint: ['The digits inside are dropped, as always.', 'अंदर के अंक हमेशा की तरह नीचे खिसके रहते हैं।'] },
-      { latex: '\\frac{22}{7}', hint: ['Open, 2, 2, line, 7, close.', 'खोलना, 2, 2, रेखा, 7, बंद करना।'] },
+      { source: '\\frac{a}{b}', hint: ['Five cells: open, a, line, b, close.', 'पाँच सेल: खोलना, a, रेखा, b, बंद करना।'] },
+      { source: '\\frac{1}{2}', hint: ['The digits inside are dropped, as always.', 'अंदर के अंक हमेशा की तरह नीचे खिसके रहते हैं।'] },
+      { source: '\\frac{22}{7}', hint: ['Open, 2, 2, line, 7, close.', 'खोलना, 2, 2, रेखा, 7, बंद करना।'] },
     ],
   },
   {
@@ -152,9 +157,9 @@ export const LESSONS: readonly Lesson[] = [
         'ख़त्म हुआ; ब्रेल में यह काम बंद करने वाली सेल करती है।',
     ],
     items: [
-      { latex: '\\sqrt{x}', hint: ['Three cells: open, x, close.', 'तीन सेल: खोलना, x, बंद करना।'] },
-      { latex: '\\sqrt{9}', hint: ['Open, then the dropped 9, then close.', 'खोलना, फिर नीचे खिसका 9, फिर बंद करना।'] },
-      { latex: '\\sqrt{x+1}', hint: ['Everything up to the closing cell is under the root.', 'बंद करने वाली सेल तक सब कुछ मूल के अंदर है।'] },
+      { source: '\\sqrt{x}', hint: ['Three cells: open, x, close.', 'तीन सेल: खोलना, x, बंद करना।'] },
+      { source: '\\sqrt{9}', hint: ['Open, then the dropped 9, then close.', 'खोलना, फिर नीचे खिसका 9, फिर बंद करना।'] },
+      { source: '\\sqrt{x+1}', hint: ['Everything up to the closing cell is under the root.', 'बंद करने वाली सेल तक सब कुछ मूल के अंदर है।'] },
     ],
   },
   {
@@ -171,9 +176,9 @@ export const LESSONS: readonly Lesson[] = [
         'नहीं लाता। यही सूचक भूलने से "x² + 1" पढ़ा जाने लगता है "x की घात 2+1"।',
     ],
     items: [
-      { latex: 'x^2', hint: ['x, superscript, dropped 2. Nothing follows, so no baseline cell is needed.', 'x, घात-सूचक, नीचे खिसका 2। आगे कुछ नहीं है, इसलिए आधार-रेखा सेल की ज़रूरत नहीं।'] },
-      { latex: 'x^2+1', hint: ['After the exponent comes ⠐ — that is what ends the power.', 'घात के बाद ⠐ आता है — यही घात को ख़त्म करता है।'] },
-      { latex: 'a^2+b^2', hint: ['Each power is closed by its own baseline indicator.', 'हर घात अपने अलग आधार-रेखा सूचक से बंद होती है।'] },
+      { source: 'x^2', hint: ['x, superscript, dropped 2. Nothing follows, so no baseline cell is needed.', 'x, घात-सूचक, नीचे खिसका 2। आगे कुछ नहीं है, इसलिए आधार-रेखा सेल की ज़रूरत नहीं।'] },
+      { source: 'x^2+1', hint: ['After the exponent comes ⠐ — that is what ends the power.', 'घात के बाद ⠐ आता है — यही घात को ख़त्म करता है।'] },
+      { source: 'a^2+b^2', hint: ['Each power is closed by its own baseline indicator.', 'हर घात अपने अलग आधार-रेखा सूचक से बंद होती है।'] },
     ],
   },
   {
@@ -185,8 +190,8 @@ export const LESSONS: readonly Lesson[] = [
       'खोलना ⠷ (डॉट 1-2-3-5-6) है, बंद करना ⠾ (डॉट 2-3-4-5-6) है।',
     ],
     items: [
-      { latex: '(a+b)', hint: ['Five cells: open, a, plus, b, close.', 'पाँच सेल: खोलना, a, जोड़, b, बंद करना।'] },
-      { latex: '2(x+1)', hint: ['The number leads, then the bracket opens.', 'पहले संख्या आती है, फिर कोष्ठक खुलता है।'] },
+      { source: '(a+b)', hint: ['Five cells: open, a, plus, b, close.', 'पाँच सेल: खोलना, a, जोड़, b, बंद करना।'] },
+      { source: '2(x+1)', hint: ['The number leads, then the bracket opens.', 'पहले संख्या आती है, फिर कोष्ठक खुलता है।'] },
     ],
   },
   {
@@ -201,10 +206,10 @@ export const LESSONS: readonly Lesson[] = [
       'कुछ नया नहीं — यही छह नियम साथ मिलकर काम करते हैं, और असली गणित ऐसा ही दिखता है।',
     ],
     items: [
-      { latex: 'x^2+3x+2=0', hint: ['Powers, plus, the equals with its spaces, and a dropped 0.', 'घात, जोड़, खाली जगहों के साथ बराबर, और नीचे खिसका 0।'] },
-      { latex: '\\frac{1}{2}+\\frac{1}{3}', hint: ['Two complete fractions, each opened and closed.', 'दो पूरी भिन्नें, हर एक खुली और बंद की हुई।'] },
-      { latex: '\\sqrt{a^2+b^2}', hint: ['A root containing two powers — watch the baseline indicators.', 'एक मूल जिसमें दो घातें हैं — आधार-रेखा सूचकों पर ध्यान दीजिए।'] },
-      { latex: '\\frac{-b}{2a}', hint: ['The minus belongs to the numerator, inside the fraction.', 'घटा का चिह्न अंश का हिस्सा है, भिन्न के अंदर।'] },
+      { source: 'x^2+3x+2=0', hint: ['Powers, plus, the equals with its spaces, and a dropped 0.', 'घात, जोड़, खाली जगहों के साथ बराबर, और नीचे खिसका 0।'] },
+      { source: '\\frac{1}{2}+\\frac{1}{3}', hint: ['Two complete fractions, each opened and closed.', 'दो पूरी भिन्नें, हर एक खुली और बंद की हुई।'] },
+      { source: '\\sqrt{a^2+b^2}', hint: ['A root containing two powers — watch the baseline indicators.', 'एक मूल जिसमें दो घातें हैं — आधार-रेखा सूचकों पर ध्यान दीजिए।'] },
+      { source: '\\frac{-b}{2a}', hint: ['The minus belongs to the numerator, inside the fraction.', 'घटा का चिह्न अंश का हिस्सा है, भिन्न के अंदर।'] },
     ],
   },
 ];

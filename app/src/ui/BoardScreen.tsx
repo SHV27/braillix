@@ -21,6 +21,7 @@ import { MathKeypad, insertAtCaret } from './MathKeypad';
 import { MathPreview } from './MathPreview';
 import { QuestionStrip } from './QuestionStrip';
 import { AddToWorksheet } from './AddToWorksheet';
+import { FirstRun } from './FirstRun';
 import { ReaderPanel } from './ReaderPanel';
 import { RecognisePanel } from './RecognisePanel';
 import { useT } from './i18n';
@@ -88,6 +89,9 @@ export function BoardScreen() {
           {t('board.title')}
         </h1>
         <p className="read__lede">{t('board.lede')}</p>
+
+        {/* Shown once, on a machine that has never used Braillix, and never again. */}
+        <FirstRun />
 
         <div className="segmented board__tabs" role="group" aria-label={t('board.source')}>
           <button

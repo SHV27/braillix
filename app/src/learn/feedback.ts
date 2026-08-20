@@ -5,10 +5,22 @@
  * and the exact indicator that was missed — never just "wrong". A student who wrote dots 1-2-4-5
  * instead of 1-2-5 does not need to be told they failed; they need to be told they added dot 4,
  * and that the cell they wrote means "g" rather than "h".
+ *
+ * It returns *keys and numbers*, not sentences. The moment a student can be marked in Hindi, a
+ * module that builds English prose is a module that has to be rewritten — so the words live in the
+ * translation table and this file stays a pure comparison, which is also what makes it testable
+ * without a language.
  */
 
 import { NEMETH_MEANINGS } from '../core/nemeth-meanings';
 import { describeMask, maskToDots, type DotMask } from '../core/braille';
+import type { StringKey } from '../ui/i18n';
+
+/** One thing to say, as a key and its numbers. The interface turns it into a sentence. */
+export interface VerdictNote {
+  readonly key: StringKey;
+  readonly vars?: Record<string, string | number>;
+}
 
 export interface CellDiff {
   readonly index: number;
@@ -20,10 +32,10 @@ export interface CellDiff {
 
 export interface Verdict {
   readonly correct: boolean;
-  /** One sentence to lead with. */
-  readonly headline: string;
+  /** The one thing to lead with. */
+  readonly headline: VerdictNote;
   /** Specific, actionable observations — the part that actually teaches. */
-  readonly details: readonly string[];
+  readonly details: readonly VerdictNote[];
   /** The first cell that differs, or null when the answer is right. */
   readonly firstWrongCell: number | null;
 }
@@ -64,7 +76,7 @@ function meaningOf(mask: DotMask): string {
 /** Mark an answer and explain it. */
 export function mark(expected: readonly DotMask[], given: readonly DotMask[]): Verdict {
   if (given.length === 0) {
-    return { correct: false, headline: 'Nothing written yet.', details: [], firstWrongCell: null };
+    return { correct: false, headline: { key: 'fb.nothing' }, details: [], firstWrongCell: null };
   }
 
   const diffs = diffCells(expected, given);
@@ -72,53 +84,56 @@ export function mark(expected: readonly DotMask[], given: readonly DotMask[]): V
   if (diffs.length === 0) {
     return {
       correct: true,
-      headline: given.length === 1 ? 'Correct.' : `Correct — all ${given.length} cells.`,
+      headline: given.length === 1 ? { key: 'fb.correct' } : { key: 'fb.correctAll', vars: { count: given.length } },
       details: [],
       firstWrongCell: null,
     };
   }
 
   const first = diffs[0];
-  const details: string[] = [];
+  const details: VerdictNote[] = [];
 
   // Length problems first: they explain everything downstream, so leading with a dot difference
   // would send the student hunting for the wrong thing.
   if (given.length < expected.length && first.given === null) {
-    details.push(
-      `The answer is ${expected.length} cells long; you wrote ${given.length}. The next one is ${describeMask(first.expected)}${meaningOf(first.expected)}.`,
-    );
-    return {
-      correct: false,
-      headline: 'Not finished yet.',
-      details,
-      firstWrongCell: first.index,
-    };
+    details.push({
+      key: 'fb.lengthNext',
+      vars: {
+        expected: expected.length,
+        given: given.length,
+        cell: `${describeMask(first.expected)}${meaningOf(first.expected)}`,
+      },
+    });
+    return { correct: false, headline: { key: 'fb.notFinished' }, details, firstWrongCell: first.index };
   }
 
   if (given.length > expected.length && first.expected === 0 && first.missingDots.length === 0) {
-    details.push(`The answer is ${expected.length} cells long; you wrote ${given.length}.`);
-    return { correct: false, headline: 'One cell too many.', details, firstWrongCell: first.index };
+    details.push({ key: 'fb.lengthOnly', vars: { expected: expected.length, given: given.length } });
+    return { correct: false, headline: { key: 'fb.tooLong' }, details, firstWrongCell: first.index };
   }
 
-  const position = `Cell ${first.index + 1}`;
+  const index = first.index + 1;
   if (first.extraDots.length > 0) {
-    details.push(`${position}: you raised dot ${first.extraDots.join(' and ')} that should not be there.`);
+    details.push({ key: 'fb.extraDots', vars: { index, dots: first.extraDots.join(', ') } });
   }
   if (first.missingDots.length > 0) {
-    details.push(`${position}: dot ${first.missingDots.join(' and ')} is missing.`);
+    details.push({ key: 'fb.missingDots', vars: { index, dots: first.missingDots.join(', ') } });
   }
 
-  details.push(
-    `You wrote ${describeMask(first.given ?? 0)}${meaningOf(first.given ?? 0)}; it should be ${describeMask(first.expected)}${meaningOf(first.expected)}.`,
-  );
+  details.push({
+    key: 'fb.youWrote',
+    vars: {
+      given: `${describeMask(first.given ?? 0)}${meaningOf(first.given ?? 0)}`,
+      expected: `${describeMask(first.expected)}${meaningOf(first.expected)}`,
+    },
+  });
 
-  if (diffs.length > 1) {
-    details.push(`${diffs.length - 1} more cell${diffs.length === 2 ? '' : 's'} after that also differ.`);
-  }
+  if (diffs.length === 2) details.push({ key: 'fb.moreDifferOne' });
+  else if (diffs.length > 2) details.push({ key: 'fb.moreDiffer', vars: { count: diffs.length - 1 } });
 
   return {
     correct: false,
-    headline: diffs.length === 1 ? 'Almost — one cell is wrong.' : `${diffs.length} cells are wrong.`,
+    headline: diffs.length === 1 ? { key: 'fb.almost' } : { key: 'fb.manyWrong', vars: { count: diffs.length } },
     details,
     firstWrongCell: first.index,
   };

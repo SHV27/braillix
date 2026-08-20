@@ -41,11 +41,11 @@ import {
   summariseLesson,
   type ProgressMap,
 } from '../learn/progress';
-import { translateLatex } from '../core/translate';
+import { translateMixed } from '../core/mixed';
 import { maskToUnicode, type DotMask } from '../core/braille';
 import { BrailleCell } from './BrailleCell';
 import { DisplayDock } from './DisplayDock';
-import { MathPreview } from './MathPreview';
+import { SourcePreview } from './SourcePreview';
 import { useT, usePick, type Bilingual } from './i18n';
 import { toCam } from '../core/profile';
 import './PracticeScreen.css';
@@ -78,7 +78,7 @@ export function PracticeScreen() {
   /* Translate the current item and, in a reading drill, put it on the display. */
   useEffect(() => {
     let cancelled = false;
-    void translateLatex(item.latex).then((translated) => {
+    void translateMixed(item.source).then((translated) => {
       if (cancelled) return;
       setExpected([...translated.cells]);
       if (drill === 'read') {
@@ -88,7 +88,7 @@ export function PracticeScreen() {
     return () => {
       cancelled = true;
     };
-  }, [item.latex, drill, showCells, t]);
+  }, [item.source, drill, showCells, t]);
 
   /* In a writing drill the display shows what the student has written so far — their own braille
      under their own fingers, which is the point of writing it. */
@@ -130,7 +130,7 @@ export function PracticeScreen() {
       const readings = interpretAnswer(typed);
       const verdicts: Verdict[] = [];
       for (const reading of readings) {
-        const translated = await translateLatex(reading);
+        const translated = await translateMixed(reading);
         verdicts.push(mark(expected, [...translated.cells]));
       }
       result = verdicts.find((v) => v.correct) ?? verdicts[0] ?? mark(expected, []);
@@ -153,7 +153,7 @@ export function PracticeScreen() {
         itemId: itemKey(lesson.id, index),
         correct: result.correct,
         at: now,
-        label: item.latex,
+        label: item.source,
       });
     }
   }
@@ -342,7 +342,7 @@ export function PracticeScreen() {
               {/* Shown as real maths, not as LaTeX: a student writing braille should be reading
                   mathematics, and a teacher checking over their shoulder should not have to parse
                   a backslash. */}
-              <MathPreview latex={item.latex} size="large" label={item.latex} />
+              <SourcePreview source={item.source} size="large" />
 
               <div className="pad6" ref={padRef} tabIndex={-1} data-testid="six-key">
                 <div className="pad6__keys" aria-hidden="true">
@@ -422,10 +422,10 @@ export function PracticeScreen() {
               role="status"
               data-testid="verdict"
             >
-              <p className="verdict__headline">{verdict.headline}</p>
+              <p className="verdict__headline">{t(verdict.headline.key, verdict.headline.vars)}</p>
               <ul className="verdict__details">
                 {verdict.details.map((detail) => (
-                  <li key={detail}>{detail}</li>
+                  <li key={detail.key}>{t(detail.key, detail.vars)}</li>
                 ))}
                 {!verdict.correct && <li>{say(item.hint)}</li>}
               </ul>
@@ -436,7 +436,7 @@ export function PracticeScreen() {
             <p className="prac__answer" data-testid="revealed">
               <span className="prac__answerlabel">{t('prac.theAnswer')}</span>
               <span className="prac__braille">{expected.map((mask) => maskToUnicode(mask)).join('')}</span>
-              <span className="num">{item.latex}</span>
+              <span className="num">{item.source}</span>
             </p>
           )}
 

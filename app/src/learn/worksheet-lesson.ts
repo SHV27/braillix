@@ -11,7 +11,6 @@
  * that teaches.
  */
 
-import { toLatex } from '../core/mathinput';
 import type { Worksheet } from '../class/types';
 import type { Lesson } from './lessons';
 
@@ -28,8 +27,10 @@ export function worksheetToLesson(worksheet: Worksheet): Lesson {
     title: [worksheet.title, worksheet.title],
     teaches: ['', ''],
     rule: ['', ''],
+    // The source is carried across untouched: a worksheet item may be a question with Hindi words
+    // in it, and turning it into LaTeX here would throw the words away.
     items: worksheet.items.map((item) => ({
-      latex: toLatex(item.source).latex,
+      source: item.source,
       hint: [item.note ?? '', item.note ?? ''],
     })),
   };

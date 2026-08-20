@@ -36,6 +36,8 @@ export function RecognisePanel({ onSent }: RecognisePanelProps) {
   const [source, setSource] = useState<Source>(null);
   const [prepared, setPrepared] = useState<PreparedImage | null>(null);
   const [result, setResult] = useState<RecognitionResult | null>(null);
+  /** A second reading of the same image, taken only when the first one was not confident. */
+  const [second, setSecond] = useState<RecognitionResult | null>(null);
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -85,6 +87,7 @@ export function RecognisePanel({ onSent }: RecognisePanelProps) {
   async function accept(url: string, label: string) {
     setError(null);
     setResult(null);
+    setSecond(null);
     setSource({ url, label });
     try {
       const image = await prepareImage(url);
@@ -115,6 +118,28 @@ export function RecognisePanel({ onSent }: RecognisePanelProps) {
       const outcome = await recogniser.recognise(new Float32Array(prepared.pixels));
       setResult(outcome);
       setDraft(outcome.latex);
+
+      /*
+       * When the model is not confident, read the image again with the greys pushed apart.
+       *
+       * This is not a retry hoping for a better answer — it is a second opinion. Two readings of
+       * the same handwriting through different preprocessing that AGREE is real evidence, of a
+       * kind the model's own output cannot give; two that disagree is a question worth putting to
+       * the teacher rather than hiding. It costs about a second, and only on the images that
+       * deserve it.
+       */
+      if (outcome.quality !== 'good' && source) {
+        setProgress({ value: 1, message: t('rec.secondTry') });
+        try {
+          const harder = await prepareImage(source.url, { contrast: 1.8 });
+          recogniser.setInkCoverage(harder.inkCoverage);
+          setSecond(await recogniser.recognise(new Float32Array(harder.pixels)));
+        } catch {
+          // A second opinion is a bonus, never a requirement.
+        } finally {
+          setProgress(null);
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setProgress(null);
@@ -252,6 +277,34 @@ export function RecognisePanel({ onSent }: RecognisePanelProps) {
                   <li key={note}>{note}</li>
                 ))}
               </ul>
+
+              {second && second.latex === result.latex && (
+                <p className="notice notice--good" data-testid="rec-agree">
+                  {t('rec.agree')}
+                </p>
+              )}
+              {second && second.latex !== result.latex && (
+                <div className="rec__second" data-testid="rec-disagree">
+                  <p className="notice notice--warn">{t('rec.disagree')}</p>
+                  <div className="rec__actions">
+                    <button
+                      type="button"
+                      className={`chip${draft === result.latex ? ' is-current' : ''}`}
+                      onClick={() => setDraft(result.latex)}
+                    >
+                      {t('rec.readingOne')}
+                    </button>
+                    <button
+                      type="button"
+                      className={`chip${draft === second.latex ? ' is-current' : ''}`}
+                      data-testid="use-second-reading"
+                      onClick={() => setDraft(second.latex)}
+                    >
+                      {t('rec.readingTwo')}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <label className="field">
                 <span className="field__label">{t('rec.correctIt')}</span>

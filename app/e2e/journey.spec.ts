@@ -104,8 +104,10 @@ test.describe('Braillix — the core journey', () => {
     await page.keyboard.press('Tab'); // skip link
     await expect(page.getByRole('link', { name: /skip to the display/i })).toBeFocused();
 
-    // Walk far enough to reach the input, and prove it can be typed into without a mouse.
-    for (let i = 0; i < 12; i += 1) {
+    // Walk far enough to reach the input, and prove it can be typed into without a mouse. The
+    // count is generous on purpose: what matters is that it is reachable, not that it is the
+    // twelfth stop — a welcome panel or a new control should not fail this test.
+    for (let i = 0; i < 40; i += 1) {
       await page.keyboard.press('Tab');
       if (await page.getByTestId('latex-input').evaluate((el) => el === document.activeElement)) break;
     }
@@ -153,5 +155,43 @@ test.describe('appearance', () => {
     await page.getByTestId('device-atlas').click();
     await expect(page.locator('.atlas__item')).toHaveCount(64);
     await page.screenshot({ path: `${SHOTS}/atlas-desktop.png`, fullPage: true });
+  });
+});
+
+/**
+ * The first sixty seconds.
+ *
+ * A teacher who has never seen this before opens it and is not asked to read anything: three
+ * things to press, each of which does what it says. And once dismissed it is gone — an app that
+ * keeps explaining itself to somebody who has used it all term is an app that is not listening.
+ */
+test.describe('the first sixty seconds', () => {
+  test('offers three things to press, and each of them does it', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
+    await expect(page.getByTestId('first-run')).toBeVisible();
+
+    await page.getByTestId('first-run-read').click();
+    await expect(page.getByTestId('latex-input')).toHaveValue('2/3 + 1/6');
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠹', { timeout: 10_000 });
+
+    await page.getByTestId('first-run-explore').click();
+    // Nineteen cells fold to five: open, something, over, something, close.
+    await expect(page.getByTestId('braille-unicode')).toHaveText('⠹⠿⠌⠿⠼', { timeout: 10_000 });
+
+    await page.getByTestId('first-run-question').click();
+    await expect(page.getByTestId('question-strip')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠸⠩', { timeout: 10_000 });
+  });
+
+  test('goes away when dismissed, and stays away', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('first-run')).toBeVisible({ timeout: 20_000 });
+    await page.getByTestId('first-run-close').click();
+    await expect(page.getByTestId('first-run')).toBeHidden();
+
+    await page.reload();
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
+    await expect(page.getByTestId('first-run')).toBeHidden();
   });
 });

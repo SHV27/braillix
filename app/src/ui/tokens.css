@@ -60,7 +60,9 @@
   --s8: 64px;
 
   /* ---- type scale ---- */
-  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
+  /* The Devanagari face is named first for the glyphs it owns; the Latin face wins for the rest,
+     because a font stack is consulted per character, not per string. */
+  --font-sans: 'IBM Plex Sans', 'IBM Plex Sans Devanagari', ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', 'Consolas', monospace;
   --t-display: clamp(1.75rem, 1.2rem + 2vw, 2.75rem);
   --t-h2: 1.25rem;

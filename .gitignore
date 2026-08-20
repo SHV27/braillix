@@ -19,6 +19,9 @@ app/public/models/
 app/public/sre/
 app/public/ort/
 
+# Vercel's local project link. Not a secret, but not ours to commit either.
+.vercel/
+
 # Test output
 app/test-results/
 app/playwright-report/
@@ -32,3 +35,4 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+

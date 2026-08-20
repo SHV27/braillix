@@ -13,7 +13,7 @@
  *   node tools/fetch-model.mjs --force    # re-download everything
  */
 
-import { createWriteStream } from 'node:fs';
+import { createWriteStream, writeFileSync } from 'node:fs';
 import { mkdir, rename, stat, unlink } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -122,6 +122,9 @@ async function main() {
       return;
     }
   }
+
+  // The app asks a file rather than probing for a 404 (see app/scripts/copy-sre-assets.mjs).
+  writeFileSync(join(DEST, '..', 'status.json'), JSON.stringify({ formulanet: true }, null, 2), 'utf8');
 
   console.log(`\nDone — ${human(bytes)} fetched. Recognition now works offline.`);
   console.log('Start the app with `npm run dev` and open the Recognise screen.');

@@ -9,6 +9,10 @@
 
 import { beforeAll, describe, expect, it } from 'vitest';
 import { interpretAnswer } from './answer';
+import { toLatex } from '../core/mathinput';
+
+/** What the Board itself makes of the same input — the second reading an answer box must accept. */
+const RAW_FRACTION = toLatex('a + b/c + d').latex;
 import { initSre } from '../core/sre-service';
 import { translateLatex } from '../core/translate';
 
@@ -26,9 +30,18 @@ describe('interpreting what a student typed', () => {
     expect(interpretAnswer(String.raw`\frac{a}{b}`)).toEqual([String.raw`\frac{a}{b}`]);
   });
 
-  it('does not guess at an ambiguous slash', () => {
-    // "a + b/c + d" could mean several things; guessing would be worse than marking it literally.
-    expect(interpretAnswer('a + b/c + d')).toEqual(['a + b/c + d']);
+  it('offers both readings of an ambiguous slash rather than choosing one', () => {
+    /*
+     * "a + b/c + d" could be a fraction or a division, and this used to return only the literal
+     * form on the grounds that guessing is worse than marking literally. That was right when there
+     * was one candidate; it is wrong now that there can be several. Marking accepts ANY candidate
+     * that produces the expected braille, so offering the Board's own reading as well means the
+     * student is accepted whichever of the two they meant — and is never marked wrong for writing
+     * their answer the way the app taught them to write the question.
+     */
+    const readings = interpretAnswer('a + b/c + d');
+    expect(readings).toContain('a + b/c + d');
+    expect(readings).toContain(RAW_FRACTION);
   });
 
   it('reads sqrt(x), sqrt x and root(x) as radicals', () => {

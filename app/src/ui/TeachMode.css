@@ -18,6 +18,11 @@
   overflow-y: auto;
 }
 
+/* While a lesson is on, the page behind it is frozen. */
+body.is-teaching {
+  overflow: hidden;
+}
+
 .teach__head {
   display: flex;
   align-items: center;
@@ -68,6 +73,14 @@
 
 .teach__stage .sourceview {
   justify-content: center;
+}
+
+/* On the stage the maths is the whole point, not a panel inside a panel. */
+.teach__stage .mathpreview {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
 }
 
 .teach__note {

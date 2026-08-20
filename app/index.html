@@ -10,6 +10,12 @@
     />
     <title>Braillix — read mathematics with your hands</title>
 
+    <!-- Installable, and once installed it opens with the Wi-Fi off. See vite.config.ts. -->
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="./icons/icon.svg" />
+    <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+    <meta name="theme-color" content="#0b0d0f" />
+
     <!--
       speech-rule-engine reads this BEFORE it initialises. Without it, SRE fetches its locale data
       from a jsDelivr CDN — which works on a good connection and fails silently in a room with no

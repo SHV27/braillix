@@ -44,6 +44,15 @@ export function TeachMode({ worksheet, onClose }: TeachModeProps) {
     if (item) setSource(item.source);
   }, [item, setSource]);
 
+  /*
+   * A lesson is modal: while it is open the page behind must not scroll, or a stray wheel turn
+   * takes the teacher to the worksheet editor with a class waiting.
+   */
+  useEffect(() => {
+    document.body.classList.add('is-teaching');
+    return () => document.body.classList.remove('is-teaching');
+  }, []);
+
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {

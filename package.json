@@ -21,6 +21,7 @@
     "fetch:model": "node tools/fetch-model.mjs",
     "pod": "node tools/virtual-pod/virtual-pod.mjs",
     "lint:dead": "node tools/find-dead-exports.mjs",
-    "accuracy": "node tools/accuracy.mjs"
+    "accuracy": "node tools/accuracy.mjs",
+    "check:deployed": "node tools/check-deployed.mjs"
   }
 }

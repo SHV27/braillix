@@ -12,13 +12,14 @@
  */
 
 import { create } from 'zustand';
-import { DEFAULT_SIMULATED_CELLS, LOCAL_MODEL_PATH } from './config';
+import { DEFAULT_SIMULATED_CELLS } from './config';
 import { renderFrame, windowFollowingCursor, type Frame } from './core/frame';
 import { simulatedProfile, type BitOrder, type DisplayProfile } from './core/profile';
-import { initSre } from './core/sre-service';
+import { initSre, toSpeechText } from './core/sre-service';
 import { toLatex, type MathInputIssue } from './core/mathinput';
+import { modelStatus } from './recognise/status';
 import { hasWords, translateMixed, type MixedLine, type SegmentKind } from './core/mixed';
-import { translateLatex, type Translation } from './core/translate';
+import { latexToMathml, translateLatex, type Translation } from './core/translate';
 import { BLANK, dotsToMask, type DotMask, type DotNumber } from './core/braille';
 import type { RefreshPlan } from './core/scheduler';
 import {
@@ -52,7 +53,7 @@ export interface Capability {
   readonly fix?: string;
 }
 
-export type CapabilityId = 'sre' | 'speech' | 'recognition' | 'usb' | 'pod';
+export type CapabilityId = 'sre' | 'speech' | 'recognition' | 'usb' | 'pod' | 'offline';
 
 export type CapabilityMap = Record<CapabilityId, Capability>;
 
@@ -62,6 +63,8 @@ const INITIAL_CAPABILITIES: CapabilityMap = {
   recognition: { state: 'checking' },
   usb: { state: 'checking' },
   pod: { state: 'unavailable', reason: 'simulated', fix: 'Connect real hardware on the Hardware screen.' },
+  // Set by the service-worker registration in main.tsx, which is the only thing that knows.
+  offline: { state: 'checking' },
 };
 
 /* ------------------------------------------------------------------ view + settings */
@@ -188,6 +191,12 @@ interface BraillixState {
 let link: DisplayLink | null = null;
 
 const NO_CELLS: DotMask[] = [];
+
+/** Speak one piece of mathematics — used when there is no tree to walk, only a line. */
+async function speakMaths(latex: string, locale: 'en' | 'hi'): Promise<string> {
+  const { mathml } = latexToMathml(latex);
+  return toSpeechText(mathml, locale);
+}
 
 export const useBraillix = create<BraillixState>((set, get) => {
   /** Compute the frame for the current state. The one place a Frame is derived. */
@@ -657,8 +666,30 @@ export const useBraillix = create<BraillixState>((set, get) => {
       }
     },
     sayCurrent: () => {
-      const { settings, mode, tree, cursorId } = get();
-      if (!settings.speechOn || !tree) return;
+      const { settings, mode, tree, cursorId, mixedLine } = get();
+      if (!settings.speechOn) return;
+
+      /*
+       * A question with words in it has no expression tree to walk, so there is nothing for the
+       * maths engine to speak. Reading it aloud is still exactly what a teacher wants — so the
+       * words are spoken as words and the maths inside them as mathematics, in that order. Without
+       * this the button was silent on precisely the lines a class most wants to hear.
+       */
+      if (mixedLine) {
+        void Promise.all(
+          mixedLine.segments.map((segment) =>
+            segment.kind === 'maths' && segment.latex
+              ? speakMaths(segment.latex, lang()).catch(() => segment.text)
+              : Promise.resolve(segment.text),
+          ),
+        ).then((parts) => {
+          set({ spokenText: parts.join(' ') });
+          speak(parts.join(' '), lang(), settings.speechRate);
+        });
+        return;
+      }
+
+      if (!tree) return;
       const id = mode === 'explore' && cursorId ? cursorId : tree.rootId;
       const node = tree.nodes.get(id);
       if (!node) return;
@@ -717,25 +748,13 @@ export const useBraillix = create<BraillixState>((set, get) => {
             },
       );
 
-      // Ask the disk rather than assuming. A badge that says 'not installed' about a model that IS
-      // installed is exactly the kind of small dishonesty this status strip exists to prevent.
-      try {
-        const url = new URL(`${LOCAL_MODEL_PATH}formulanet/config.json`, document.baseURI).href;
-        const response = await fetch(url);
-        const body = response.ok ? await response.text() : '';
-        const installed = body.trimStart().startsWith('{');
-        setCapability('recognition', {
-          state: installed ? 'ready' : 'unavailable',
-          reason: installed ? 'on this device, offline' : 'on-device model not installed',
-          fix: installed ? undefined : 'Run `npm run fetch:model` once (76 MB) to enable reading handwriting.',
-        });
-      } catch {
-        setCapability('recognition', {
-          state: 'unavailable',
-          reason: 'could not check whether the model is installed',
-          fix: 'Run `npm run fetch:model` once (76 MB) to enable reading handwriting.',
-        });
-      }
+      // Ask the file `npm install` wrote rather than probing for a 404 — see recognise/status.ts.
+      const model = await modelStatus();
+      setCapability('recognition', {
+        state: model.installed ? 'ready' : 'unavailable',
+        reason: model.installed ? 'on this device, offline' : (model.reason ?? 'on-device model not installed'),
+        fix: model.installed ? undefined : 'Run `npm run fetch:model` once (76 MB) to enable reading handwriting.',
+      });
     },
   };
 });

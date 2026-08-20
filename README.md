@@ -6,7 +6,10 @@
 
 A refreshable braille display for maths, built cheap enough to reach Indian schools for the blind.
 This repository is the **software half** — everything from *"here is an equation"* to
-*"the right dots are raised on the right cells."*
+*"the right dots are raised on the right cells"* — and the classroom around it.
+
+**[braillix.vercel.app](https://braillix.vercel.app)** · works offline · installs like an app ·
+English and हिन्दी
 
 </div>
 
@@ -48,6 +51,26 @@ corrected is recognition you cannot trust.
 **Learn, practise, get feedback** — braille-first, with answers entered in six-key braille rather
 than picked from a list.
 
+**Write it the way you write it.** `1/2`, `sqrt(9)`, `x^2`, `2 <= x`, `45 degrees`, `Rs 250`,
+`3 x 4`. Nobody at a school for the blind is going to type `\frac{1}{2}`, and they do not have to.
+A keypad covers the rest, and the expression is shown **in print** next to the braille — because
+the teacher who has to check it usually reads neither LaTeX nor braille.
+
+**Words and mathematics on one line.** A Hindi maths textbook is Hindi with maths inside it, and
+the two halves are written in different braille codes. Braillix cuts the line, sends the words to
+**Bharati Braille** and the maths to Nemeth, and marks the boundary the way a reader expects:
+
+```
+दो संख्याओं का योग 12 है  →  ⠙⠕ ⠎⠰⠨⠈⠽⠜⠕⠰ ⠅⠜ ⠽⠕⠛ ⠸⠩ ⠼⠂⠆ ⠸⠱ ⠓⠌
+```
+
+**A class, not just a display.** Worksheets a teacher writes and keeps, a Teach mode that puts each
+question on the display in turn, students with their own records, a printable sheet with print and
+braille together, and a `.brf` file for an embosser. All of it on the laptop, moving between
+laptops as a file — no account, no server, nothing to sign into.
+
+**The whole interface in Hindi**, switched in one control, with the braille standard unchanged.
+
 
 ---
 
@@ -58,7 +81,10 @@ than picked from a list.
 | **Read** — one cell, a whole quadratic, and the cam number for every dot | ![Read](docs/screenshots/read.png) |
 | **Explore structure** — the quadratic formula folded to five cells, ⠹ ⠿ ⠌ ⠿ ⠼ | ![Reader](docs/screenshots/reader.png) |
 | **Practice** — braille-first drills, answers written in six-key Perkins entry | ![Practice](docs/screenshots/practice.png) |
-| **Hardware** — the discovered chain, and the cam calibration that de-risks demo day | ![Hardware](docs/screenshots/hardware.png) |
+| **Class** — worksheets a teacher writes and keeps, with print and braille together | ![Class](docs/screenshots/class.png) |
+| **Teach** — one question at a time, arrow keys, the display in sync | ![Teach](docs/screenshots/teach.png) |
+| **Help** — one button that goes and checks whether this laptop actually works | ![Help](docs/screenshots/help.png) |
+| **Device** — the discovered chain, and the cam calibration that de-risks demo day | ![Hardware](docs/screenshots/hardware.png) |
 | **Cell atlas** — all 64 cam positions, printable, for holding against the physical cam | ![Atlas](docs/screenshots/atlas.png) |
 
 ## Why it is built this way
@@ -90,11 +116,21 @@ sheet you can hold against the physical cam.
 
 ```bash
 npm run verify     # typecheck · lint · unit tests · headless journey + screenshots
+npm run accuracy   # translate the whole school syllabus and write down what came out
 ```
 
 The unit suite includes golden Nemeth expressions, every letter and digit cross-checked against the
-translation engine, and structural invariants that fail the build if a cell count gets hardcoded or
-hardware bit arithmetic escapes its one permitted file.
+translation engine, the Bharati tables checked against the published charts, and structural
+invariants that fail the build if a cell count gets hardcoded, a translated string goes missing in
+one language, or hardware bit arithmetic escapes its one permitted file.
+
+[`docs/ACCURACY.md`](docs/ACCURACY.md) is the evidence: sixty-nine lines of real syllabus, from a
+single digit to a definite integral, with the braille each one produces. Check a row against a
+published Nemeth table — that is what it is there for.
+
+Inside the app, **Help → Is everything working?** runs the same kind of check on the machine in
+front of you: it translates a known expression and compares the answer, fetches the braille tables
+from disk, and writes to storage. Eight rows, each with the fix for anything that is not right.
 
 ## Repository map
 
@@ -104,7 +140,8 @@ hardware bit arithmetic escapes its one permitted file.
 | `app/src/ui/` | Screens and components. One design-token source in `tokens.css`. |
 | `app/src/transport/` | Simulator · Web Serial · Wi-Fi pod, behind one interface. |
 | `firmware/` | ESP32 pod and muscle-cell sketches, written to the same protocol. |
-| `tools/` | The virtual pod emulator, and the model fetcher. |
+| `app/src/class/` | Worksheets, students and records — the teacher's half of the product. |
+| `tools/` | The virtual pod emulator, the model fetcher, and the accuracy report. |
 | `docs/` | The hardware handoff, the wire protocol, the integration notes. |
 
 Demo runbook: [`docs/DEMO.md`](docs/DEMO.md) — seven minutes, with what to say.
@@ -119,5 +156,9 @@ Braillix stands on [speech-rule-engine](https://github.com/speech-rule-engine/sp
 [Temml](https://github.com/ronkok/Temml), [Transformers.js](https://github.com/huggingface/transformers.js)
 and [FormulaNet](https://huggingface.co/alephpi/FormulaNet). Full attribution and licences in
 [`THIRD_PARTY.md`](THIRD_PARTY.md).
+
+The braille tables are cited where they are used: **Nemeth** from the BANA code for the
+mathematics, **Bharati Braille** from liblouis's `devanagari.cti` — maintained for NIEPVD Dehradun —
+and the published letter charts for the Hindi words around it.
 
 Software by **Shaurya Verma**. Hardware by the Braillix team.

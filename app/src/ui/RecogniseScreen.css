@@ -198,3 +198,12 @@
     height: 120px;
   }
 }
+
+/* The second opinion: two readings, side by side, one click to take either. */
+.rec__second {
+  margin-top: var(--s3);
+}
+
+.notice--good {
+  border-left-color: var(--good);
+}

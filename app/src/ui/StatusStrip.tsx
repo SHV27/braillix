@@ -31,6 +31,7 @@ const CAP_LABEL: Record<CapabilityId, StringKey> = {
   recognition: 'cap.recognition',
   usb: 'cap.usb',
   pod: 'cap.pod',
+  offline: 'cap.offline',
 };
 
 export function StatusStrip() {

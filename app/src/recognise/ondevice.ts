@@ -7,6 +7,7 @@
  */
 
 import { LOCAL_MODEL_PATH, ORT_WASM_PATH } from '../config';
+import { modelStatus } from './status';
 import { latexToMathml } from '../core/translate';
 import { tidyLatex } from './tidy';
 import { judge, type ProviderStatus, type RecognitionProvider, type RecognitionResult } from './types';
@@ -20,18 +21,7 @@ function absolute(path: string): string {
   return new URL(path, document.baseURI).href;
 }
 
-/** Is the model actually on disk? Asked before offering the feature, so the badge can be honest. */
-async function modelPresent(): Promise<boolean> {
-  try {
-    const response = await fetch(absolute(`${LOCAL_MODEL_PATH}formulanet/config.json`), { method: 'GET' });
-    if (!response.ok) return false;
-    // A dev server happily returns index.html for a missing file; check it is really JSON.
-    const text = await response.text();
-    return text.trimStart().startsWith('{');
-  } catch {
-    return false;
-  }
-}
+
 
 export class OnDeviceRecogniser implements RecognitionProvider {
   readonly id = 'on-device' as const;
@@ -47,7 +37,7 @@ export class OnDeviceRecogniser implements RecognitionProvider {
     if (typeof Worker === 'undefined') {
       return { state: 'unavailable', reason: 'this browser has no Web Workers' };
     }
-    if (!(await modelPresent())) {
+    if (!((await modelStatus()).installed)) {
       return {
         state: 'unavailable',
         reason: 'the recognition model is not installed',

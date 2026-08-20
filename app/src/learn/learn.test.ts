@@ -1,11 +1,12 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { EMPTY, backspace, describeChord, isSixKey, keyDown, keyUp, releaseAll, writeSpace } from './sixkey';
-import { diffCells, mark } from './feedback';
+import { diffCells, mark, type Verdict } from './feedback';
 import { LESSONS, lessonById, totalItems } from './lessons';
 import { itemKey, recordAttempt, summariseLesson, type ProgressMap } from './progress';
 import { dotsToMask } from '../core/braille';
 import { initSre } from '../core/sre-service';
 import { translateLatex } from '../core/translate';
+import { translate, type StringKey } from '../ui/i18n';
 
 /* ------------------------------------------------------------------ six-key entry */
 
@@ -99,6 +100,15 @@ describe('marking an answer', () => {
   const H = dotsToMask([1, 2, 5]); // h
   const G = dotsToMask([1, 2, 4, 5]); // g
 
+  /**
+   * `mark` returns keys and numbers rather than sentences, so a student can be marked in Hindi.
+   * These helpers put them back into English, which is what the assertions are about: the wording
+   * belongs to the translation table, the *facts* belong here.
+   */
+  const say = (note: { key: StringKey; vars?: Record<string, string | number> }) =>
+    translate(note.key, note.vars, 'en');
+  const details = (verdict: Verdict) => verdict.details.map(say).join(' ');
+
   it('accepts a correct answer', () => {
     const verdict = mark([H], [H]);
     expect(verdict.correct).toBe(true);
@@ -108,30 +118,30 @@ describe('marking an answer', () => {
   it('names the extra dot, not just "wrong"', () => {
     const verdict = mark([H], [G]);
     expect(verdict.correct).toBe(false);
-    expect(verdict.details.join(' ')).toContain('dot 4');
-    expect(verdict.details.join(' ')).toContain('should not be there');
+    expect(details(verdict)).toContain('dot 4');
+    expect(details(verdict)).toContain('should not be there');
   });
 
   it('names a missing dot', () => {
     const verdict = mark([G], [H]);
-    expect(verdict.details.join(' ')).toContain('dot 4 is missing');
+    expect(details(verdict)).toContain('dot 4 is missing');
   });
 
   it('says what the cell the student wrote actually means', () => {
     const verdict = mark([H], [G]);
-    expect(verdict.details.join(' ')).toContain('letter g');
-    expect(verdict.details.join(' ')).toContain('letter h');
+    expect(details(verdict)).toContain('letter g');
+    expect(details(verdict)).toContain('letter h');
   });
 
   it('points at an unfinished answer rather than marking dots', () => {
     const verdict = mark([H, G], [H]);
-    expect(verdict.headline).toBe('Not finished yet.');
-    expect(verdict.details.join(' ')).toContain('2 cells long; you wrote 1');
+    expect(say(verdict.headline)).toBe('Not finished yet.');
+    expect(details(verdict)).toContain('2 cells long; you wrote 1');
   });
 
   it('notices an answer that is too long', () => {
     const verdict = mark([H], [H, G]);
-    expect(verdict.headline).toContain('too many');
+    expect(say(verdict.headline)).toContain('too many');
   });
 
   it('reports the first wrong cell so the display can point at it', () => {
@@ -140,11 +150,19 @@ describe('marking an answer', () => {
 
   it('counts every differing cell, not only the first', () => {
     const verdict = mark([H, H, H], [G, G, G]);
-    expect(verdict.headline).toContain('3 cells are wrong');
+    expect(say(verdict.headline)).toContain('3 cells are wrong');
   });
 
   it('says nothing useless when nothing has been written', () => {
-    expect(mark([H], []).headline).toBe('Nothing written yet.');
+    expect(say(mark([H], []).headline)).toBe('Nothing written yet.');
+  });
+
+  it('says the same things in Hindi, with the same numbers in them', () => {
+    const verdict = mark([H], [G]);
+    const hindi = verdict.details.map((note) => translate(note.key, note.vars, 'hi')).join(' ');
+    expect(hindi).toContain('4'); // the dot number survives
+    expect(hindi).toContain('सेल');
+    expect(hindi).not.toContain('should not be there');
   });
 
   it('diffCells reports position, extra and missing dots', () => {
@@ -183,13 +201,13 @@ describe('the lessons', () => {
         expect(lesson.teaches[index].length, `${lesson.id} teaches (${language})`).toBeGreaterThan(10);
         expect(lesson.title[index].length, `${lesson.id} title (${language})`).toBeGreaterThan(3);
         for (const item of lesson.items) {
-          expect(item.hint[index].length, `${lesson.id}: ${item.latex} (${language})`).toBeGreaterThan(15);
+          expect(item.hint[index].length, `${lesson.id}: ${item.source} (${language})`).toBeGreaterThan(15);
         }
       }
       expect(lesson.title[0], `${lesson.id} title is untranslated`).not.toBe(lesson.title[1]);
       expect(lesson.rule[0], `${lesson.id} rule is untranslated`).not.toBe(lesson.rule[1]);
       for (const item of lesson.items) {
-        expect(item.hint[0], `${lesson.id}: ${item.latex} hint is untranslated`).not.toBe(item.hint[1]);
+        expect(item.hint[0], `${lesson.id}: ${item.source} hint is untranslated`).not.toBe(item.hint[1]);
       }
     }
   });
@@ -199,9 +217,9 @@ describe('the lessons', () => {
     // explanation. This is the test that stops that reaching anybody.
     for (const lesson of LESSONS) {
       for (const item of lesson.items) {
-        const translated = await translateLatex(item.latex);
-        expect(translated.issues.filter((i) => i.kind === 'parse'), `${lesson.id}: ${item.latex}`).toEqual([]);
-        expect(translated.cells.length, `${lesson.id}: ${item.latex}`).toBeGreaterThan(0);
+        const translated = await translateLatex(item.source);
+        expect(translated.issues.filter((i) => i.kind === 'parse'), `${lesson.id}: ${item.source}`).toEqual([]);
+        expect(translated.cells.length, `${lesson.id}: ${item.source}`).toBeGreaterThan(0);
       }
     }
   });

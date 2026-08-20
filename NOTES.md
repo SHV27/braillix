@@ -37,3 +37,37 @@ arc plan first.
   *which* cell is stuck rather than "a cell did not acknowledge".
 - **Grade-2 contractions for surrounding prose.** Irrelevant inside Nemeth, but if Braillix ever
   displays sentences around the maths, literary braille would want them.
+
+## Parked after arcs 7–10 (20 Aug 2026, evening)
+
+- **Bharati maths braille** — still the biggest open item, and still blocked on the same thing: the
+  NIEPVD maths notation has no open machine-readable table. What changed is that the *language*
+  half now exists (`core/bharati.ts`), so the seam is real rather than theoretical — a maths table
+  would slot in beside it. Would need someone with the printed NIEPVD code to author it.
+- **More Indian languages.** The Bharati tables cover nine scripts; Braillix implements Devanagari.
+  Marathi and Nepali would work today (same script); Bengali, Gujarati, Punjabi, Tamil, Telugu,
+  Kannada, Malayalam and Oriya each need their own letter table plus a font subset. The interface
+  translation table is the other half — `ui/i18n.ts` is keyed for it, `LANGS` is a list.
+- **A second reading of a photograph.** When the recogniser judges its own answer "check this one",
+  it could re-run with different preprocessing and offer both readings. Cheap (about a second) and
+  a real accuracy gain on bad handwriting. Not built: it needs its own measurement before it can be
+  claimed, and the six shipped samples all read correctly as they are.
+- **Worksheet sharing by QR code.** A worksheet is a small JSON file; a QR code would move one
+  between two laptops with no cable and no network. Charming, and genuinely useful in a school
+  with one laptop per teacher. Needs a QR encoder (~3 KB) and a camera decode path.
+- **Per-student assignment.** Worksheets are for the class; a teacher may want "Asha does sheet A,
+  Ravi does sheet B". The data model already carries both ids on every record, so this is interface
+  work rather than a change of shape.
+- **Speech in more voices.** The Hindi transcript is always shown; hearing it depends on a system
+  voice. A bundled voice is out of scope (tens of megabytes, and licensing).
+
+## Measured, and honestly not yet measured (20 Aug 2026)
+
+- **The second reading of an uncertain image.** Built and shipped: when the model judges its own
+  answer "check this one", Braillix reads the image again with the greys pushed apart and offers
+  both readings, with agreement between the two shown as what it is — evidence of a kind the model
+  cannot give about itself. What is *not* measured is how much it helps, because all six shipped
+  samples are read confidently first time, so the second pass never fires on them. Measuring it
+  properly needs a set of genuinely hard photographs — real pencil, real classroom light — which is
+  a morning at a school, not an afternoon at a keyboard. Until then the interface claims only what
+  it does: a second opinion, offered, never asserted.

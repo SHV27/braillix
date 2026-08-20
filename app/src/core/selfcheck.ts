@@ -13,7 +13,7 @@
 import { translateLatex, cellsToUnicode } from './translate';
 import { toLatex } from './mathinput';
 import { devanagariToBraille } from './bharati';
-import { LOCAL_MODEL_PATH } from '../config';
+import { modelStatus } from '../recognise/status';
 
 export type CheckState = 'pass' | 'warn' | 'fail';
 
@@ -152,26 +152,15 @@ function checkStorage(): CheckResult {
 }
 
 async function checkRecognition(): Promise<CheckResult> {
-  try {
-    const url = new URL(`${LOCAL_MODEL_PATH}formulanet/config.json`, document.baseURI).href;
-    const response = await fetch(url);
-    const body = response.ok ? await response.text() : '';
-    return body.trimStart().startsWith('{')
-      ? { id: 'recognition', state: 'pass', detail: 'Handwriting can be read on this device, with no network.' }
-      : {
-          id: 'recognition',
-          state: 'warn',
-          detail: 'The handwriting model is not installed.',
-          fix: 'Run `npm run fetch:model` once (76 MB). Everything else works without it — type the maths instead.',
-        };
-  } catch {
-    return {
-      id: 'recognition',
-      state: 'warn',
-      detail: 'Could not tell whether the handwriting model is installed.',
-      fix: 'Run `npm run fetch:model` once (76 MB) if you want to photograph equations.',
-    };
-  }
+  const model = await modelStatus();
+  return model.installed
+    ? { id: 'recognition', state: 'pass', detail: 'Handwriting can be read on this device, with no network.' }
+    : {
+        id: 'recognition',
+        state: 'warn',
+        detail: 'The handwriting model is not installed on this machine.',
+        fix: 'Run `npm run fetch:model` once (76 MB). Everything else works without it — type the maths instead.',
+      };
 }
 
 function checkSpeech(voice: { available: boolean; name?: string }, language: string): CheckResult {

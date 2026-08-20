@@ -43,6 +43,9 @@ test.describe('reading handwriting', () => {
 
     const pad = page.getByTestId('draw-pad');
     await expect(pad).toBeVisible();
+    // The raw mouse API does not scroll; without this the coordinates can be below the fold and
+    // the strokes land on whatever happens to be there.
+    await pad.scrollIntoViewIfNeeded();
     const box = (await pad.boundingBox())!;
 
     // Draw a rough "1 + 1".

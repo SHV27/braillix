@@ -3,6 +3,9 @@
 Locked 20 August 2026, after the five attacks below. Features may change every arc. **Nothing in
 this file changes without re-running this review.**
 
+*Amended the same evening, after arcs 7–10 added the classroom and shipped it. The amendments are
+marked; the original decisions are untouched, because none of them turned out to be wrong.*
+
 ---
 
 ## System sketch
@@ -22,6 +25,23 @@ this file changes without re-running this review.**
 
 Six boxes, one direction. Every arrow is a pure function except the last one.
 
+**Amended (arc 7).** Two things now happen before that pipeline, and neither changes it:
+
+```
+ what the teacher typed
+        │
+        ├─ core/mathinput  ─ "1/2", "sqrt(9)", "45 degrees"  ──► LaTeX ──► (the pipeline above)
+        │
+        └─ core/mixed      ─ a line with words in it
+                              ├─ words ──► core/bharati  (Devanagari)  ──┐
+                              │        └─► core/literal  (Grade 1)      ├─► one run of cells,
+                              └─ maths ──► (the pipeline above)         ─┘   each segment labelled
+```
+
+A line with no words takes exactly the path it always did — proven by a test that compares the
+cells, not the code path. Where the codes meet, the boundary is written into the braille with
+BANA's Nemeth opening indicator and terminator, because a reader must be told the rules changed.
+
 ## The state authority
 
 One Zustand store, four **exclusive owners**. A second computation of any of these is a bug, and
@@ -37,6 +57,19 @@ the lint rule `no-restricted-imports` plus a Referee test enforce it.
 `sreService` exists because SRE keeps **global** engine state: a naïve app that asks for braille and
 speech concurrently will race and get braille in the speech slot. One queue, one owner.
 
+**Amended (arcs 7–10).** Three more facts appeared, each with one owner, and each deliberately
+*outside* the main store because their lifetimes are different:
+
+| State | Sole authority | Why not the main store |
+|---|---|---|
+| Which language the interface speaks | `ui/i18n.ts` | The store *reads* it to build announcements, so the dependency has to point that way. |
+| Worksheets, students, records | `class/store.ts` | The main store owns a moment; this owns a term. Merging them would put a child's record in the same object as every keystroke. |
+| Whether an offline copy exists | the service-worker registration in `main.tsx` | It is the only thing that knows, and it reports through the same capability channel as everything else. |
+
+Whether the handwriting model is installed has one owner too — `recognise/status.ts`, reading a
+file written at install time. Three places used to ask that question and all three asked it by
+requesting a file that might not exist.
+
 ## Choke points & enforcers
 
 No money, no accounts, no server — so the choke points are privacy and correctness, not auth.
@@ -46,6 +79,8 @@ No money, no accounts, no server — so the choke points are privacy and correct
 | Student work (photos, answers) never leaves the device | There is no backend to send it to, and after D5.1 there is no network-capable provider at all. Recognition runs in this browser. |
 | API keys | There are none. Braillix has no key, no account and no server, and D5.1 removed the only feature that would have needed one. |
 | Progress data | `localStorage` under one namespaced key, with a visible "erase all my data" control. |
+| Class data (worksheets, students, records) | `localStorage` under `braillix.class.v1`, with an erase control and an export file. Deleting a student deletes their records — a record naming nobody is a leak. |
+| What the service worker keeps | Only our own static build, and only same-origin: a pod on the LAN is never cached, and nothing crosses an origin. |
 | Cam numbers on the wire | Derived **only** by `profile.toCam(dots)`. Nothing else may do bit arithmetic. |
 | Serial / camera access | Browser-enforced user gesture; we never auto-connect. |
 
@@ -154,3 +189,29 @@ version is chosen only where it is also the proven one.
 MathJax full (heavier route to the same SRE) · FastAPI/Python backend (install friction, and both
 hard parts were proven in JS) · react-router, Tailwind, any component kit (ceremony or sameness) ·
 TypeScript 7 (see above).
+
+---
+
+## Amendments after arcs 7–10 (20 August 2026, evening)
+
+Nothing above was found wrong. Four things were added, and each one is here because it changes how
+the next person should reason about the system.
+
+**7. Two notations in, one meaning out.** `core/mathinput.ts` is a parser, not a preprocessor: it
+produces the same LaTeX an expert would have written, and the proof is a test comparing the
+*braille*, not the LaTeX. Anything that accepts new input syntax in future belongs there, and must
+carry the same equivalence test — a second path from typing to cells is a second set of bugs.
+
+**8. Two braille codes, and the boundary is data.** `core/mixed.ts` decides which is which and
+returns segments; nothing downstream guesses. The classifier is a heuristic (three strengths, two
+smoothing passes), so it is exposed in the interface with a one-click override rather than hidden
+behind confidence. **A heuristic that cannot be corrected by the user is a bug with a good mood.**
+
+**9. Two stores, on purpose.** See the state-authority table. The rule for adding a third: does it
+have a different *lifetime* from both? If not, it belongs in one of the two that exist.
+
+**10. The published build is a different build.** `BRAILLIX_DEPLOY=1` drops the model and the ONNX
+runtime, and the app reports recognition as unavailable rather than pretending. The consequence
+worth remembering: **anything that must work on the public site has to be in the precache list**,
+and `npm run check:deployed` asserts the ones that matter against the live URL. A local build
+passing proves only that the local build passes.

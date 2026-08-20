@@ -115,3 +115,31 @@ virtual pod draws the dots as they change and reports how much motor time each f
 
 Print the **Cell atlas** screen and hold it against the physical cam — all 64 positions, their dots,
 and what each one means in Nemeth, on one sheet.
+
+---
+
+## Added 20 August 2026 — several pods, and what they mean together
+
+Braillix now asks a question it used to answer by assumption. With more than one pod address, the
+Device screen offers two arrangements, and the software never guesses between them:
+
+**Joined** (`/layout`, as in §4B of your handoff). The pods are one long display. Pod 0 shows the
+first cells, pod 1 the next, and the laptop sends each pod its own slice along with the overall
+layout so two pods can never disagree about the message. Total width = the sum of the pods.
+
+**Mirrored** (`/show` to every pod). Every pod shows the *same* cells — one teacher, one
+expression, a display in front of each child. Two things about this are worth knowing on the
+hardware side:
+
+1. **The width is the smallest pod, not the largest.** A frame the small display cannot show would
+   leave one child reading a truncated equation with no way to know that is what happened.
+2. **A wider pod has its spare cells blanked**, in the same frame. Nothing is left showing what it
+   was showing before.
+
+Nothing on the pod changes for either mode. Mirrored, a pod receives an ordinary `/show` with a
+full-width `positions` array, exactly as a single pod does today. The whole difference is in the
+laptop.
+
+Both are exercised by the conformance suite against two virtual pods (`npm run pod`), and the
+mirrored test asks the pods what they are showing rather than trusting what the laptop believes it
+sent.

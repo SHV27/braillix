@@ -42,6 +42,30 @@ export interface PreparedImage {
 /** Anything we can draw: a URL, a data URL, a File/Blob, or a canvas. */
 export type ImageSource = Blob | string;
 
+export interface PrepareOptions {
+  /**
+   * How hard to push the greys apart before cropping. 1 leaves the image alone.
+   *
+   * A pencil photographed in a classroom is grey on grey; the model was trained on crisp black on
+   * white. Raising this darkens what is already dark and lightens what is already light, which is
+   * the difference between a stroke and a shadow. Used for the *second* reading of an image the
+   * recogniser was unsure about — see `RecognisePanel`.
+   */
+  readonly contrast?: number;
+}
+
+/**
+ * A levels curve about mid-grey, clamped.
+ *
+ * Deliberately linear rather than an S-curve: a soft curve flatters photographs and loses the
+ * faintest strokes, which are exactly the ones this exists to rescue.
+ */
+export function applyContrast(value: number, contrast: number): number {
+  if (contrast === 1) return value;
+  const shifted = (value - 128) * contrast + 128;
+  return Math.max(0, Math.min(255, Math.round(shifted)));
+}
+
 interface Decoded {
   readonly image: CanvasImageSource;
   readonly width: number;
@@ -139,7 +163,7 @@ function inkBounds(grey: Uint8Array, width: number, height: number) {
 }
 
 /** Prepare an image for the recognition model. */
-export async function prepareImage(source: ImageSource): Promise<PreparedImage> {
+export async function prepareImage(source: ImageSource, options: PrepareOptions = {}): Promise<PreparedImage> {
   const decoded = await decode(source);
   const { width, height } = decoded;
 
@@ -162,6 +186,12 @@ export async function prepareImage(source: ImageSource): Promise<PreparedImage> 
   const inverted = shouldInvert(grey);
   if (inverted) {
     for (let i = 0; i < grey.length; i += 1) grey[i] = 255 - grey[i];
+  }
+
+  // After inverting, so the curve always works on dark-ink-on-light.
+  const contrast = options.contrast ?? 1;
+  if (contrast !== 1) {
+    for (let i = 0; i < grey.length; i += 1) grey[i] = applyContrast(grey[i], contrast);
   }
 
   const bounds = inkBounds(grey, width, height);

@@ -139,7 +139,8 @@ export function MathKeypad({ onInsert }: MathKeypadProps) {
                   type="button"
                   className={`key${key.math ? ' key--math' : ''}`}
                   title={key.name}
-                  aria-label={key.name}
+                  /* WCAG 2.5.3: the face is on the key, so it has to be in the name as well. */
+                  aria-label={`${key.face} — ${key.name}`}
                   data-testid={`key-${key.face}`}
                   onClick={() => onInsert(key.insert, key.back ?? 0)}
                 >

@@ -7,7 +7,7 @@
 //
 // Runs automatically on `npm install`. Safe to run repeatedly. Never fails the install.
 
-import { cp, mkdir, readdir, stat } from 'node:fs/promises';
+import { cp, mkdir, readdir, stat, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -49,6 +49,22 @@ async function copySreMathmaps() {
     copied += 1;
   }
   ok(`sre mathmaps: ${copied}/${LOCALES.length} locales -> public/sre/mathmaps`);
+}
+
+/**
+ * Say, in a file, whether the handwriting model is installed.
+ *
+ * The app used to find out by fetching the model's own config and treating a 404 as "no". That
+ * works, and it logs a console error on every load of every build that does not have the model —
+ * including the public one, where it never will. An error in the console is a thing somebody has to
+ * investigate, and this one had no bottom. So the answer is written down instead.
+ */
+async function writeModelStatus() {
+  const dir = join(appRoot, 'public', 'models');
+  await mkdir(dir, { recursive: true });
+  const installed = existsSync(join(dir, 'formulanet', 'config.json'));
+  await writeFile(join(dir, 'status.json'), JSON.stringify({ formulanet: installed }, null, 2), 'utf8');
+  ok(`model status: formulanet ${installed ? 'installed' : 'not installed'}`);
 }
 
 async function copyOnnxRuntimeWasm() {
@@ -99,6 +115,7 @@ const warn = (m) => console.log(`  [braillix] ! ${m}`);
 try {
   await copySreMathmaps();
   await copyOnnxRuntimeWasm();
+  await writeModelStatus();
 } catch (err) {
   // Never break `npm install` over this — the app degrades observably instead (Law 3).
   warn(`asset copy incomplete: ${err?.message ?? err}`);

@@ -95,6 +95,31 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   'code.literary': ['Grade 1 · words', 'ग्रेड 1 · शब्द'],
   'board.question': ['The question, part by part', 'प्रश्न, हिस्सा-दर-हिस्सा'],
 
+  /* ---- the first sixty seconds ---- */
+  'first.title': ['New here? Sixty seconds.', 'पहली बार? साठ सेकंड।'],
+  'first.lede': [
+    'Press any of these and watch the display. Nothing is being set up — this is the product working.',
+    'इनमें से कोई भी दबाइए और डिस्प्ले देखिए। कुछ सेट नहीं हो रहा — यह उत्पाद चल रहा है।',
+  ],
+  'first.skip': ['I know it already', 'मुझे पता है'],
+  'first.step1': ['Put a sum on the display', 'डिस्प्ले पर एक सवाल भेजिए'],
+  'first.step1detail': [
+    'Two thirds plus one sixth, written the way you would write it.',
+    'दो तिहाई जोड़ एक छठा — जैसे आप लिखते हैं वैसे ही।',
+  ],
+  'first.step2': ['Make a long formula fit one cell', 'लंबा सूत्र एक सेल में समाइए'],
+  'first.step2detail': [
+    'The quadratic formula folds from nineteen cells to five, and you step into the parts.',
+    'द्विघात सूत्र उन्नीस सेल से पाँच में सिमट जाता है, और आप हिस्सों में जा सकते हैं।',
+  ],
+  'first.step3': ['Write a question in Hindi', 'हिन्दी में सवाल लिखिए'],
+  'first.step3detail': [
+    'Words in Bharati Braille, the number in Nemeth, on one line of cells.',
+    'शब्द भारती ब्रेल में, संख्या नेमेथ में — सेल की एक ही पंक्ति पर।',
+  ],
+  'first.foot': ['Everything else is explained in', 'बाक़ी सब समझाया गया है'],
+  'first.help': ['Help', 'सहायता में'],
+
   /* ---- keypad ---- */
   'keypad.arithmetic': ['Arithmetic', 'अंकगणित'],
   'keypad.shapes': ['Powers and roots', 'घात और मूल'],
@@ -207,6 +232,31 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
     'Braillix turns mathematics into braille and drives a refreshable display, on however many cells it has — one or forty. It has no account, no server and no API key, and everything it does works with the network unplugged. Nemeth is used for the mathematics and Bharati Braille for Hindi words; both are cited in the repository.',
     'ब्रेलिक्स गणित को ब्रेल में बदलता है और रिफ्रेशेबल डिस्प्ले चलाता है — चाहे उसमें एक सेल हो या चालीस। इसमें न कोई खाता है, न सर्वर, न कोई API कुंजी, और यह सब कुछ नेटवर्क के बिना करता है। गणित के लिए नेमेथ और हिन्दी शब्दों के लिए भारती ब्रेल — दोनों के स्रोत रिपॉज़िटरी में दर्ज हैं।',
   ],
+
+  /* ---- marking an answer ---- */
+  'fb.nothing': ['Nothing written yet.', 'अभी कुछ नहीं लिखा।'],
+  'fb.correct': ['Correct.', 'सही।'],
+  'fb.correctAll': ['Correct — all {count} cells.', 'सही — पूरी {count} सेल।'],
+  'fb.notFinished': ['Not finished yet.', 'अभी पूरा नहीं हुआ।'],
+  'fb.tooLong': ['One cell too many.', 'एक सेल ज़्यादा है।'],
+  'fb.almost': ['Almost — one cell is wrong.', 'लगभग — एक सेल ग़लत है।'],
+  'fb.manyWrong': ['{count} cells are wrong.', '{count} सेल ग़लत हैं।'],
+  'fb.lengthNext': [
+    'The answer is {expected} cells long; you wrote {given}. The next one is {cell}.',
+    'उत्तर {expected} सेल का है; आपने {given} लिखीं। अगली सेल है {cell}।',
+  ],
+  'fb.lengthOnly': [
+    'The answer is {expected} cells long; you wrote {given}.',
+    'उत्तर {expected} सेल का है; आपने {given} लिखीं।',
+  ],
+  'fb.extraDots': [
+    'Cell {index}: you raised dot {dots}, which should not be there.',
+    'सेल {index}: आपने डॉट {dots} उठाया, जो नहीं होना चाहिए।',
+  ],
+  'fb.missingDots': ['Cell {index}: dot {dots} is missing.', 'सेल {index}: डॉट {dots} छूट गया।'],
+  'fb.youWrote': ['You wrote {given}; it should be {expected}.', 'आपने {given} लिखा; होना चाहिए {expected}।'],
+  'fb.moreDiffer': ['{count} more cells after that also differ.', 'उसके बाद {count} और सेल भी अलग हैं।'],
+  'fb.moreDifferOne': ['1 more cell after that also differs.', 'उसके बाद 1 और सेल भी अलग है।'],
 
   /* ---- the class ---- */
   'nav.class': ['Class', 'कक्षा'],
@@ -398,6 +448,17 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
     'जब तक आप यह नहीं दबाते, डिस्प्ले पर कुछ नहीं जाता। मॉडल का उत्तर एक सुझाव है, फ़ैसला नहीं।',
   ],
   'rec.samples': ['Sample images', 'नमूना चित्र'],
+  'rec.secondTry': ['Reading it a second time…', 'दूसरी बार पढ़ा जा रहा है…'],
+  'rec.agree': [
+    'Read twice, two different ways, and both readings agree.',
+    'दो अलग तरीक़ों से दो बार पढ़ा गया, और दोनों बार एक ही निकला।',
+  ],
+  'rec.disagree': [
+    'The second reading came out differently. Pick whichever matches the writing.',
+    'दूसरी बार अलग निकला। जो लिखावट से मिलता हो वही चुनिए।',
+  ],
+  'rec.readingOne': ['First reading', 'पहली बार'],
+  'rec.readingTwo': ['With more contrast', 'ज़्यादा कंट्रास्ट के साथ'],
   'rec.draw': ['Draw an equation here', 'यहाँ समीकरण बनाइए'],
 
   /* ---- device: connection and calibration ---- */
@@ -517,6 +578,7 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   'cap.recognition': ['Recognition', 'पहचान'],
   'cap.usb': ['USB display', 'USB डिस्प्ले'],
   'cap.pod': ['Display', 'डिस्प्ले'],
+  'cap.offline': ['Offline copy', 'ऑफ़लाइन प्रति'],
 
   /* ---- the reader ---- */
   'reader.title': ['How to read it', 'कैसे पढ़ें'],

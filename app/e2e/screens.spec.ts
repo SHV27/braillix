@@ -74,6 +74,41 @@ test.describe('states worth capturing', () => {
     await page.screenshot({ path: `${SHOTS}/reader-exploring.png`, fullPage: true });
   });
 
+  test('a worksheet with real questions in it', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/');
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
+    await page.getByTestId('nav-class').click();
+    await page.getByTestId('new-worksheet').click();
+    await page.getByTestId('worksheet-title').fill('Tuesday, fractions');
+    for (const source of ['2/3 + 1/6', 'sqrt(144) = 12', 'दो संख्याओं का योग 12 है']) {
+      await page.getByTestId('new-item').fill(source);
+      await page.getByTestId('add-item').click();
+    }
+    await expect(page.getByTestId('worksheet-items').locator('li')).toHaveCount(3);
+    await page.waitForTimeout(500);
+    await noSidewaysScroll(page, 'class with items');
+    await page.screenshot({ path: `${SHOTS}/class-worksheet.png`, fullPage: true });
+
+    // And the same worksheet being taught — the screen a class actually sees.
+    await page.getByTestId('teach').click();
+    await expect(page.getByTestId('teach-braille')).toContainText('⠹', { timeout: 10_000 });
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: `${SHOTS}/teach-mode.png`, fullPage: true });
+  });
+
+  test('the self-check, run', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/');
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
+    await page.getByTestId('nav-help').click();
+    await page.getByTestId('run-selfcheck').click();
+    await expect(page.getByTestId('selfcheck-results')).toBeVisible({ timeout: 20_000 });
+    await page.waitForTimeout(300);
+    await noSidewaysScroll(page, 'help');
+    await page.screenshot({ path: `${SHOTS}/help-selfcheck.png`, fullPage: true });
+  });
+
   test('the practice writing drill, mid-chord', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/');

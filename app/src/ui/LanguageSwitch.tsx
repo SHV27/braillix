@@ -30,9 +30,13 @@ export function LanguageSwitch() {
           lang={entry.id}
           className={`langswitch__btn${active === entry.id ? ' is-current' : ''}`}
           aria-pressed={active === entry.id}
-          // The English name is in the accessible name so a screen reader in either language
-          // announces something its voice can actually pronounce.
-          aria-label={entry.english}
+          /*
+            WCAG 2.5.3, Label in Name: whatever is written on a control must be part of its
+            accessible name, or somebody driving the machine by voice cannot say the thing they can
+            see. So the accessible name is "हिन्दी (Hindi)" rather than "Hindi" — the visible word
+            first, and the English one after it for a voice that cannot pronounce Devanagari.
+          */
+          aria-label={entry.label === entry.english ? undefined : `${entry.label} (${entry.english})`}
           data-testid={`lang-${entry.id}`}
           onClick={() => choose(entry.id)}
         >

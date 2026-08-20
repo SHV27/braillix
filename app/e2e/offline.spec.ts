@@ -77,3 +77,35 @@ test.describe('with the network unplugged', () => {
     expect(loaded.join(','), 'IBM Plex should have loaded from our own origin').toContain('IBM Plex');
   });
 });
+
+/**
+ * The strongest version of the offline claim: not "we blocked the CDN", but "the network is gone".
+ *
+ * A school hall has no Wi-Fi, a hotspot runs out of data, a router is switched off at four o'clock.
+ * Once Braillix has been opened once, none of that is allowed to matter.
+ */
+test.describe('with the network genuinely switched off', () => {
+  test('the app opens again from the copy on this machine', async ({ page, context }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
+
+    // Wait until the service worker is not just registered but in charge of this page.
+    await page.waitForFunction(() => navigator.serviceWorker.controller !== null, undefined, { timeout: 20_000 });
+
+    await context.setOffline(true);
+    try {
+      await page.reload();
+
+      // It opened, it translated, and it did all of that with nothing to talk to.
+      await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
+      await page.getByTestId('latex-input').fill('1/2');
+      await expect(page.getByTestId('braille-unicode')).toHaveText('⠹⠂⠌⠆⠼', { timeout: 20_000 });
+
+      // And the interface still switches language, because those words were cached too.
+      await page.getByTestId('lang-hi').click();
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('गणित');
+    } finally {
+      await context.setOffline(false);
+    }
+  });
+});
