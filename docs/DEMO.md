@@ -155,6 +155,10 @@ Then the Hindi question again.
 > the mathematics, Bharati for the words, Grade-1 for English. The whole question is checked, or it
 > is not a verdict."
 
+**If they ask what happens when a lesson is running:** open Teach mode and say nothing about it.
+The verdict is silent there — a lesson is not a settings screen — and it speaks up only when the
+dots cannot be vouched for, in the last moment before a line goes under a child's fingers.
+
 **If somebody asks whether this ever caught anything:** yes, on the first run, in code that had
 passed every gate we had. `25% of 80` was reaching the display as *o times f* — an English word read
 as two variables. `1/2 x b x h`, the area of a triangle, was arriving as four variables with no

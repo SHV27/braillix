@@ -96,10 +96,11 @@ syllabus is what found the bugs listed in `ARC_PLAN.md` under Arc 11, including 
 the display as *o times f*, and `1/2 x b x h` — the area of a triangle — arriving as four variables
 with no multiplication in it anywhere.
 
-**A class, not just a display.** Worksheets a teacher writes and keeps, a Teach mode that puts each
-question on the display in turn, students with their own records, a printable sheet with print and
-braille together, and a `.brf` file for an embosser. All of it on the laptop, moving between
-laptops as a file — no account, no server, nothing to sign into.
+**A class, not just a display.** Worksheets a teacher writes and keeps — paste a whole numbered
+exercise and each line becomes a question — a Teach mode that puts each one on the display in turn,
+students with their own records, a printable sheet with print and braille together, and a `.brf`
+file for an embosser. All of it on the laptop, moving between laptops as a file — no account, no
+server, nothing to sign into.
 
 **The whole interface in Hindi**, switched in one control, with the braille standard unchanged.
 
@@ -110,13 +111,13 @@ laptops as a file — no account, no server, nothing to sign into.
 
 | | |
 |---|---|
-| **Read** — one cell, a whole quadratic, and the cam number for every dot | ![Read](docs/screenshots/read.png) |
+| **Board** — one cell, a whole quadratic, the cam number for every dot, and the dots read back | ![Board](docs/screenshots/read.png) |
 | **Explore structure** — the quadratic formula folded to five cells, ⠹ ⠿ ⠌ ⠿ ⠼ | ![Reader](docs/screenshots/reader.png) |
 | **Practice** — braille-first drills, answers written in six-key Perkins entry | ![Practice](docs/screenshots/practice.png) |
 | **Class** — worksheets a teacher writes and keeps, with print and braille together | ![Class](docs/screenshots/class.png) |
 | **Teach** — one question at a time, arrow keys, the display in sync | ![Teach](docs/screenshots/teach.png) |
 | **Help** — one button that goes and checks whether this laptop actually works | ![Help](docs/screenshots/help.png) |
-| **Device** — the discovered chain, and the cam calibration that de-risks demo day | ![Hardware](docs/screenshots/hardware.png) |
+| **Device** — the discovered chain, the cells it is driving, and the cam calibration | ![Device](docs/screenshots/hardware.png) |
 | **Cell atlas** — all 64 cam positions, printable, for holding against the physical cam | ![Atlas](docs/screenshots/atlas.png) |
 
 ## Why it is built this way
@@ -156,13 +157,16 @@ translation engine, the Bharati tables checked against the published charts, and
 invariants that fail the build if a cell count gets hardcoded, a translated string goes missing in
 one language, or hardware bit arithmetic escapes its one permitted file.
 
-[`docs/ACCURACY.md`](docs/ACCURACY.md) is the evidence: sixty-nine lines of real syllabus, from a
-single digit to a definite integral, with the braille each one produces. Check a row against a
-published Nemeth table — that is what it is there for.
+[`docs/ACCURACY.md`](docs/ACCURACY.md) is the evidence: **149 lines of real syllabus across 21
+topics**, from a single digit to a definite integral, in five scripts, with the braille each one
+produces — and, beside it, what that braille says when it is read back by an engine that never saw
+the input. Every row is one where the two agree. Check a row against a published Nemeth table; that
+is what it is there for.
 
 Inside the app, **Help → Is everything working?** runs the same kind of check on the machine in
 front of you: it translates a known expression and compares the answer, fetches the braille tables
-from disk, and writes to storage. Eight rows, each with the fix for anything that is not right.
+from disk, writes to storage, and hands the verifier braille it knows is broken to confirm the
+verifier still catches things. Nine rows, each with the fix for anything that is not right.
 
 ## Repository map
 
@@ -176,7 +180,7 @@ from disk, and writes to storage. Eight rows, each with the fix for anything tha
 | `tools/` | The virtual pod emulator, the model fetcher, and the accuracy report. |
 | `docs/` | The hardware handoff, the wire protocol, the integration notes. |
 
-Demo runbook: [`docs/DEMO.md`](docs/DEMO.md) — seven minutes, with what to say.
+Demo runbook: [`docs/DEMO.md`](docs/DEMO.md) — nine minutes, with what to say.
 
 Project documents: [`CLAUDE.md`](CLAUDE.md) (the rules) · [`ARCHITECTURE.md`](ARCHITECTURE.md) ·
 [`RESEARCH.md`](RESEARCH.md) · [`DECISIONS.md`](DECISIONS.md) · [`ARC_PLAN.md`](ARC_PLAN.md) ·
