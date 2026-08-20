@@ -76,6 +76,9 @@ const PUNCTUATION: Readonly<Record<string, readonly number[]>> = {
   '!': [2, 3, 5],
   "'": [3],
   '-': [3, 6],
+  // A blank to be filled in. Written with the same cell as a dash, because that is exactly what the
+  // printed line is — and `foldLiteral()` records that the two cannot be told apart.
+  '_': [3, 6],
   '(': [1, 2, 3, 5, 6],
   ')': [2, 3, 4, 5, 6],
   '/': [3, 4],

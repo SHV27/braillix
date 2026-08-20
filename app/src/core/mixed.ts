@@ -201,6 +201,10 @@ function strengthOf(token: string): Strength {
   if (!bare) return 'weak'; // a lone punctuation mark: the colon in "2 : 3", a stray dash
   if (hasIndic(bare)) return 'text'; // Nemeth has no cells for any Indian script, so never maths
   if (NEVER_MATHS.has(bare.toLowerCase())) return 'text'; // decided outright, before any neighbour can vote
+  // A run of underscores is a blank to be filled in, which is half the questions in a primary
+  // worksheet. Read as mathematics it was three subscript operators with nothing to subscript, and
+  // `2x + ___ = 10` produced no braille at all plus an internal error message on screen.
+  if (/^[_—-]{2,}$/.test(bare)) return 'text';
   // A hyphen between two whole words is a hyphen, not a minus sign: "a right-angled triangle" was
   // being read as algebra because of the dash in the middle of an ordinary English adjective.
   // `a-b` keeps its minus, because single letters either side of a dash are a subtraction.
@@ -303,6 +307,15 @@ export function splitLine(line: string, overrides: Readonly<Record<string, Segme
  */
 const SENTENCE_END = /[.,;:।॥?]+$/;
 
+/**
+ * Which marks end a SENTENCE rather than separate two pieces of mathematics.
+ *
+ * At the end of a maths run every mark is sentence punctuation, because what follows is words. In
+ * the middle of one only these are: a comma between the terms of a progression — `a, a+d, a+2d` —
+ * belongs to the mathematics, and cutting the line there put two full stops into a series.
+ */
+const ENDS_A_SENTENCE = /[.।॥?]+$/;
+
 function punctuationBelongsToTheSentence(segments: readonly Segment[]): Segment[] {
   const out: Segment[] = [];
   for (const segment of segments) {
@@ -310,15 +323,28 @@ function punctuationBelongsToTheSentence(segments: readonly Segment[]): Segment[
       out.push(segment);
       continue;
     }
-    const match = SENTENCE_END.exec(segment.text);
-    // A lone punctuation mark IS the segment (the colon of `2 : 3`); there is nothing to move.
-    const body = match ? segment.text.slice(0, -match[0].length) : segment.text;
-    if (!match || !body.trim()) {
-      out.push(segment);
-      continue;
+    // Every token, not only the last one. "Find the value of x. (2 marks)" has the full stop in the
+    // MIDDLE of the maths run, where it was still becoming a decimal point.
+    let run: string[] = [];
+    const flush = () => {
+      if (run.length > 0) out.push({ kind: 'maths', text: run.join(' ') });
+      run = [];
+    };
+    const tokens = segment.text.split(' ');
+    for (const [index, token] of tokens.entries()) {
+      const last = index === tokens.length - 1;
+      const match = (last ? SENTENCE_END : ENDS_A_SENTENCE).exec(token);
+      const body = match ? token.slice(0, -match[0].length) : token;
+      // A lone punctuation mark IS the token (the colon of `2 : 3`); there is nothing to move.
+      if (!match || !body.trim()) {
+        run.push(token);
+        continue;
+      }
+      run.push(body);
+      flush();
+      out.push({ kind: 'text', text: match[0] });
     }
-    out.push({ kind: 'maths', text: body });
-    out.push({ kind: 'text', text: match[0] });
+    flush();
   }
   return out;
 }

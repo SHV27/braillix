@@ -317,6 +317,22 @@ export const SYLLABUS: readonly SyllabusTopic[] = [
     ],
   },
   {
+    topic: 'How an exam paper is laid out',
+    classes: 'all',
+    entries: [
+      { source: '(i) 2x + 3 = 7', says: 'a sub-question label' },
+      { source: '(ii) Find the value of x.', says: 'a sub-question that is a sentence', words: true },
+      { source: 'Q1. Find the area.', says: 'a numbered question', words: true },
+      { source: 'The sum of 5 and ___ is 12.', says: 'a blank inside a sentence', words: true },
+      { source: 'Find the value of x. (2 marks)', says: 'a question with its marks printed after it', words: true },
+      { source: '9.8 m/s^2', says: 'an acceleration' },
+      { source: '6.02 x 10^23', says: "Avogadro's number" },
+      { source: '5 cm^2', says: 'a square unit' },
+      { source: 'Rs 1,250.50', says: 'money with paise' },
+      { source: 'Which is greater: 2/3 or 3/5?', says: 'a question ending in a question mark', words: true },
+    ],
+  },
+  {
     topic: 'Questions with words in them',
     classes: 'all',
     entries: [

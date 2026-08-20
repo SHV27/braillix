@@ -250,3 +250,20 @@ Acceptance (frozen):
 - [x] A hyphen between two whole words is a hyphen, not a minus sign
 - [x] A comma is read at the baseline, not up inside a superscript
 - [x] Sixteen whole questions added to the corpus permanently — **165 lines, all round-tripping**
+
+
+## Arc 15 — THE PAPER ITSELF
+*Sub-question labels, blanks, marks in brackets, units with exponents.*
+
+Twenty-one of the formats an Indian exam paper is actually printed in. Sixteen agreed; the other
+five found four more defects and one honest limitation.
+
+Acceptance (frozen):
+- [x] `2x + ___ = 10` no longer produces an empty display and a raw JavaScript error
+- [x] `Q1. Find the area` no longer reads back as `Q:`
+- [x] A full stop in the MIDDLE of a maths run is sentence punctuation; a comma is not
+- [x] Nemeth square brackets read back
+- [x] A structural test that no reader table can contain an eight-dot cell
+- [x] Ten more formats in the corpus — **175 lines across 23 topics, all round-tripping**
+- [x] The one thing that could not be done honestly — the Nemeth omission symbol — written down in
+      `NOTES.md` with the reason, rather than guessed at

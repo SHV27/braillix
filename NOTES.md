@@ -91,3 +91,16 @@ arc plan first.
 - **A "why does it differ?" view.** Today a mismatch shows both readings. Showing *where* they
   diverge — the first cell whose meaning changed — would turn a report into a diagnosis. Small, and
   genuinely useful the first time somebody hits a real one.
+
+## Known limitation, found and left alone (21 August 2026)
+
+- **A blank inside a bare expression.** `The sum of 5 and ___ is 12.` works: the blank is a word, it
+  goes to literary braille as a run of dashes, and the maths either side is whole. `2x + ___ = 10`
+  does not: splitting at the blank leaves `2x +` and `= 10`, two fragments that the parser correctly
+  complains about, so the teacher sees two warnings under a line that is perfectly clear to them.
+
+  The right fix is the Nemeth **omission symbol**, which the code defines for exactly this — an item
+  deliberately left out of a problem. It is not implemented because the cells are not in any table
+  we hold, and guessing them would break the rule this project runs on: dot patterns follow the
+  published standard or they do not ship. Whoever has the printed Nemeth code can close this in an
+  afternoon; the seam is `core/mixed.ts`, where a run of underscores is currently classified as text.

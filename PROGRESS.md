@@ -8,7 +8,7 @@ Repo: **github.com/SHV27/braillix** · Live: **https://braillix.vercel.app**
 
 ## Where we are
 
-**Fourteen arcs built and closed.** Arcs 1–6 built the instrument; arcs 7–10 built the classroom
+**Fifteen arcs built and closed.** Arcs 1–6 built the instrument; arcs 7–10 built the classroom
 around it and shipped it; arc 11 made it prove its own work; arc 12 made sure the proof reaches the
 teacher rather than sitting in a cache; arc 13 swept every symbol a senior class needs into it; arc 14 ran whole exam questions
 through it and fixed the six things they found.
@@ -29,6 +29,7 @@ through it and fixed the six things they found.
 | 12 · Delivery (a new version announces itself; the Device screen shows its cells) | ✅ closed |
 | 13 · The Sweep (every symbol a senior class needs, verified) | ✅ closed |
 | 14 · Whole Questions (the sentences an exam paper prints) | ✅ closed |
+| 15 · The Paper Itself (labels, blanks, marks, units) | ✅ closed |
 
 ## The one next action
 
@@ -54,9 +55,9 @@ starting anything ad hoc.
 
 | Gate | Result |
 |---|---|
-| Unit tests | **738 passing** |
+| Unit tests | **750 passing** |
 | Journey tests | **134 passing** across board / read-back / reader / hardware / recognition / practice / class / offline / screens / a11y |
-| Syllabus accuracy | **165 of 165** lines translate cleanly **and read back correctly** — `npm run accuracy`, evidence in `docs/ACCURACY.md` |
+| Syllabus accuracy | **175 of 175** lines translate cleanly **and read back correctly** — `npm run accuracy`, evidence in `docs/ACCURACY.md` |
 | Round trip | every segment of every syllabus line **and every practice drill**, in all three braille codes, read back by an engine that never saw the input |
 | Lighthouse (deployed) | **accessibility 100 · best practices 100 · SEO 100**, zero failed audits |
 | Deployed LCP / CLS | **349 ms / 0.00** |

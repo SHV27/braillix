@@ -134,6 +134,8 @@ const SYMBOLS: ReadonlyArray<readonly [string, string]> = ([
   ['⠨⠩', '∩'],
   ['⠈⠑', '∈'],
   ['⠨⠷', '{'],
+  ['⠈⠷', '['], // Nemeth square brackets — the round ones with a dot-4 prefix
+  ['⠈⠾', ']'],
   ['⠨⠾', '}'],
   ['⠐⠂', ':'],
   ['⠫⠪', '∠'],
@@ -255,6 +257,15 @@ class Reader {
       this.out.push('∝');
       this.last = 'other';
       return 2;
+    }
+
+    // The ratio colon ⠐⠂ is spaced — `2 : 3`. Unspaced, the same two cells are the baseline
+    // indicator followed by the digit 1, which is how `Q1` is written, and `Q1. Find the area` was
+    // reading back as `Q:`.
+    if (this.cells.startsWith('⠐⠂', i) && !(i === 0 || this.cells[i - 1] === '⠀')) {
+      this.closeLevels();
+      this.last = 'other';
+      return 1; // consume only the ⠐; the digit is read on the next pass
     }
 
     if (this.cells.startsWith('⠨⠠', i)) return this.greekCapital(i);

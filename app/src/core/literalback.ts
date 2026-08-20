@@ -159,11 +159,15 @@ export function readLiteral(cells: readonly DotMask[]): LiteralReadback {
 /**
  * Collapse what Grade-1 braille does not carry, and nothing more.
  *
- * One line only, because this code is nearly lossless: the question mark and the quotation mark
- * share dots 2-3-6. Spaces go, as everywhere else in these comparisons.
+ * Two lines only, because this code is nearly lossless: the question mark and the quotation mark
+ * share dots 2-3-6, and so do the dash and the underscore of a fill-in-the-blank. Spaces go, as
+ * everywhere else in these comparisons.
  */
 export function foldLiteral(text: string): string {
-  return text.replace(/"/g, '?').replace(/\s+/g, '');
+  return text
+    .replace(/"/g, '?')
+    .replace(/_/g, '-') // a blank and a dash share dots 3-6
+    .replace(/\s+/g, '');
 }
 
 /** What a single Grade-1 cell stands for, for the evidence table. */

@@ -15,6 +15,7 @@
  * ships (CLAUDE.md Law 7, and the two-sided-honesty rule in ARCHITECTURE.md).
  */
 
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { readBack, readBackUnicode } from './readback';
 import { dotsToMask } from './braille';
@@ -206,6 +207,38 @@ describe('the check has teeth — every one of these must read differently', () 
   it('reports a cell it has no rule for rather than dropping it', () => {
     const result = readBackUnicode('⠭⢿⠆');
     expect(result.unknown.length).toBeGreaterThan(0);
+  });
+});
+
+describe('every cell in the tables is a six-dot cell', () => {
+  /*
+   * Unicode has 256 braille patterns, and only the first 64 are six-dot. The other 192 carry dots 7
+   * and 8, which belong to computer braille and cannot appear on any display Braillix drives.
+   *
+   * This is here because the same typo was made twice while adding symbols: \u28c8 and \u2888 were
+   * written where ⠸ and ⠈ belonged — a braille character is 0x2800 plus the DOT MASK, and a mask of
+   * 56 is 0x2838, not 0x28c8. The rules looked right, matched nothing, and the symbols they were
+   * meant to read went on being reported as gaps. A table that cannot be typed wrongly is worth
+   * more than one that is merely correct today.
+   */
+  it('has no eight-dot cell anywhere in the reader', () => {
+    const source = readFileSync(new URL('./readback.ts', import.meta.url), 'utf8');
+    const wrong = [...source].filter((char) => {
+      const code = char.codePointAt(0)!;
+      return code > 0x283f && code <= 0x28ff;
+    });
+    expect(wrong.map((char) => char.codePointAt(0)!.toString(16))).toEqual([]);
+  });
+
+  it('and none in the Bharati or Grade-1 readers either', () => {
+    for (const file of ['./bharatiback.ts', './literalback.ts']) {
+      const source = readFileSync(new URL(file, import.meta.url), 'utf8');
+      const wrong = [...source].filter((char) => {
+        const code = char.codePointAt(0)!;
+        return code > 0x283f && code <= 0x28ff;
+      });
+      expect(wrong.map((char) => char.codePointAt(0)!.toString(16)), file).toEqual([]);
+    }
   });
 });
 

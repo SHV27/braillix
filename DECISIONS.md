@@ -675,3 +675,19 @@ Run before calling this shipped. Result: **nothing to rotate, nothing to hide, n
   are generated from the same engine that drives the display and so cannot drift from it — but
   "cannot drift" is a claim about the code, and `lessons.roundtrip.test.ts` is the check. All 34
   items agree.
+- **D15.13** — A run of underscores is a blank to be filled in, not three subscript operators. Read
+  as mathematics, `2x + ___ = 10` produced no braille at all and put a raw JavaScript error message
+  on screen. It is written with the same cell as a dash, which is what the printed line is, and
+  `foldLiteral()` records that the two cannot be told apart.
+- **D15.14** — Sentence punctuation is moved out of a maths run wherever it appears, but only a full
+  stop, a question mark or a danda counts in the MIDDLE of one. A comma between the terms of a
+  progression — `a, a+d, a+2d` — belongs to the mathematics, and treating every mark alike cut that
+  series into five pieces.
+- **D15.15** — ⠐⠂ is the ratio colon only when it is spaced. Unspaced, the same two cells are the
+  baseline indicator followed by the digit 1, which is how `Q1` is written — and `Q1. Find the area`
+  was reading back as `Q:`.
+- **D15.16** — No table in any reader may contain an eight-dot braille character, and a test asserts
+  it. The same typo was made twice while adding symbols — a braille character is 0x2800 plus the dot
+  MASK, and a mask of 56 is 0x2838, not 0x28c8 — and both times the rule looked right, matched
+  nothing, and the symbol went on being reported as a gap. A table that cannot be typed wrongly is
+  worth more than one that is merely correct today.
