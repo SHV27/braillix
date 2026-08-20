@@ -19,6 +19,7 @@ import { DOT_COUNT, maskToUnicode, type DotNumber } from '../core/braille';
 import { exportCalibration, toCam, type BitOrder } from '../core/profile';
 import type { PodMode } from '../transport/httppod';
 import { dotsToMask } from '../core/braille';
+import { DisplayDock } from './DisplayDock';
 import { useT } from './i18n';
 import './HardwareScreen.css';
 
@@ -43,7 +44,15 @@ export function HardwareScreen() {
   const setCellCount = useBraillix((s) => s.setCellCount);
   const usbCap = useBraillix((s) => s.capabilities.usb);
 
-  const [podAddresses, setPodAddresses] = useState('192.168.1.42');
+  /**
+   * Empty, with the shape shown as a hint rather than filled in.
+   *
+   * It used to open with 192.168.1.42 already in the box, which looks exactly like a pod somebody
+   * has already set up — so the honest first move, pressing Connect, failed against an address that
+   * was never real. The placeholder shows two addresses on purpose: that is how a teacher discovers
+   * that more than one pod is possible, and typing a second one is what reveals mirror mode.
+   */
+  const [podAddresses, setPodAddresses] = useState('');
   /*
    * Everything below the connection is for whoever assembled the display, once. A teacher opening
    * this screen wants to know what is plugged in and how to plug something in — putting cam bit
@@ -52,6 +61,9 @@ export function HardwareScreen() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [podMode, setPodMode] = useState<PodMode>('chain');
   const [copied, setCopied] = useState(false);
+
+  /** The addresses actually typed, with the blanks a trailing comma leaves behind removed. */
+  const hosts = podAddresses.split(',').map((host) => host.trim()).filter(Boolean);
 
   const simulated = profile.source === 'simulated';
 
@@ -146,6 +158,7 @@ export function HardwareScreen() {
                 className="field__input num"
                 value={podAddresses}
                 spellCheck={false}
+                placeholder="192.168.1.42, 192.168.1.43"
                 name="pod-hosts" data-testid="pod-hosts"
                 onChange={(event) => setPodAddresses(event.target.value)}
               />
@@ -153,7 +166,10 @@ export function HardwareScreen() {
                 type="button"
                 className="btn"
                 data-testid="connect-pods"
-                onClick={() => void connectPods(podAddresses.split(','), podMode)}
+                /* Nothing typed, nothing to connect to. A button that reports a failure the moment
+                   you press it is a button that taught you nothing. */
+                disabled={hosts.length === 0}
+                onClick={() => void connectPods(hosts, podMode)}
               >
                 {t('hw.connect')}
               </button>
@@ -161,7 +177,7 @@ export function HardwareScreen() {
           </label>
           {/* Only worth asking once there is more than one address: with one pod the two modes
               are the same thing, and a control that changes nothing is a control that confuses. */}
-          {podAddresses.split(',').filter((host) => host.trim()).length > 1 && (
+          {hosts.length > 1 && (
             <fieldset className="hw__modes">
               <legend className="field__label">{t('hw.podMode')}</legend>
               {(['chain', 'mirror'] as const).map((mode) => (
@@ -209,6 +225,16 @@ export function HardwareScreen() {
           )}
         </section>
 
+
+        {/* The cells, next to the thing that drives them.
+            `DisplayDock` says it in its own header comment: anywhere that drives the cells must
+            also show them. This screen changes the cell count, raises a test dot and sends frames
+            down a wire, and until now it showed none of it — a teacher pressed "raise dot 3" and
+            got a cam number. The claim at the top of this page is that connecting a pod changes
+            nothing except where the frames go; this is that claim, visible. */}
+        <section className="panel" aria-labelledby="dock-heading">
+          <DisplayDock title="hw.onTheCells" hint="hw.onTheCellsHint" showCellCount={false} showPaging={false} />
+        </section>
       </div>
 
       <button

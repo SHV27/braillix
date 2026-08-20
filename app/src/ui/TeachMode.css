@@ -134,3 +134,13 @@ body.is-teaching {
     font-size: 1.75rem;
   }
 }
+
+/*
+ * The one thing allowed to interrupt a lesson. Full width, above the controls, so a teacher whose
+ * eyes are on the class still catches it on the way to the Next button.
+ */
+.teach__verdict {
+  margin: 0 auto var(--s3);
+  max-width: 60ch;
+  text-align: center;
+}

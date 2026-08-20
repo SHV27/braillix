@@ -25,7 +25,7 @@ teacher rather than sitting in a cache.
 | 9 · Trust (syllabus accuracy, self-check, embosser file, printed sheet) | ✅ closed |
 | 10 · Ship (installable offline app, deployed and verified) | ✅ closed |
 | 11 · The Proof (the pipeline reads its own braille back) | ✅ closed |
-| 12 · Delivery (a new version announces itself) | ✅ closed |
+| 12 · Delivery (a new version announces itself; the Device screen shows its cells) | ✅ closed |
 
 ## The one next action
 
@@ -40,7 +40,7 @@ from `NOTES.md` into a new arc rather than starting anything ad hoc.
 | Gate | Result |
 |---|---|
 | Unit tests | **647 passing** |
-| Journey tests | **129 passing** across board / read-back / reader / hardware / recognition / practice / class / offline / screens / a11y |
+| Journey tests | **132 passing** across board / read-back / reader / hardware / recognition / practice / class / offline / screens / a11y |
 | Syllabus accuracy | **133 of 133** lines translate cleanly **and read back correctly** — `npm run accuracy`, evidence in `docs/ACCURACY.md` |
 | Round trip | every segment of every syllabus line, in all three braille codes, read back by an engine that never saw the input |
 | Lighthouse (deployed) | **accessibility 100 · best practices 100 · SEO 100**, zero failed audits |

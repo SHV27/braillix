@@ -207,3 +207,6 @@ Acceptance (frozen):
 - [x] Nothing is said on a first visit: an install is not an update
 - [x] Proved end to end by changing the deployed worker on disk exactly as a deploy would, and
       watching the browser notice
+- [x] The Device screen shows the cells it drives, and stops pretending a pod address is already
+      set up
+- [x] Teach mode carries the verdict — silent when the braille is right, loud when it is not

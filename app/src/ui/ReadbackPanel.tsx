@@ -21,8 +21,7 @@
  * health would be the exact failure this panel exists to prevent (CLAUDE.md Law 3).
  */
 
-import { useBraillix } from '../store';
-import { checkRoundTrip, checkSegment, type RoundTrip } from '../core/roundtrip';
+import { useReadback } from './useReadback';
 import { useT } from './i18n';
 import './ReadbackPanel.css';
 
@@ -50,33 +49,10 @@ function shorten(text: string): string {
   return text.length > 120 ? `${text.slice(0, 120)}…` : text;
 }
 
-/** The verdict for the whole line: the worst of its parts, since one wrong segment is a wrong line. */
-function worst(trips: readonly RoundTrip[]): RoundTrip | null {
-  if (trips.length === 0) return null;
-  return (
-    trips.find((trip) => trip.verdict === 'differs') ??
-    trips.find((trip) => trip.verdict === 'unchecked') ??
-    trips[0]
-  );
-}
-
 export function ReadbackPanel() {
   const t = useT();
-  const translation = useBraillix((s) => s.translation);
-  const mixedLine = useBraillix((s) => s.mixedLine);
-
-  // Every segment, in whatever code it is written: Nemeth for the mathematics, Bharati for words in
-  // an Indian script, Grade-1 for English ones. Three readers, one verdict, no half-checked line.
-  const trips: RoundTrip[] = mixedLine
-    ? mixedLine.segments.map((segment) => checkSegment(segment.kind, segment.text, segment.latex, segment.cells))
-    : translation && translation.cells.length > 0 && !translation.degraded
-      ? [checkRoundTrip(translation.latex, translation.cells)]
-      : [];
-
-  const result = worst(trips);
+  const { result, reading } = useReadback();
   if (!result) return null;
-
-  const reading = trips.map((trip) => trip.reading).join(' ');
 
   return (
     <section className={`readback readback--${result.verdict}`} aria-labelledby="readback-heading">

@@ -16,6 +16,7 @@ import { cellsToUnicode } from '../core/translate';
 import type { Worksheet } from '../class/types';
 import { DisplayDock } from './DisplayDock';
 import { SourcePreview } from './SourcePreview';
+import { useReadback } from './useReadback';
 import { useT } from './i18n';
 import './TeachMode.css';
 
@@ -29,6 +30,16 @@ export function TeachMode({ worksheet, onClose }: TeachModeProps) {
   const setSource = useBraillix((s) => s.setSource);
   const sayCurrent = useBraillix((s) => s.sayCurrent);
   const activeCells = useBraillix((s) => s.activeCells);
+
+  /*
+   * Silent when it agrees, loud when it does not.
+   *
+   * A lesson is not a settings screen, so the verdict does not get a panel here — the Board is where
+   * a teacher builds trust in the translation. But this is the last moment before a line goes under
+   * a child's fingers, and if the braille does not say what the question says, that is the one thing
+   * worth interrupting a lesson for.
+   */
+  const { result } = useReadback();
 
   const [index, setIndex] = useState(0);
   const item = worksheet.items[index];
@@ -139,6 +150,17 @@ export function TeachMode({ worksheet, onClose }: TeachModeProps) {
           <div className="teach__dock">
             <DisplayDock showCellCount={false} hint="teach.onDisplay" />
           </div>
+
+          {result && result.verdict !== 'agrees' && (
+            <p
+              className={`notice ${result.verdict === 'differs' ? 'notice--bad' : 'notice--warn'} teach__verdict`}
+              role="alert"
+              data-testid="teach-verdict"
+              data-verdict={result.verdict}
+            >
+              {t(result.verdict === 'differs' ? 'teach.wrong' : 'teach.unchecked', { reading: result.reading })}
+            </p>
+          )}
 
           <div className="teach__controls">
             <button

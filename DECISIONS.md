@@ -581,3 +581,21 @@ Run before calling this shipped. Result: **nothing to rotate, nothing to hide, n
   first visit the component mounts before registration finishes, `getRegistration()` resolves with
   nothing, and the watcher is never attached — so the first update of that session goes unannounced.
   Caught in the browser, not by a test; the test came after.
+- **D13.3** — The Wi-Fi pod field opens empty, with `192.168.1.42, 192.168.1.43` as a hint. It used
+  to open with one address already filled in, which looks exactly like a pod somebody has set up —
+  so the honest first move, pressing Connect, failed against an address that was never real. Two
+  addresses in the hint, because that is how a teacher discovers that more than one pod is possible,
+  and typing the second is what reveals the choice between chain and mirror.
+- **D13.4** — Connect is disabled when nothing is typed. A button that reports a failure the moment
+  it is pressed has taught nobody anything.
+- **D13.5** — The Device screen shows the cells. `DisplayDock` has said in its own header comment
+  since arc 5 that anywhere driving the cells must also show them, and this screen — which changes
+  the cell count, raises a test dot and sends frames down a wire — was the one place still ignoring
+  it. A teacher pressed "raise dot 3" and got a cam number.
+- **D13.6** — Teach mode shows the verdict only when it is not "agrees". A lesson is not a settings
+  screen, and the Board is where trust in the translation gets built — but this is the last moment
+  before a line goes under a child's fingers, and braille that does not say what the question says
+  is the one thing worth interrupting a lesson for. Silent when right, loud when wrong.
+- **D13.7** — Both screens ask `useReadback()`; neither computes the verdict itself. Two copies of
+  a rule are a fork of its future bugs, and a lesson disagreeing with the Board about whether a
+  question is safe would be the worst possible version of that.

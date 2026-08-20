@@ -445,6 +445,14 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   /* ---- teaching ---- */
   'teach.title': ['Teaching {name}', '{name} पढ़ाया जा रहा है'],
   'teach.position': ['{index} of {total}', '{total} में से {index}'],
+  'teach.wrong': [
+    'The dots do NOT say this question. They say {reading}. Do not use this one — check it on the Board.',
+    'डॉट्स यह प्रश्न नहीं कह रहे। वे {reading} कह रहे हैं। इसे इस्तेमाल न करें — बोर्ड पर जाँचिए।',
+  ],
+  'teach.unchecked': [
+    'This one could not be checked, so nothing here promises the dots are right. The dots read {reading}.',
+    'इसे जाँचा नहीं जा सका, इसलिए डॉट्स सही होने का यहाँ कोई वादा नहीं है। डॉट्स {reading} पढ़े गए।',
+  ],
   'teach.close': ['Close', 'बंद कीजिए'],
   'teach.previous': ['Previous question', 'पिछला सवाल'],
   'teach.next': ['Next question', 'अगला सवाल'],
@@ -578,6 +586,11 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   'hw.useSim': ['Use the simulator', 'सिम्युलेटर चलाइए'],
   'hw.connectUsb': ['Connect over USB', 'USB से जोड़िए'],
   'hw.usbHint': ['Recommended for demos — no network needed', 'प्रदर्शन के लिए सबसे अच्छा — नेटवर्क की ज़रूरत नहीं'],
+  'hw.onTheCells': ['On the cells now', 'अभी सेल पर क्या है'],
+  'hw.onTheCellsHint': [
+    'Whatever is here is exactly what a connected pod is showing. Raise a test dot below and watch it move.',
+    'यहाँ जो है, ठीक वही जुड़ा हुआ पॉड दिखा रहा है। नीचे कोई टेस्ट डॉट उठाइए और इसे बदलते देखिए।',
+  ],
   'hw.wifiPods': ['Wi-Fi pods (comma separated)', 'Wi-Fi पॉड (अल्पविराम से अलग)'],
   'hw.connect': ['Connect', 'जोड़िए'],
   'hw.podMode': ['Several displays', 'कई डिस्प्ले'],

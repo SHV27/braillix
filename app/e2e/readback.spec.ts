@@ -121,4 +121,31 @@ test.describe('reading the dots back', () => {
     await expect(page.locator('.evidence__count')).not.toContainText('Bharati');
     await expect(table).toContainText('letter x');
   });
+
+  test('a lesson is silent when the braille is right, and speaks up when it is not', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
+    await page.getByTestId('nav-class').click();
+    await page.getByTestId('new-worksheet').click();
+
+    for (const source of ['1/2 + 1/3', '\\binom{n}{k}']) {
+      await page.getByTestId('new-item').fill(source);
+      await page.getByTestId('add-item').click();
+    }
+
+    await page.getByTestId('teach').click();
+    await expect(page.getByTestId('teach-mode')).toBeVisible();
+    await expect(page.getByTestId('teach-braille')).toContainText('⠹', { timeout: 10_000 });
+
+    // A lesson is not a settings screen. When the dots say what the question says — which is almost
+    // always — nothing appears at all.
+    await expect(page.getByTestId('teach-verdict')).toHaveCount(0);
+
+    // And when they cannot be vouched for, it says so, in the last moment before a child reads it.
+    await page.getByTestId('teach-next').click();
+    await expect(page.getByTestId('teach-verdict')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('teach-verdict')).toHaveAttribute('data-verdict', 'unchecked');
+    // The braille is still on the display. An unverified question is not a blank one (Law 4).
+    await expect(page.getByTestId('teach-braille')).not.toBeEmpty();
+  });
 });

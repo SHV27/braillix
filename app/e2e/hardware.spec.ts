@@ -171,4 +171,47 @@ test.describe('the Device screen belongs to the teacher first', () => {
     await page.getByTestId('show-advanced').click();
     await expect(page.getByTestId('bit-for-dot-1')).toBeHidden();
   });
+
+  test('does not pretend a pod address is already set up', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('nav-device').click();
+
+    // It used to open with 192.168.1.42 already in the box — which looks exactly like a pod that
+    // somebody has set up, so the honest first move (press Connect) failed against an address that
+    // was never real.
+    await expect(page.getByTestId('pod-hosts')).toHaveValue('');
+    await expect(page.getByTestId('connect-pods')).toBeDisabled();
+
+    // The hint shows two addresses, which is how a teacher finds out that more than one pod is
+    // possible — and typing the second one is what reveals the choice between chain and mirror.
+    await expect(page.getByTestId('pod-hosts')).toHaveAttribute('placeholder', /,/);
+    await expect(page.getByTestId('pod-mode-mirror')).toHaveCount(0);
+
+    await page.getByTestId('pod-hosts').fill('127.0.0.1:8080');
+    await expect(page.getByTestId('connect-pods')).toBeEnabled();
+    await expect(page.getByTestId('pod-mode-mirror')).toHaveCount(0);
+
+    await page.getByTestId('pod-hosts').fill('127.0.0.1:8080, 127.0.0.1:8081');
+    await expect(page.getByTestId('pod-mode-mirror')).toBeVisible();
+
+    // A trailing comma is not a second pod.
+    await page.getByTestId('pod-hosts').fill('127.0.0.1:8080,');
+    await expect(page.getByTestId('pod-mode-mirror')).toHaveCount(0);
+    await expect(page.getByTestId('connect-pods')).toBeEnabled();
+  });
+
+  test('shows the cells it is driving', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('nav-device').click();
+
+    // This screen changes the cell count, raises a test dot and sends frames down a wire. Until it
+    // showed the cells, pressing "raise dot 3" gave a teacher a cam number and nothing else.
+    await expect(page.getByText('On the cells now')).toBeVisible();
+    await expect(page.getByTestId('cell-0')).toBeVisible();
+
+    await page.getByTestId('nav-device').click();
+    await page.getByRole('button', { name: /Show/ }).first().click();
+    await page.getByTestId('test-dot-3').click();
+    await expect(page.getByTestId('cell-0')).toHaveAttribute('aria-label', /3/);
+  });
 });
