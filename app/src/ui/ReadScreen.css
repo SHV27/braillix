@@ -16,6 +16,16 @@
 }
 .read__display {
   grid-area: display;
+  /* The cells stay in view while the teacher works down the input column — the whole point of the
+     screen is watching them move, and a display that scrolls away is a display you stop watching. */
+  position: sticky;
+  top: var(--s4);
+  /* On a short laptop screen the display and the reader together are taller than the window. A
+     sticky column that does not scroll would simply hide its own bottom half. */
+  max-height: calc(100vh - var(--s6));
+  overflow-y: auto;
+  /* Room for the scrollbar so it never sits on top of the cells. */
+  padding-right: var(--s1);
 }
 .evidence {
   grid-area: evidence;
@@ -133,6 +143,10 @@
       'display'
       'evidence';
     gap: var(--s6);
+  }
+  /* Stacked, sticky would pin the display over the thing being typed. */
+  .read__display {
+    position: static;
   }
   .read__title {
     max-width: none;

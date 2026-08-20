@@ -66,6 +66,10 @@
 
 .lessons__title {
   flex: 1;
+  min-width: 0;
+  /* A teacher may name a worksheet with a two-hundred-character sentence. It wraps; it does not
+     push the page sideways. */
+  overflow-wrap: anywhere;
 }
 
 .lessons__score {

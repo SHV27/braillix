@@ -480,3 +480,14 @@ Run before calling this shipped. Result: **nothing to rotate, nothing to hide, n
 - **D9.6** — `interpretAnswer` now offers the Board's own reading of what the student typed as one
   more candidate. Marking accepts any candidate that produces the expected braille, so a student is
   never marked wrong for writing their answer the way the app taught them to write the question.
+- **D10.7** — Lists are keyed by position, not by their own text. `((((` produces four identical
+  complaints, and two identical messages are two real messages. Found by typing rubbish at the real
+  thing; now asserted by a test that fails on a single console warning.
+- **D10.8** — Long text wraps; wide *mathematics* scrolls inside its own box. A teacher pasting a
+  question out of a textbook is not an attack, and 1,762 pixels of horizontal overflow is not a
+  layout. Asserted at all three widths with the content that caused it.
+- **D10.9** — Teach mode traps focus and returns it. A dialog that lets Tab walk into the page
+  behind it is useless to the one person who most needs it to be a dialog.
+- **D10.10** — The self-check returns keys, not sentences, like `learn/feedback.ts`. The English
+  wall it used to put in front of a Hindi-reading teacher was in the sentences that explain what is
+  wrong — precisely the part that has to be understood.

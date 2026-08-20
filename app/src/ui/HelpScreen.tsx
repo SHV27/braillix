@@ -12,7 +12,7 @@
 
 import { useState } from 'react';
 import { useBraillix } from '../store';
-import { runSelfCheck, reportToText, type CheckId, type CheckResult } from '../core/selfcheck';
+import { runSelfCheck, reportToText, type CheckId, type CheckNote, type CheckResult } from '../core/selfcheck';
 import { voiceFor } from './speech';
 import { webSerialSupported } from '../transport/webserial';
 import { useT, useLang, type StringKey } from './i18n';
@@ -49,13 +49,18 @@ export function HelpScreen() {
   const [running, setRunning] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  /** Every check's sentence, in the language the teacher is reading. */
+  const say = (note: CheckNote) => t(note.key, note.vars);
+
   async function run() {
     setRunning(true);
     setCopied(false);
     try {
+      // The voice's own name if it has one, and words the teacher can read if it does not.
+      const voice = voiceFor(language);
       const outcome = await runSelfCheck({
-        voice: voiceFor(language),
-        language: language === 'hi' ? 'Hindi' : 'English',
+        voice: { available: voice.available, name: voice.name ?? t('check.someVoice') },
+        language: t('check.systemLanguage'),
         usbSupported: webSerialSupported(),
       });
       setResults(outcome);
@@ -70,7 +75,7 @@ export function HelpScreen() {
       (Object.keys(CHECK_LABEL) as CheckId[]).map((id) => [id, t(CHECK_LABEL[id])]),
     ) as Record<CheckId, string>;
     try {
-      await navigator.clipboard.writeText(reportToText(results, names));
+      await navigator.clipboard.writeText(reportToText(results, names, say, new Date().toISOString()));
       setCopied(true);
     } catch {
       setCopied(false);
@@ -132,8 +137,8 @@ export function HelpScreen() {
                       {t(CHECK_LABEL[result.id])}
                       <span className="check__state">{t(STATE_LABEL[result.state])}</span>
                     </span>
-                    <span className="check__detail">{result.detail}</span>
-                    {result.fix && <span className="check__fix">{result.fix}</span>}
+                    <span className="check__detail">{say(result.detail)}</span>
+                    {result.fix && <span className="check__fix">{say(result.fix)}</span>}
                   </span>
                 </li>
               ))}
@@ -162,7 +167,7 @@ export function HelpScreen() {
           <h2 className="panel__title help__keysheading">{t('help.keys')}</h2>
           <ul className="help__keys">
             {KEYS.map((row) => (
-              <li key={row.what}>
+              <li key={`${row.what}-${row.keys.join('')}`}>
                 <span className="help__keycaps">
                   {row.keys.map((key) => (
                     <kbd key={key}>{key}</kbd>

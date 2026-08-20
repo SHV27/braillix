@@ -73,6 +73,7 @@ body.is-teaching {
 
 .teach__stage .sourceview {
   justify-content: center;
+  max-width: 100%;
 }
 
 /* On the stage the maths is the whole point, not a panel inside a panel. */

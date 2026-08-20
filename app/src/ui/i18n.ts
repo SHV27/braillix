@@ -211,6 +211,71 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   'check.speech': ['Speech', 'वाणी'],
   'check.usb': ['Connecting by cable', 'तार से जोड़ना'],
   'check.pass': ['working', 'चल रहा है'],
+
+  /* What each check found, and what to do about it. Prose a teacher reads, so it is translated —
+     unlike the status strip's one-line diagnostics, which quote commands and API names (D7.8). */
+  'check.engineOk': ['One half is {braille}, exactly as the Nemeth table says.', 'आधा {braille} है, ठीक वैसे ही जैसे नेमेथ तालिका कहती है।'],
+  'check.engineDead': [
+    'The maths engine did not start, so the cells would show ordinary braille, not Nemeth.',
+    'गणित इंजन चालू नहीं हुआ, इसलिए सेल में नेमेथ नहीं बल्कि आम ब्रेल दिखेगी।',
+  ],
+  'check.engineDeadFix': [
+    'Reload the page. If it persists, run `npm install` again — public/sre/mathmaps may be missing.',
+    'पन्ना दोबारा लोड कीजिए। फिर भी न हो तो `npm install` दोबारा चलाइए — public/sre/mathmaps ग़ायब हो सकता है।',
+  ],
+  'check.engineWrong': ['One half translated to {got}, and it should be {want}.', 'आधा {got} में बदला, जबकि होना चाहिए {want}।'],
+  'check.dontUse': [
+    'Do not use this build in a lesson. Reinstall Braillix and run the check again.',
+    'इस बिल्ड को कक्षा में मत चलाइए। ब्रेलिक्स दोबारा स्थापित कीजिए और जाँच फिर चलाइए।',
+  ],
+  'check.nemethOk': ['A quadratic is {count} cells, and every one matches.', 'एक द्विघात {count} सेल का है, और हर सेल मेल खाती है।'],
+  'check.nemethWrong': ['A quadratic translated to {got}, and it should be {want}.', 'द्विघात {got} में बदला, जबकि होना चाहिए {want}।'],
+  'check.bharatiOk': ['गणित is {braille}, as the Bharati table says.', 'गणित {braille} है, जैसा भारती तालिका कहती है।'],
+  'check.bharatiWrong': [
+    'गणित translated to {got}, and it should be {want}. Hindi words would be wrong on the display.',
+    'गणित {got} में बदला, जबकि होना चाहिए {want}। डिस्प्ले पर हिन्दी शब्द ग़लत आएँगे।',
+  ],
+  'check.offlineOk': [
+    'The Nemeth tables are on this machine ({size} KB). No network is needed.',
+    'नेमेथ तालिकाएँ इसी मशीन पर हैं ({size} KB)। किसी नेटवर्क की ज़रूरत नहीं।',
+  ],
+  'check.offlineBad': ['The local Nemeth tables could not be read ({reason}).', 'स्थानीय नेमेथ तालिकाएँ पढ़ी नहीं जा सकीं ({reason})।'],
+  'check.offlineFix': [
+    'Run `npm install` again. Without them Braillix needs the internet, which a classroom may not have.',
+    '`npm install` दोबारा चलाइए। इनके बिना ब्रेलिक्स को इंटरनेट चाहिए, जो कक्षा में शायद न हो।',
+  ],
+  'check.storageOk': [
+    'Worksheets and student records will be kept on this laptop.',
+    'वर्कशीट और विद्यार्थियों के रिकॉर्ड इसी लैपटॉप पर रहेंगे।',
+  ],
+  'check.storageBad': ['This browser will not let Braillix save anything.', 'यह ब्राउज़र ब्रेलिक्स को कुछ भी सहेजने नहीं देता।'],
+  'check.storageFix': [
+    'Leave private browsing, or allow site data. Everything else works; nothing will be remembered.',
+    'निजी ब्राउज़िंग बंद कीजिए, या साइट डेटा की अनुमति दीजिए। बाक़ी सब चलेगा; बस कुछ याद नहीं रहेगा।',
+  ],
+  'check.recognitionOk': [
+    'Handwriting can be read on this device, with no network.',
+    'लिखावट इसी डिवाइस पर पढ़ी जा सकती है, बिना नेटवर्क के।',
+  ],
+  'check.recognitionMissing': ['The handwriting model is not installed on this machine.', 'लिखावट पढ़ने वाला मॉडल इस मशीन पर स्थापित नहीं है।'],
+  'check.recognitionFix': [
+    'Run `npm run fetch:model` once (76 MB). Everything else works without it — type the maths instead.',
+    'एक बार `npm run fetch:model` चलाइए (76 MB)। इसके बिना भी बाक़ी सब चलता है — गणित टाइप कर लीजिए।',
+  ],
+  'check.speechOk': ['{language} speech: {voice}.', '{language} वाणी: {voice}।'],
+  'check.speechMissing': ['This machine has no {language} voice installed.', 'इस मशीन पर {language} की कोई आवाज़ स्थापित नहीं है।'],
+  'check.speechFix': [
+    'The braille and the written transcript are unaffected. Install the language pack in Windows settings to hear it.',
+    'ब्रेल और लिखा हुआ पाठ इससे अछूते हैं। सुनने के लिए विंडोज़ सेटिंग्स में भाषा पैक स्थापित कीजिए।',
+  ],
+  'check.usbOk': ['A pod can be connected over USB from this browser.', 'इस ब्राउज़र से USB के ज़रिए पॉड जोड़ा जा सकता है।'],
+  'check.usbMissing': ['This browser cannot open a USB port.', 'यह ब्राउज़र USB पोर्ट नहीं खोल सकता।'],
+  'check.usbFix': [
+    'Use Chrome or Edge on a laptop to connect a pod by cable, or connect over Wi-Fi instead.',
+    'तार से पॉड जोड़ने के लिए लैपटॉप पर Chrome या Edge चलाइए, या Wi-Fi से जोड़िए।',
+  ],
+  'check.systemLanguage': ['English', 'हिन्दी'],
+  'check.someVoice': ['a system voice', 'सिस्टम की आवाज़'],
   'check.warn': ['not installed', 'स्थापित नहीं'],
   'check.fail': ['wrong', 'ग़लत'],
 

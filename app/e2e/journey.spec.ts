@@ -195,3 +195,53 @@ test.describe('the first sixty seconds', () => {
     await expect(page.getByTestId('first-run')).toBeHidden();
   });
 });
+
+/**
+ * Hostile input.
+ *
+ * Everything here was typed at the real thing during a QA pass, and one of them found a genuine
+ * defect: "((((" produces four identical complaints, four React children claimed the same identity,
+ * and the console filled with warnings on a screen that looked perfectly fine. A test that only
+ * types valid maths would never have seen it.
+ */
+test.describe('nothing a teacher can type breaks it', () => {
+  test('survives nonsense, and says so without a single console error', async ({ page }) => {
+    const problems: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error' || message.type() === 'warning') problems.push(message.text());
+    });
+    page.on('pageerror', (error) => problems.push(`pageerror: ${error.message}`));
+
+    await page.goto('/');
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
+
+    const nasty = [
+      '((((',
+      '))))',
+      '?????',
+      '1/0',
+      'x'.repeat(300),
+      '।।।।',
+      'क ् ्',
+      '^^^^',
+      '{{{{}}}}',
+      '|||',
+      'Rs Rs Rs',
+      '\frac{1}{',
+      '💥 + 2',
+      '   ',
+    ];
+    for (const input of nasty) {
+      await page.getByTestId('latex-input').fill(input);
+      await page.waitForTimeout(120);
+      // Still alive, still showing cells, still able to be typed into.
+      await expect(page.getByTestId('cell-row')).toBeVisible();
+    }
+
+    // And back to something ordinary, from whatever state that left it in.
+    await page.getByTestId('latex-input').fill('1/2');
+    await expect(page.getByTestId('braille-unicode')).toHaveText('⠹⠂⠌⠆⠼', { timeout: 10_000 });
+
+    expect(problems, 'the console must stay clean, even under abuse').toEqual([]);
+  });
+});

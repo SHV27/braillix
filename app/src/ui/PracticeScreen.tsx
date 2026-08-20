@@ -424,8 +424,8 @@ export function PracticeScreen() {
             >
               <p className="verdict__headline">{t(verdict.headline.key, verdict.headline.vars)}</p>
               <ul className="verdict__details">
-                {verdict.details.map((detail) => (
-                  <li key={detail.key}>{t(detail.key, detail.vars)}</li>
+                {verdict.details.map((detail, index) => (
+                  <li key={index}>{t(detail.key, detail.vars)}</li>
                 ))}
                 {!verdict.correct && <li>{say(item.hint)}</li>}
               </ul>

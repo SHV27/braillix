@@ -273,8 +273,8 @@ export function RecognisePanel({ onSent }: RecognisePanelProps) {
                 <span className="num"> · {t('rec.onDevice', { ms: result.ms })}</span>
               </p>
               <ul className="rec__notes">
-                {result.notes.map((note) => (
-                  <li key={note}>{note}</li>
+                {result.notes.map((note, index) => (
+                  <li key={index}>{note}</li>
                 ))}
               </ul>
 

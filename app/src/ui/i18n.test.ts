@@ -78,7 +78,7 @@ describe('every string exists in every language', () => {
     // Braillix, Nemeth, LaTeX, npm commands, maths examples and single-letter variables (a, b, x)
     // stay as they are — everything else in a Hindi string written in the Latin alphabet is an
     // untranslated fragment.
-    const names = /Braillix|Nemeth|LaTeX|SRE|npm run [a-z:]+|npm|USB|Wi-Fi|BRF|CSV|JSON|API|sqrt|degrees|Prev|Select|Next|\bms\b/g;
+    const names = /Braillix|Nemeth|LaTeX|SRE|npm (install|run [a-z:]+)|npm|USB|Wi-Fi|BRF|CSV|JSON|API|Chrome|Edge|Windows|KB|MB|sqrt|degrees|Prev|Select|Next|\bms\b/g;
     // A token carrying a dot, slash or colon is a path, a command or an address — docs/PROTOCOL.md,
     // 127.0.0.1:8080 — and translating those would break them.
     const code = /[A-Za-z][\w.\-/]*[./:][\w.\-/:]*/g;
@@ -86,8 +86,10 @@ describe('every string exists in every language', () => {
       /[A-Za-z]/.test(
         translate(key, undefined, 'hi')
           .replace(/\{\w+\}/g, '') // `{count}` and friends are placeholders, not words
-          .replace(code, '')
+          // Names first: `code` would otherwise eat "fetch:model" out of "npm run fetch:model"
+          // and leave a bare "run" behind, which is not a word anybody has to translate.
           .replace(names, '')
+          .replace(code, '')
           .replace(/\b[a-zA-Z]\b/g, ''), // single letters are maths variables
       ),
     );

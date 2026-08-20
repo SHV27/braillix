@@ -8,12 +8,17 @@
  *
  * Every check reports the same three things: what it is, what happened, and what to do about it if
  * it is not right. That is CLAUDE.md Law 3 as a screen rather than as a badge.
+ *
+ * Like `learn/feedback.ts`, it returns **keys and values, not sentences** — a teacher reading this
+ * screen in Hindi is exactly the teacher who most needs to understand it, and a module that builds
+ * English prose could not give them that.
  */
 
 import { translateLatex, cellsToUnicode } from './translate';
 import { toLatex } from './mathinput';
 import { devanagariToBraille } from './bharati';
 import { modelStatus } from '../recognise/status';
+import type { StringKey } from '../ui/i18n';
 
 export type CheckState = 'pass' | 'warn' | 'fail';
 
@@ -27,13 +32,19 @@ export type CheckId =
   | 'speech'
   | 'usb';
 
+/** One thing to say, as a key and its values. The interface turns it into a sentence. */
+export interface CheckNote {
+  readonly key: StringKey;
+  readonly vars?: Record<string, string | number>;
+}
+
 export interface CheckResult {
   readonly id: CheckId;
   readonly state: CheckState;
-  /** What actually happened, in a form worth pasting into a message to whoever helps them. */
-  readonly detail: string;
+  /** What actually happened. */
+  readonly detail: CheckNote;
   /** Only when the state is not 'pass'. */
-  readonly fix?: string;
+  readonly fix?: CheckNote;
 }
 
 /**
@@ -44,6 +55,8 @@ export interface CheckResult {
  * verify with their fingers.
  */
 const KNOWN_FRACTION = '⠹⠂⠌⠆⠼';
+/** A quadratic: a superscript, the return to the baseline, and the two-cell equals with its spaces. */
+const KNOWN_QUADRATIC = '⠭⠘⠆⠐⠬⠒⠭⠬⠆⠀⠨⠅⠀⠼⠴';
 /** ⠛⠼⠊⠞ — "gaṇit", the word mathematics, in Bharati Braille. */
 const KNOWN_HINDI = '⠛⠼⠊⠞';
 
@@ -55,54 +68,46 @@ async function checkEngine(): Promise<CheckResult> {
       return {
         id: 'engine',
         state: 'fail',
-        detail: 'The maths engine did not start, so the cells would show ordinary braille, not Nemeth.',
-        fix: 'Reload the page. If it persists, run `npm install` again — public/sre/mathmaps may be missing.',
+        detail: { key: 'check.engineDead' },
+        fix: { key: 'check.engineDeadFix' },
       };
     }
     if (braille !== KNOWN_FRACTION) {
       return {
         id: 'engine',
         state: 'fail',
-        detail: `One half translated to ${braille || '(nothing)'}, and it should be ${KNOWN_FRACTION}.`,
-        fix: 'Do not use this build in a lesson. Reinstall Braillix and run the check again.',
+        detail: { key: 'check.engineWrong', vars: { got: braille || '—', want: KNOWN_FRACTION } },
+        fix: { key: 'check.dontUse' },
       };
     }
-    return { id: 'engine', state: 'pass', detail: `One half is ${braille}, exactly as the Nemeth table says.` };
-  } catch (error) {
-    return {
-      id: 'engine',
-      state: 'fail',
-      detail: error instanceof Error ? error.message : String(error),
-      fix: 'Reload the page. If it persists, run `npm install` again.',
-    };
+    return { id: 'engine', state: 'pass', detail: { key: 'check.engineOk', vars: { braille } } };
+  } catch {
+    return { id: 'engine', state: 'fail', detail: { key: 'check.engineDead' }, fix: { key: 'check.engineDeadFix' } };
   }
 }
 
 async function checkNemeth(): Promise<CheckResult> {
-  // A second expression, chosen because it exercises the parts that are easy to get wrong:
-  // a superscript, the return to the baseline, and the two-cell equals with its spaces.
   const result = await translateLatex(toLatex('x^2 + 3x + 2 = 0').latex);
   const braille = cellsToUnicode(result.cells);
-  const expected = '⠭⠘⠆⠐⠬⠒⠭⠬⠆⠀⠨⠅⠀⠼⠴';
-  return braille === expected
-    ? { id: 'nemeth', state: 'pass', detail: `A quadratic is ${braille.length} cells, and every one matches.` }
+  return braille === KNOWN_QUADRATIC
+    ? { id: 'nemeth', state: 'pass', detail: { key: 'check.nemethOk', vars: { count: braille.length } } }
     : {
         id: 'nemeth',
         state: 'fail',
-        detail: `A quadratic translated to ${braille}, and it should be ${expected}.`,
-        fix: 'Do not use this build in a lesson. Reinstall Braillix.',
+        detail: { key: 'check.nemethWrong', vars: { got: braille || '—', want: KNOWN_QUADRATIC } },
+        fix: { key: 'check.dontUse' },
       };
 }
 
 function checkBharati(): CheckResult {
   const braille = devanagariToBraille('गणित').cells.map((mask) => String.fromCodePoint(0x2800 + mask)).join('');
   return braille === KNOWN_HINDI
-    ? { id: 'bharati', state: 'pass', detail: `गणित is ${braille}, as the Bharati table says.` }
+    ? { id: 'bharati', state: 'pass', detail: { key: 'check.bharatiOk', vars: { braille } } }
     : {
         id: 'bharati',
         state: 'fail',
-        detail: `गणित translated to ${braille}, and it should be ${KNOWN_HINDI}.`,
-        fix: 'Reinstall Braillix. Hindi words would be wrong on the display until this passes.',
+        detail: { key: 'check.bharatiWrong', vars: { got: braille || '—', want: KNOWN_HINDI } },
+        fix: { key: 'check.dontUse' },
       };
 }
 
@@ -118,17 +123,16 @@ async function checkOffline(): Promise<CheckResult> {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const size = (await response.text()).length;
-    return {
-      id: 'offline',
-      state: 'pass',
-      detail: `The Nemeth tables are on this machine (${Math.round(size / 1024)} KB). No network is needed.`,
-    };
+    return { id: 'offline', state: 'pass', detail: { key: 'check.offlineOk', vars: { size: Math.round(size / 1024) } } };
   } catch (error) {
     return {
       id: 'offline',
       state: 'fail',
-      detail: `The local Nemeth tables could not be read (${error instanceof Error ? error.message : String(error)}).`,
-      fix: 'Run `npm install` again. Without them Braillix needs the internet, which a classroom may not have.',
+      detail: {
+        key: 'check.offlineBad',
+        vars: { reason: error instanceof Error ? error.message : String(error) },
+      },
+      fix: { key: 'check.offlineFix' },
     };
   }
 }
@@ -140,60 +144,53 @@ function checkStorage(): CheckResult {
     const read = localStorage.getItem(key);
     localStorage.removeItem(key);
     if (read !== '1') throw new Error('the value did not come back');
-    return { id: 'storage', state: 'pass', detail: 'Worksheets and student records will be kept on this laptop.' };
+    return { id: 'storage', state: 'pass', detail: { key: 'check.storageOk' } };
   } catch {
-    return {
-      id: 'storage',
-      state: 'warn',
-      detail: 'This browser will not let Braillix save anything.',
-      fix: 'Leave private browsing, or allow site data. Everything else works; nothing will be remembered.',
-    };
+    return { id: 'storage', state: 'warn', detail: { key: 'check.storageBad' }, fix: { key: 'check.storageFix' } };
   }
 }
 
 async function checkRecognition(): Promise<CheckResult> {
   const model = await modelStatus();
   return model.installed
-    ? { id: 'recognition', state: 'pass', detail: 'Handwriting can be read on this device, with no network.' }
+    ? { id: 'recognition', state: 'pass', detail: { key: 'check.recognitionOk' } }
     : {
         id: 'recognition',
         state: 'warn',
-        detail: 'The handwriting model is not installed on this machine.',
-        fix: 'Run `npm run fetch:model` once (76 MB). Everything else works without it — type the maths instead.',
+        detail: { key: 'check.recognitionMissing' },
+        fix: { key: 'check.recognitionFix' },
       };
 }
 
 function checkSpeech(voice: { available: boolean; name?: string }, language: string): CheckResult {
   return voice.available
-    ? { id: 'speech', state: 'pass', detail: `${language} speech: ${voice.name ?? 'a system voice'}.` }
+    ? {
+        id: 'speech',
+        state: 'pass',
+        detail: { key: 'check.speechOk', vars: { language, voice: voice.name ?? '' } },
+      }
     : {
         id: 'speech',
         state: 'warn',
-        detail: `This machine has no ${language} voice installed.`,
-        fix: 'The braille and the written transcript are unaffected. Install the language pack in Windows settings to hear it.',
+        detail: { key: 'check.speechMissing', vars: { language } },
+        fix: { key: 'check.speechFix' },
       };
 }
 
 function checkUsb(supported: boolean): CheckResult {
   return supported
-    ? { id: 'usb', state: 'pass', detail: 'A pod can be connected over USB from this browser.' }
-    : {
-        id: 'usb',
-        state: 'warn',
-        detail: 'This browser cannot open a USB port.',
-        fix: 'Use Chrome or Edge on a laptop to connect a pod by cable, or connect over Wi-Fi instead.',
-      };
+    ? { id: 'usb', state: 'pass', detail: { key: 'check.usbOk' } }
+    : { id: 'usb', state: 'warn', detail: { key: 'check.usbMissing' }, fix: { key: 'check.usbFix' } };
 }
 
 export interface SelfCheckInput {
   readonly voice: { available: boolean; name?: string };
+  /** Already in the interface's own language — the caller knows it, this module does not. */
   readonly language: string;
   readonly usbSupported: boolean;
 }
 
-/**
- * Run everything. Never throws: a check that cannot run reports that it could not run.
- */
+/** Run everything. Never throws: a check that cannot run reports that it could not run. */
 export async function runSelfCheck(input: SelfCheckInput): Promise<CheckResult[]> {
   const [engine, nemeth, offline, recognition] = await Promise.all([
     checkEngine(),
@@ -213,12 +210,22 @@ export async function runSelfCheck(input: SelfCheckInput): Promise<CheckResult[]
   ];
 }
 
-/** The whole report as plain text, for pasting into a message to whoever helps this school. */
-export function reportToText(results: readonly CheckResult[], names: Record<CheckId, string>): string {
-  const lines = ['Braillix self-check', new Date().toISOString(), ''];
+/**
+ * The whole report as plain text, for pasting into a message to whoever helps this school.
+ *
+ * The caller supplies the words, because it is the only one that knows which language the teacher
+ * is reading in — and a report they cannot read is a report they cannot send.
+ */
+export function reportToText(
+  results: readonly CheckResult[],
+  names: Record<CheckId, string>,
+  say: (note: CheckNote) => string,
+  now: string,
+): string {
+  const lines = ['Braillix self-check', now, ''];
   for (const result of results) {
-    lines.push(`[${result.state.toUpperCase()}] ${names[result.id]}: ${result.detail}`);
-    if (result.fix) lines.push(`        fix: ${result.fix}`);
+    lines.push(`[${result.state.toUpperCase()}] ${names[result.id]}: ${say(result.detail)}`);
+    if (result.fix) lines.push(`        fix: ${say(result.fix)}`);
   }
   return lines.join('\n');
 }

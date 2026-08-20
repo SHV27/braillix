@@ -29,9 +29,9 @@ export function QuestionStrip() {
   return (
     <div className="qstrip" data-testid="question-strip">
       <div className="qstrip__parts">
-        {line.segments.map((segment) => (
+        {line.segments.map((segment, index) => (
           <button
-            key={segment.text}
+            key={`${index}:${segment.text}`}
             type="button"
             className={`qseg qseg--${segment.kind}`}
             data-testid={`segment-${segment.kind}`}

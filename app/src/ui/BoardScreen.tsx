@@ -171,8 +171,10 @@ export function BoardScreen() {
           <RecognisePanel onSent={() => setTab('type')} />
         )}
 
-        {inputIssues.map((issue) => (
-          <p key={issue.message} className="notice notice--warn" data-testid="input-issue">
+        {/* Keyed by position, not by text: "((((" genuinely produces four identical complaints,
+            and React is right to object to four children claiming the same identity. */}
+        {inputIssues.map((issue, index) => (
+          <p key={index} className="notice notice--warn" data-testid="input-issue">
             {issue.message}
             {issue.fix && <span className="notice__fix">{issue.fix}</span>}
           </p>
@@ -186,8 +188,8 @@ export function BoardScreen() {
         )}
         {issues
           .filter((issue) => issue.kind !== 'parse')
-          .map((issue) => (
-            <p key={issue.message} className="notice notice--warn">
+          .map((issue, index) => (
+            <p key={index} className="notice notice--warn">
               {issue.message}
               {issue.fix && <span className="notice__fix">{issue.fix}</span>}
             </p>

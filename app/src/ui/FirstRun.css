@@ -47,12 +47,14 @@
   max-width: 60ch;
 }
 
+/* One column, three steps, in order. A two-up grid left the third step alone in a corner with a
+   hole beside it, which is the shape of a layout that was not looked at. */
 .firstrun__steps {
   margin: 0;
   padding: 0;
   list-style: none;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: var(--s2);
 }
 

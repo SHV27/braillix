@@ -10,7 +10,7 @@
  * lesson is byte-identical to what the teacher checked while preparing it.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useBraillix } from '../store';
 import { cellsToUnicode } from '../core/translate';
 import type { Worksheet } from '../class/types';
@@ -33,6 +33,7 @@ export function TeachMode({ worksheet, onClose }: TeachModeProps) {
   const [index, setIndex] = useState(0);
   const item = worksheet.items[index];
   const total = worksheet.items.length;
+  const dialog = useRef<HTMLDivElement>(null);
 
   const go = useCallback(
     (delta: 1 | -1) => setIndex((current) => Math.min(Math.max(current + delta, 0), Math.max(0, total - 1))),
@@ -45,12 +46,43 @@ export function TeachMode({ worksheet, onClose }: TeachModeProps) {
   }, [item, setSource]);
 
   /*
-   * A lesson is modal: while it is open the page behind must not scroll, or a stray wheel turn
-   * takes the teacher to the worksheet editor with a class waiting.
+   * A lesson is modal, and modal means three things, not one.
+   *
+   * The page behind must not scroll, or a stray wheel turn takes the teacher to the worksheet
+   * editor with a class waiting. Focus must move *into* the lesson, or a screen-reader user is
+   * still standing on the button they pressed. And Tab must not walk out of it into a page that is
+   * visually gone — which is the version of this that everybody forgets, and the one that makes a
+   * dialog useless to somebody who cannot see that it is there.
    */
   useEffect(() => {
     document.body.classList.add('is-teaching');
-    return () => document.body.classList.remove('is-teaching');
+    const returnTo = document.activeElement as HTMLElement | null;
+    dialog.current?.focus();
+
+    function onTab(event: KeyboardEvent) {
+      if (event.key !== 'Tab' || !dialog.current) return;
+      const focusable = [...dialog.current.querySelectorAll<HTMLElement>('button, [href], input, select, [tabindex]:not([tabindex="-1"])')]
+        .filter((element) => !element.hasAttribute('disabled') && element.offsetParent !== null);
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (!event.shiftKey && (active === last || !dialog.current.contains(active))) {
+        event.preventDefault();
+        first.focus();
+      } else if (event.shiftKey && (active === first || !dialog.current.contains(active))) {
+        event.preventDefault();
+        last.focus();
+      }
+    }
+
+    document.addEventListener('keydown', onTab);
+    return () => {
+      document.removeEventListener('keydown', onTab);
+      document.body.classList.remove('is-teaching');
+      returnTo?.focus?.();
+    };
   }, []);
 
   useEffect(() => {
@@ -74,7 +106,15 @@ export function TeachMode({ worksheet, onClose }: TeachModeProps) {
   }, [go, onClose, sayCurrent]);
 
   return (
-    <div className="teach" role="dialog" aria-modal="true" aria-label={t('teach.title', { name: worksheet.title })} data-testid="teach-mode">
+    <div
+      ref={dialog}
+      className="teach"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('teach.title', { name: worksheet.title })}
+      data-testid="teach-mode"
+      tabIndex={-1}
+    >
       <header className="teach__head">
         <div className="teach__where">
           <strong className="teach__sheet">{worksheet.title}</strong>

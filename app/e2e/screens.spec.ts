@@ -129,3 +129,44 @@ test.describe('states worth capturing', () => {
     await page.keyboard.up('l');
   });
 });
+
+/**
+ * Long text does not push the page sideways.
+ *
+ * Found during a QA pass, not by reasoning: a worksheet titled with a two-hundred-character
+ * sentence and an item three hundred characters long gave the Class screen 1,762 pixels of
+ * horizontal overflow. Both are things a teacher does — they paste a question out of a textbook —
+ * and neither is an attack.
+ *
+ * Wide *mathematics* is allowed to scroll inside its own box. The page is not.
+ */
+test.describe('nothing overflows, however long the words are', () => {
+  const MONSTER = 'x'.repeat(300);
+  const LONG_TITLE = 'A very long worksheet name that a teacher might genuinely type '.repeat(3);
+
+  for (const size of WIDTHS) {
+    test(`${size.name}: a long question and a long title stay inside the page`, async ({ page }) => {
+      await page.setViewportSize({ width: size.width, height: size.height });
+      await page.goto('/');
+      await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
+
+      await page.getByTestId('latex-input').fill(`${MONSTER} और ${'y'.repeat(150)}`);
+      await page.waitForTimeout(400);
+      await noSidewaysScroll(page, `board at ${size.width}px`);
+
+      await page.getByTestId('nav-class').click();
+      await page.getByTestId('new-worksheet').click();
+      await page.getByTestId('worksheet-title').fill(LONG_TITLE);
+      await page.getByTestId('new-item').fill(MONSTER);
+      await page.getByTestId('add-item').click();
+      await page.getByTestId('new-item').fill('दो संख्याओं का योग बहुत लंबा प्रश्न है '.repeat(4));
+      await page.getByTestId('add-item').click();
+      await page.waitForTimeout(600);
+      await noSidewaysScroll(page, `class at ${size.width}px`);
+
+      await page.getByTestId('teach').click();
+      await page.waitForTimeout(600);
+      await noSidewaysScroll(page, `teaching at ${size.width}px`);
+    });
+  }
+});

@@ -80,6 +80,7 @@
   flex-direction: column;
   gap: var(--s1);
   min-width: 0;
+  overflow: hidden;
 }
 
 .cls__itemsource {
@@ -94,6 +95,7 @@
 .cls__itemnote {
   color: var(--text-300);
   font-size: var(--t-small);
+  overflow-wrap: anywhere;
 }
 
 .cls__itemactions {
