@@ -182,3 +182,9 @@
   background: transparent;
   border: 0;
 }
+
+.cls__editoractions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+}

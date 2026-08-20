@@ -11,6 +11,7 @@
  */
 
 import { expect, test, type Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 
 async function openClass(page: Page) {
   await page.goto('/');
@@ -175,5 +176,36 @@ test.describe('the class, and what leaves this laptop', () => {
     await openClass(page);
     await page.getByTestId('class-records').click();
     await expect(page.getByText(/no account and no server/)).toBeVisible();
+  });
+});
+
+test.describe('paper', () => {
+  test('saves a worksheet as an embosser file', async ({ page }) => {
+    await openClass(page);
+    await newWorksheetWith(page, ['1/2', '22/7']);
+
+    const download = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByTestId('save-brf').click(),
+    ]).then(([event]) => event);
+
+    expect(download.suggestedFilename()).toMatch(/\.brf$/);
+    const path = await download.path();
+    const text = readFileSync(path!, 'utf8');
+    // Braille ASCII: "#A. " numbers the first question, "?1/2#" is one half in Nemeth.
+    expect(text).toContain('#A. ?1/2#');
+    expect(text).toContain('#B. ');
+  });
+
+  test('has a printable sheet with both the print and the braille on it', async ({ page }) => {
+    await openClass(page);
+    await newWorksheetWith(page, ['1/2']);
+
+    const sheet = page.getByTestId('print-sheet');
+    // Hidden on screen, present in the page: printing must never open a second window that could
+    // show something different from what the teacher just checked.
+    await expect(sheet).toBeHidden();
+    await expect(sheet.locator('.printsheet__braille')).toContainText('⠹', { timeout: 10_000 });
+    await expect(sheet.locator('math')).toHaveCount(1);
   });
 });

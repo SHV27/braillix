@@ -141,6 +141,73 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   'device.connect': ['Connect and calibrate', 'जोड़ें और कैलिब्रेट करें'],
   'device.atlas': ['Cell atlas', 'सेल एटलस'],
 
+  /* ---- the printed worksheet ---- */
+  'print.name': ['Name', 'नाम'],
+  'print.date': ['Date', 'दिनांक'],
+  'print.foot': [
+    'Prepared with Braillix. The braille under each question is Nemeth for the mathematics and Bharati for the words.',
+    'ब्रेलिक्स से बनाया गया। हर सवाल के नीचे की ब्रेल में गणित नेमेथ में है और शब्द भारती में।',
+  ],
+  'class.print': ['Print this worksheet', 'यह वर्कशीट छापिए'],
+  'class.brf': ['Save for an embosser (BRF)', 'एम्बॉसर के लिए सहेजिए (BRF)'],
+
+  /* ---- help and the self-check ---- */
+  'nav.help': ['Help', 'सहायता'],
+  'nav.help.hint': ['How it works, and what is working right now', 'यह कैसे काम करता है, और अभी क्या चल रहा है'],
+  'help.title': ['Help', 'सहायता'],
+  'help.lede': [
+    'What Braillix does, how to use it in a lesson, and a button that goes and checks whether everything on this laptop is actually working.',
+    'ब्रेलिक्स क्या करता है, कक्षा में इसे कैसे चलाएँ, और एक बटन जो जाकर जाँचता है कि इस लैपटॉप पर सब सचमुच काम कर रहा है या नहीं।',
+  ],
+  'help.check': ['Is everything working?', 'क्या सब काम कर रहा है?'],
+  'help.checkLede': [
+    'This does the work rather than reading a setting: it translates a known expression and compares the answer, fetches the braille tables from this machine, and writes to storage. It takes about a second.',
+    'यह सेटिंग पढ़कर नहीं बताता, बल्कि सचमुच करके देखता है: एक जाना-पहचाना व्यंजक अनूदित करके उत्तर मिलाता है, इसी मशीन से ब्रेल तालिकाएँ लाता है, और सहेजकर देखता है। लगभग एक सेकंड लगता है।',
+  ],
+  'help.run': ['Run the check', 'जाँच चलाइए'],
+  'help.running': ['Checking…', 'जाँच हो रही है…'],
+  'help.copy': ['Copy the report', 'रिपोर्ट कॉपी कीजिए'],
+  'help.copied': ['Copied', 'कॉपी हो गई'],
+  'help.allWell': ['Everything needed for a lesson is working.', 'कक्षा के लिए ज़रूरी सब कुछ चल रहा है।'],
+  'help.someWarn': [
+    'The lesson will work. Some extras are not installed — each one says what it needs.',
+    'कक्षा चल जाएगी। कुछ अतिरिक्त चीज़ें स्थापित नहीं हैं — हर एक बता रही है उसे क्या चाहिए।',
+  ],
+  'help.someFail': [
+    'Something is wrong that would affect what a child reads. Do not use this build in a lesson until it passes.',
+    'कुछ ऐसा ग़लत है जो बच्चे के पढ़ने पर असर डालेगा। जब तक यह ठीक न हो, कक्षा में इसका उपयोग न करें।',
+  ],
+  'check.engine': ['The maths engine', 'गणित इंजन'],
+  'check.nemeth': ['Nemeth translation', 'नेमेथ अनुवाद'],
+  'check.bharati': ['Hindi braille', 'हिन्दी ब्रेल'],
+  'check.offline': ['Works without the internet', 'बिना इंटरनेट काम करना'],
+  'check.storage': ['Saving your work', 'आपका काम सहेजना'],
+  'check.recognition': ['Reading handwriting', 'लिखावट पढ़ना'],
+  'check.speech': ['Speech', 'वाणी'],
+  'check.usb': ['Connecting by cable', 'तार से जोड़ना'],
+  'check.pass': ['working', 'चल रहा है'],
+  'check.warn': ['not installed', 'स्थापित नहीं'],
+  'check.fail': ['wrong', 'ग़लत'],
+
+  'help.howTo': ['How to use it in a lesson', 'कक्षा में कैसे चलाएँ'],
+  'help.step1': ['Write the question on the Board. Check it in print — that is what the child will read.', 'बोर्ड पर सवाल लिखिए। छपाई में जाँच लीजिए — वही बच्चा पढ़ेगा।'],
+  'help.step2': ['Keep it in a worksheet, so tomorrow you press one button instead of typing again.', 'उसे वर्कशीट में रख लीजिए, ताकि कल दोबारा लिखने के बजाय एक बटन दबाना पड़े।'],
+  'help.step3': ['Press Teach. The arrow keys move through the questions; each one goes onto the display.', '“पढ़ाइए” दबाइए। तीर बटन सवालों में चलते हैं; हर सवाल डिस्प्ले पर चला जाता है।'],
+  'help.step4': ['With one cell, use Explore structure — a long expression folds into a few cells you can step into.', 'एक ही सेल हो तो “रचना देखिए” चलाइए — लंबा व्यंजक कुछ सेल में सिमट जाता है, जिनमें अंदर जाया जा सकता है।'],
+  'help.step5': ['Choose who is at the display on the Class screen, and their practice is kept against their name.', 'कक्षा स्क्रीन पर चुनिए कि डिस्प्ले पर कौन है, फिर उनका अभ्यास उन्हीं के नाम से रखा जाएगा।'],
+
+  'help.keys': ['Keys worth knowing', 'काम के बटन'],
+  'help.keysReader': ['move through the expression', 'व्यंजक में चलिए'],
+  'help.keysSay': ['say the part you are on', 'जिस हिस्से पर हैं वह बोलिए'],
+  'help.keysWrite': ['write braille, six keys like a Perkins', 'ब्रेल लिखिए, पर्किन्स जैसे छह बटन'],
+  'help.keysTeach': ['next and previous question while teaching', 'पढ़ाते समय अगला और पिछला सवाल'],
+
+  'help.about': ['About Braillix', 'ब्रेलिक्स के बारे में'],
+  'help.aboutText': [
+    'Braillix turns mathematics into braille and drives a refreshable display, on however many cells it has — one or forty. It has no account, no server and no API key, and everything it does works with the network unplugged. Nemeth is used for the mathematics and Bharati Braille for Hindi words; both are cited in the repository.',
+    'ब्रेलिक्स गणित को ब्रेल में बदलता है और रिफ्रेशेबल डिस्प्ले चलाता है — चाहे उसमें एक सेल हो या चालीस। इसमें न कोई खाता है, न सर्वर, न कोई API कुंजी, और यह सब कुछ नेटवर्क के बिना करता है। गणित के लिए नेमेथ और हिन्दी शब्दों के लिए भारती ब्रेल — दोनों के स्रोत रिपॉज़िटरी में दर्ज हैं।',
+  ],
+
   /* ---- the class ---- */
   'nav.class': ['Class', 'कक्षा'],
   'nav.class.hint': ['Worksheets, students and what they have done', 'वर्कशीट, विद्यार्थी और उनका किया हुआ काम'],

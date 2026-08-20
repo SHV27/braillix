@@ -1,0 +1,100 @@
+/*
+ * Invisible until the moment somebody prints.
+ *
+ * On paper Braillix stops being an instrument and becomes a worksheet: white, black, generous, and
+ * with nothing on it that cannot be read with the eyes or the fingers.
+ */
+
+.printsheet {
+  display: none;
+}
+
+@media print {
+  /* Everything except the sheet goes away — the masthead, the nav, the status strip, the editor. */
+  body * {
+    visibility: hidden;
+  }
+
+  .printsheet,
+  .printsheet * {
+    visibility: visible;
+  }
+
+  .printsheet {
+    display: block;
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    background: #fff;
+    color: #000;
+    font-size: 12pt;
+  }
+
+  .printsheet__head {
+    margin-bottom: 18pt;
+    padding-bottom: 8pt;
+    border-bottom: 1pt solid #000;
+  }
+
+  .printsheet__title {
+    margin: 0 0 6pt;
+    font-size: 18pt;
+    font-weight: 600;
+  }
+
+  .printsheet__meta {
+    margin: 0;
+    font-size: 11pt;
+  }
+
+  .printsheet__items {
+    margin: 0;
+    padding-left: 22pt;
+    display: flex;
+    flex-direction: column;
+    gap: 16pt;
+  }
+
+  .printsheet__item {
+    break-inside: avoid;
+  }
+
+  .printsheet__print math,
+  .printsheet__print .sourceview__words {
+    color: #000;
+    font-size: 16pt;
+  }
+
+  /* The braille line is a reference for the teacher, at a size fingers would expect on paper. */
+  .printsheet__braille {
+    margin-top: 4pt;
+    font-size: 16pt;
+    letter-spacing: 0.14em;
+    word-break: break-all;
+  }
+
+  .printsheet__answer {
+    margin-top: 10pt;
+    border-bottom: 0.5pt solid #999;
+    height: 20pt;
+  }
+
+  .printsheet__foot {
+    margin-top: 24pt;
+    padding-top: 6pt;
+    border-top: 0.5pt solid #999;
+    font-size: 9pt;
+  }
+
+  /* Backgrounds and shadows cost ink and say nothing on paper. */
+  .printsheet .mathpreview {
+    background: none;
+    border: 0;
+    padding: 0;
+    min-height: 0;
+  }
+
+  @page {
+    margin: 16mm;
+  }
+}

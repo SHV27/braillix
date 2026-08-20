@@ -17,7 +17,10 @@ import { useBraillix } from '../store';
 import { progressByStudent, recordsToCsv, useClass } from '../class/store';
 import { deserialiseClassData, serialiseClassData, FILE_EXTENSION } from '../class/storage';
 import type { Worksheet } from '../class/types';
+import { translateMixed } from '../core/mixed';
+import { worksheetToBrf } from '../core/brf';
 import { SourcePreview } from './SourcePreview';
+import { PrintSheet } from './PrintSheet';
 import { TeachMode } from './TeachMode';
 import { useT, type StringKey } from './i18n';
 import './ClassScreen.css';
@@ -144,6 +147,20 @@ function WorksheetEditor({ worksheet, onTeach }: { worksheet: Worksheet; onTeach
 
   const [draft, setDraft] = useState('');
 
+  /**
+   * The worksheet as an embosser file.
+   *
+   * Translating here rather than storing the braille: what is embossed must be what the display
+   * would show today, not what it would have shown when the item was typed.
+   */
+  async function saveForEmbosser() {
+    const items = await Promise.all(
+      worksheet.items.map(async (item) => ({ cells: (await translateMixed(item.source)).cells })),
+    );
+    const name = worksheet.title.trim().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '') || 'worksheet';
+    download(`${name}.brf`, worksheetToBrf(items), 'application/octet-stream');
+  }
+
   function add() {
     const text = draft.trim();
     if (!text) return;
@@ -164,15 +181,35 @@ function WorksheetEditor({ worksheet, onTeach }: { worksheet: Worksheet; onTeach
             onChange={(event) => rename(worksheet.id, event.target.value, Date.now())}
           />
         </label>
-        <button
-          type="button"
-          className="btn btn--primary cls__teach"
-          disabled={worksheet.items.length === 0}
-          data-testid="teach"
-          onClick={() => onTeach(worksheet)}
-        >
-          {t('class.teach')} →
-        </button>
+        <div className="cls__editoractions">
+          <button
+            type="button"
+            className="btn"
+            disabled={worksheet.items.length === 0}
+            data-testid="print-worksheet"
+            onClick={() => window.print()}
+          >
+            {t('class.print')}
+          </button>
+          <button
+            type="button"
+            className="btn"
+            disabled={worksheet.items.length === 0}
+            data-testid="save-brf"
+            onClick={() => void saveForEmbosser()}
+          >
+            {t('class.brf')}
+          </button>
+          <button
+            type="button"
+            className="btn btn--primary cls__teach"
+            disabled={worksheet.items.length === 0}
+            data-testid="teach"
+            onClick={() => onTeach(worksheet)}
+          >
+            {t('class.teach')} →
+          </button>
+        </div>
       </div>
 
       {worksheet.items.length === 0 ? (
@@ -257,6 +294,10 @@ function WorksheetEditor({ worksheet, onTeach }: { worksheet: Worksheet; onTeach
       </label>
       <p className="field__help">{t('class.addItemHint')}</p>
       {draft.trim() && <SourcePreview source={draft} />}
+
+      {/* Present in the page, invisible until somebody prints — so the sheet can never drift
+          away from what is on screen. */}
+      <PrintSheet worksheet={worksheet} />
 
       <div className="cls__danger">
         <button

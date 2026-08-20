@@ -78,7 +78,7 @@ describe('every string exists in every language', () => {
     // Braillix, Nemeth, LaTeX, npm commands, maths examples and single-letter variables (a, b, x)
     // stay as they are — everything else in a Hindi string written in the Latin alphabet is an
     // untranslated fragment.
-    const names = /Braillix|Nemeth|LaTeX|SRE|npm run [a-z:]+|npm|USB|Wi-Fi|BRF|CSV|JSON|sqrt|degrees|Prev|Select|Next|\bms\b/g;
+    const names = /Braillix|Nemeth|LaTeX|SRE|npm run [a-z:]+|npm|USB|Wi-Fi|BRF|CSV|JSON|API|sqrt|degrees|Prev|Select|Next|\bms\b/g;
     // A token carrying a dot, slash or colon is a path, a command or an address — docs/PROTOCOL.md,
     // 127.0.0.1:8080 — and translating those would break them.
     const code = /[A-Za-z][\w.\-/]*[./:][\w.\-/:]*/g;

@@ -6,6 +6,7 @@ import { BoardScreen } from './BoardScreen';
 import { DeviceScreen } from './DeviceScreen';
 import { PracticeScreen } from './PracticeScreen';
 import { ClassScreen } from './ClassScreen';
+import { HelpScreen } from './HelpScreen';
 import { LanguageSwitch } from './LanguageSwitch';
 import { useT, type StringKey } from './i18n';
 
@@ -22,6 +23,7 @@ const VIEWS: { id: ViewId; label: StringKey; hint: StringKey }[] = [
   { id: 'practice', label: 'nav.practice', hint: 'nav.practice.hint' },
   { id: 'class', label: 'nav.class', hint: 'nav.class.hint' },
   { id: 'device', label: 'nav.device', hint: 'nav.device.hint' },
+  { id: 'help', label: 'nav.help', hint: 'nav.help.hint' },
 ];
 
 export function App() {
@@ -83,6 +85,7 @@ export function App() {
         {view === 'practice' && <PracticeScreen />}
         {view === 'class' && <ClassScreen />}
         {view === 'device' && <DeviceScreen />}
+        {view === 'help' && <HelpScreen />}
       </main>
 
       <StatusStrip />
