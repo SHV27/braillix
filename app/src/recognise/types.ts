@@ -1,13 +1,20 @@
 /**
  * Reading maths off a photograph.
  *
- * Recognition is a *provider*, never a requirement. The app is fully usable with none of them
+ * Recognition is a *provider*, never a requirement. The app is fully usable without it
  * available — you type instead — and every result lands in an editable field rather than being
  * committed on the model's say-so. A recogniser that cannot be corrected is a recogniser you
  * cannot trust in front of a class.
  */
 
-export type ProviderId = 'on-device' | 'cloud';
+/**
+ * Only one provider exists, deliberately.
+ *
+ * A cloud vision provider was designed and then cut — see DECISIONS.md D5.1. Leaving 'cloud' in
+ * this union while nothing implemented it would have been a lie in the type system, which is the
+ * quietest kind.
+ */
+export type ProviderId = 'on-device';
 
 export type ProviderState = 'unavailable' | 'loadable' | 'loading' | 'ready' | 'error';
 

@@ -70,8 +70,8 @@ docs/           handoff PDF, protocol spec, cell atlas
   Resume line is always **"read PROGRESS.md and continue."**
 - Log every judgment call in `DECISIONS.md`, one line. Never delete a line.
 - Verify volatile facts live (versions, model names, APIs) — memory of these is presumed stale.
-- **Secrets:** no key is ever written to a file, `.env`, or `import.meta.env`. The optional cloud
-  provider takes a key typed at runtime, held in memory only.
+- **Secrets:** there are none, and it must stay that way. Braillix has no API key, no account and no
+  server. If a feature ever needs one, it is an escalation, not a commit.
 - **Escalate only:** spending money · anything irreversible or touching the team's hardware repo ·
   publishing publicly for the first time · a genuine expensive product fork · a missing credential.
   Everything else: decide, log, keep moving.

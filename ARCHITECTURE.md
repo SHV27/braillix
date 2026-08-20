@@ -43,8 +43,8 @@ No money, no accounts, no server — so the choke points are privacy and correct
 
 | Choke point | Enforcer |
 |---|---|
-| Student work (photos, answers) never leaves the device | There is no backend to send it to. The only network-capable provider (cloud OCR) is **off by default, opt-in per image, with an on-screen notice before the request**. |
-| Optional API key | Entered at runtime into a memory-only store (never `localStorage`, never a file, never `import.meta.env` — Vite would inline it into the static bundle). Cleared on reload. |
+| Student work (photos, answers) never leaves the device | There is no backend to send it to, and after D5.1 there is no network-capable provider at all. Recognition runs in this browser. |
+| API keys | There are none. Braillix has no key, no account and no server, and D5.1 removed the only feature that would have needed one. |
 | Progress data | `localStorage` under one namespaced key, with a visible "erase all my data" control. |
 | Cam numbers on the wire | Derived **only** by `profile.toCam(dots)`. Nothing else may do bit arithmetic. |
 | Serial / camera access | Browser-enforced user gesture; we never auto-connect. |
@@ -75,9 +75,9 @@ reason, fix?}` rendered in a persistent status strip. Nothing degrades silently 
 
 | Failure | What the user sees | What still works |
 |---|---|---|
-| OCR model not downloaded | `Recognition · not installed` + a **Download (80 MB)** button | everything else |
-| OCR model download fails / offline | `Recognition · offline` + retry + "type it instead" | everything else |
-| Recognition returns nonsense | Result lands in an **editable** LaTeX field with confidence shown; nothing is auto-committed | everything else |
+| OCR model not downloaded | `Recognition · not installed` + the exact command to install it (`npm run fetch:model`). Deliberately NOT an in-app download button: fetching 76 MB needs a network, and offering that as the primary path would undercut the offline promise. | everything else |
+| OCR model present but fails to start | the error names the missing file and the command that fixes it; the Read screen is untouched | everything else |
+| Recognition returns nonsense | Result lands in an **editable** LaTeX field with a quality judgement and its reasons — never a fabricated confidence percentage (D3.12); nothing is auto-committed | everything else |
 | Web Serial unsupported (Firefox/Safari) | `USB · not supported in this browser` + name the browsers that do | simulator + Wi-Fi pod |
 | Pod unreachable over Wi-Fi | `Pod · unreachable (192.168.x.x)` + retry | simulator |
 | Speech synthesis absent | `Speech · unavailable` | braille + on-screen |
@@ -117,8 +117,8 @@ reason, fix?}` rendered in a persistent status strip. Nothing degrades silently 
    costs a full resend; it never costs correctness.
 5. **"Speech always accompanies braille" × "speech may be unavailable / unwanted."** → speech is a
    capability with a toggle, on by default, announced once when absent, never assumed present.
-6. **"Student privacy" × "optional cloud OCR."** → off by default, opt-in per image, notice shown
-   before the request, key held in memory only.
+6. **"Student privacy" × "optional cloud OCR."** → resolved by removing the second half: the cloud
+   provider was cut (D5.1). Nothing leaves the device, so there is no notice to get wrong.
 
 ## STACK LOCK
 
@@ -146,8 +146,9 @@ version is chosen only where it is also the proven one.
 - SRE's locale data (`base.json`, `nemeth.json`, `en.json`, `hi.json` — ~1.2 MB) is **copied into
   `public/sre/mathmaps/` at install time** and loaded from there. SRE must never reach a CDN.
 - ONNX runtime `.wasm` files are copied to `public/`, not fetched.
-- The only network request the app can ever make is: (a) the optional one-time model download, and
-  (b) an opt-in cloud OCR call. Both are visible, both are refusable.
+- The only network request the app can ever make is the optional one-time model download, run from
+  the command line by choice. `e2e/offline.spec.ts` blocks every external request and asserts that
+  not one is attempted.
 
 **Rejected, with reasons:** liblouis (no tables shipped, wrong tool for maths — RESEARCH Verdict 8) ·
 MathJax full (heavier route to the same SRE) · FastAPI/Python backend (install friction, and both

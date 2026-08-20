@@ -334,3 +334,45 @@ Veto any of these with one word:
   "2 cells are on the display" while the Practice screen showed no display at all. With hardware
   attached the dots are under the student's fingers; with none — the primary mode — there was
   nothing to read. The dock is now a shared component used by every screen that drives the cells.
+
+## D5 · Cuts made on audit (20 Aug 2026, after Arc 6)
+
+An audit of our own documents against the code — the "documented but unbuilt" check — found two
+claims that were not behaviours. Both are now resolved rather than left standing.
+
+- **D5.1** — **The cloud recognition provider is CUT.** D2.7 described it as an optional provider;
+  it appeared in five documents and existed in the code only as a dead member of a type union,
+  which is the quietest kind of lie. It is cut rather than built, because: the on-device path
+  already works and is genuinely offline; a network provider would add an API key, a privacy
+  surface over children's work, and a dependency on a free tier that visibly moves (our own
+  RESEARCH.md records Groq deprecating a vision model in February 2026); and the brief's primary
+  requirement is self-sufficiency, which a cloud call pulls against. The design is parked in
+  NOTES.md in case it is ever wanted. Braillix now has **no API key anywhere**, which is a simpler
+  and stronger promise than "a key handled carefully".
+- **D5.2** — **The literal-braille fallback is BUILT**, because that claim was worth keeping.
+  ARCHITECTURE.md promised the display would never blank if the maths engine failed; nothing
+  implemented it. It is now core/literal.ts, wired in, and tested — including the test that pins
+  down that literary digits and Nemeth digits are different, so the fallback can never quietly
+  switch braille codes without saying so.
+
+## D6 · Security audit (20 Aug 2026, pre-ship)
+
+Run before calling this shipped. Result: **nothing to rotate, nothing to hide, nothing leaking.**
+
+- **D6.1** — No secret exists anywhere in the project. There is no API key, no token, no account and
+  no server. `git grep` for key/secret/password/token patterns returns only the ML *tokenizer* and
+  prose. `.env`, `*.key` and `*.pem` are gitignored and none are tracked.
+- **D6.2** — The app can make exactly three kinds of network request, and all three are enumerable:
+  (a) same-origin fetches of its own model files under `public/models/`, (b) same-origin fetches of
+  the SRE locale data under `public/sre/`, and (c) requests to a pod address the user typed in, on
+  their own LAN. There is no fourth. `e2e/offline.spec.ts` blocks every external request and asserts
+  none is attempted.
+- **D6.3** — Zero analytics or telemetry dependencies. The full runtime dependency list is seven
+  packages, all of them doing visible work.
+- **D6.4** — Student data (photographs, drawings, answers, progress) never leaves the machine.
+  Progress lives in one namespaced `localStorage` key with a working erase control; images are
+  processed in-page and never uploaded. This is the resolution of the brief's unanswered "data
+  sensitivity tier": the safe answer was to build a product with nowhere for the data to go.
+- **D6.5** — The two `npm audit` findings (`sharp`, `onnxruntime-node`) are **Node-only optional
+  dependencies of `@huggingface/transformers`** and never reach the browser bundle. They are
+  externalised in `vite.config.ts` and a unit test fails the build if either is ever imported.
