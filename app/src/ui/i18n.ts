@@ -560,6 +560,13 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
     'पॉड मौजूद नहीं? npm run pod चलाइए और 127.0.0.1:8080 से जुड़िए — यह असली प्रोटोकॉल बोलता है।',
   ],
   'hw.simCells': ['Simulated cells', 'नक़ली सेल'],
+  'hw.advanced': ['Setting up the hardware', 'हार्डवेयर सेट करना'],
+  'hw.advancedHint': [
+    'Cam wiring, the test dot, and what travels down the wire. Whoever assembled the display needs this once; a teacher never does.',
+    'कैम की वायरिंग, जाँच वाला डॉट, और तार पर क्या जाता है। जिसने डिस्प्ले जोड़ा उसे यह एक बार चाहिए; शिक्षक को कभी नहीं।',
+  ],
+  'hw.show': ['Show', 'दिखाइए'],
+  'hw.hide': ['Hide', 'छिपाइए'],
   'hw.calibration': ['Calibration', 'कैलिब्रेशन'],
   'hw.calLede': [
     'The handoff flags one thing as unconfirmed: whether dot 1 really drives cam track 0. Raise one dot below and look at the cell. If a different dot pops up, correct the mapping here — it is a setting, not a code change.',

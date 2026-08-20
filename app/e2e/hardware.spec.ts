@@ -38,6 +38,17 @@ test.afterAll(() => {
   pod?.kill();
 });
 
+/**
+ * Open the Device screen and reveal the half of it that is for whoever assembled the display.
+ *
+ * A teacher never needs the cam wiring, so it is one press away rather than in front of them —
+ * which means every test that touches it has to make that press too. Honest, and one line.
+ */
+async function openCalibration(page: Page) {
+  await openHardware(page);
+  await page.getByTestId('show-advanced').click();
+}
+
 async function openHardware(page: Page) {
   await page.goto('/');
   await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
@@ -71,6 +82,7 @@ test.describe('the hardware seam', () => {
     await page.getByTestId('connect-pods').click();
     await expect(page.getByTestId('link-cells')).toContainText(`${POD_CELLS} (reported`, { timeout: 15_000 });
 
+    await page.getByTestId('show-advanced').click();
     await page.getByTestId('test-dot-1').click();
     // Dot 1 with the default wiring is cam position 1 — ask the pod what it is actually showing.
     await expect
@@ -93,7 +105,7 @@ test.describe('the hardware seam', () => {
   });
 
   test('calibration changes the cam number without touching the braille', async ({ page }) => {
-    await openHardware(page);
+    await openCalibration(page);
 
     // The handoff's worked example: dots 1-2-5 is cam position 19.
     await expect(page.getByText('is cam position')).toContainText('19');
@@ -109,7 +121,7 @@ test.describe('the hardware seam', () => {
   });
 
   test('a single dot can be raised on every cell, for checking against the physical cam', async ({ page }) => {
-    await openHardware(page);
+    await openCalibration(page);
     await page.getByTestId('test-dot-3').click();
     await expect(page.getByTestId('test-dot-3')).toHaveClass(/is-current/);
     await page.getByTestId('test-clear').click();
@@ -127,5 +139,36 @@ test.describe('the hardware seam', () => {
     await expect(page.getByTestId('link-cells')).toContainText('(reported by the hardware)', { timeout: 15_000 });
     // The size control is gone: the hardware decides, not the slider.
     await expect(page.getByTestId('hw-cell-count')).toHaveCount(0);
+  });
+});
+
+/**
+ * A teacher opening the Device screen should see a device, not an engineering console.
+ *
+ * Cam bit order, the test dot and the wire protocol are needed once, by whoever assembled the
+ * display, and never again. They are one press away — which is not the same as hidden, and this is
+ * the test that keeps those two things apart.
+ */
+test.describe('the Device screen belongs to the teacher first', () => {
+  test('shows the connection, and offers the technical half rather than presenting it', async ({ page }) => {
+    await openHardware(page);
+
+    // What is connected, and how to connect something: visible.
+    await expect(page.getByTestId('link-label')).toBeVisible();
+    await expect(page.getByTestId('connect-usb')).toBeVisible();
+    await expect(page.getByTestId('pod-hosts')).toBeVisible();
+
+    // Cam wiring: offered, not shown.
+    await expect(page.getByTestId('bit-for-dot-1')).toBeHidden();
+    await expect(page.getByTestId('show-advanced')).toBeVisible();
+    await expect(page.getByTestId('show-advanced')).toHaveAttribute('aria-expanded', 'false');
+
+    await page.getByTestId('show-advanced').click();
+    await expect(page.getByTestId('bit-for-dot-1')).toBeVisible();
+    await expect(page.getByTestId('test-dot-1')).toBeVisible();
+    await expect(page.getByTestId('show-advanced')).toHaveAttribute('aria-expanded', 'true');
+
+    await page.getByTestId('show-advanced').click();
+    await expect(page.getByTestId('bit-for-dot-1')).toBeHidden();
   });
 });

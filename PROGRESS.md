@@ -34,11 +34,12 @@ parked idea from `NOTES.md` into a new arc rather than starting anything ad hoc.
 
 | Gate | Result |
 |---|---|
-| Unit tests | **506 passing** |
-| Journey tests | **110 passing** across board / reader / hardware / recognition / practice / class / offline / screens / a11y |
+| Unit tests | **511 passing** |
+| Journey tests | **117 passing** across board / reader / hardware / recognition / practice / class / offline / screens / a11y |
 | Syllabus accuracy | **69 of 69** lines translate cleanly — `npm run accuracy`, evidence in `docs/ACCURACY.md` |
-| Lighthouse accessibility | **100** (deployed build) |
-| Lighthouse SEO / best practices | **100 / 96→100** after the console 404 was removed |
+| Lighthouse (deployed) | **accessibility 100 · best practices 100 · SEO 100**, zero failed audits |
+| Deployed LCP / CLS | **349 ms / 0.00** |
+| The deployed site itself | `npm run check:deployed` — 17 checks against the live URL, all green |
 | Console errors | **zero**, asserted in the journey tests |
 | Offline | passes with every external request blocked, **and** with the network genuinely switched off |
 | Installable | service worker precaches 39 files including the Nemeth tables; 3.5 MB deploy |

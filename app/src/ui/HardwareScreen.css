@@ -286,3 +286,62 @@
   font-size: var(--t-tiny);
   line-height: 1.5;
 }
+
+/*
+ * The line between "a teacher plugging in a display" and "whoever assembled it".
+ *
+ * Everything past this button is needed once, by one person, and never again — so it is one press
+ * away rather than in front of a teacher who has twelve children waiting.
+ */
+.hw__disclosure {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s4);
+  width: 100%;
+  margin: var(--s5) 0 var(--s4);
+  padding: var(--s3) var(--s4);
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--ink-000);
+  box-shadow: inset 0 0 0 1px var(--edge);
+  color: var(--text-200);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: box-shadow var(--dur-ui) ease;
+}
+
+.hw__disclosure:hover {
+  box-shadow: inset 0 0 0 1px var(--edge-strong);
+}
+
+.hw__disclosurehead {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.hw__disclosurehead strong {
+  color: var(--text-100);
+  font-weight: 500;
+}
+
+.hw__disclosurehead small {
+  color: var(--text-400);
+  font-size: var(--t-tiny);
+  line-height: 1.5;
+}
+
+.hw__disclosureaction {
+  flex: none;
+  color: var(--signal);
+  font-size: var(--t-small);
+}
+
+/* With the technical half away, the connection panel has the row to itself. */
+.hw__grid:has(> .panel:only-child) {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 640px;
+}

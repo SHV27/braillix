@@ -491,3 +491,6 @@ Run before calling this shipped. Result: **nothing to rotate, nothing to hide, n
 - **D10.10** — The self-check returns keys, not sentences, like `learn/feedback.ts`. The English
   wall it used to put in front of a Hindi-reading teacher was in the sentences that explain what is
   wrong — precisely the part that has to be understood.
+- **D10.11** — The Device screen is a teacher's screen first. Cam wiring, the test dot and the wire
+  protocol sit behind one press labelled "Setting up the hardware": needed once, by whoever
+  assembled the display, and never again. Offered, not hidden — and a test keeps those two apart.

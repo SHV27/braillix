@@ -211,7 +211,12 @@ then connect to `127.0.0.1:8080` — or to both, with **All showing the same** s
 > class reading together? Mirrored, every child gets the same expression under their own fingers —
 > at the width of the smallest display, so nobody is left reading a truncated equation."
 
-Now the answer to the obvious question. Press **dot 1** in Calibration.
+Now the answer to the obvious question. Open **Setting up the hardware** and press **dot 1**.
+
+> "Notice that was behind one press. A teacher opening this screen sees what is plugged in and how
+> to plug something in. Cam bit order is needed once, by whoever assembled the display, and never
+> again — so it is one press away rather than in front of them."
+
 
 > "The hardware handoff flags one thing as unconfirmed: whether dot 1 really drives cam track 0. If
 > the physical cell raises the wrong dot, I change it here" — change the dropdown, show the cam

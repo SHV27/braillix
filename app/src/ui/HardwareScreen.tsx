@@ -44,6 +44,12 @@ export function HardwareScreen() {
   const usbCap = useBraillix((s) => s.capabilities.usb);
 
   const [podAddresses, setPodAddresses] = useState('192.168.1.42');
+  /*
+   * Everything below the connection is for whoever assembled the display, once. A teacher opening
+   * this screen wants to know what is plugged in and how to plug something in — putting cam bit
+   * order in front of them is the difference between a device screen and an engineering console.
+   */
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [podMode, setPodMode] = useState<PodMode>('chain');
   const [copied, setCopied] = useState(false);
 
@@ -203,92 +209,107 @@ export function HardwareScreen() {
           )}
         </section>
 
-        {/* ------------------------------------------------------------------ calibration */}
-        <section className="panel" aria-labelledby="cal-heading">
-          <h2 id="cal-heading" className="panel__title">
-            {t('hw.calibration')}
-          </h2>
-          <p className="panel__lede">{t('hw.calLede')}</p>
-
-          <div className="dottest" role="group" aria-label={t('hw.raiseDot')}>
-            {DOTS.map((dot) => (
-              <button
-                key={dot}
-                type="button"
-                className={`dottest__btn${testingDot === dot ? ' is-current' : ''}`}
-                data-testid={`test-dot-${dot}`}
-                onClick={() => void testDot(testingDot === dot ? null : dot)}
-              >
-                <span className="dottest__num num">{dot}</span>
-                <span className="dottest__cam num">{t('hw.cam', { position: toCam(profile, dotsToMask([dot])) })}</span>
-              </button>
-            ))}
-            <button type="button" className="btn" onClick={() => void testDot(null)} data-testid="test-clear">
-              {t('hw.clear')}
-            </button>
-          </div>
-
-          <table className="bitmap">
-            <caption className="visually-hidden">{t('hw.whichTrack')}</caption>
-            <thead>
-              <tr>
-                <th scope="col">{t('hw.dot')}</th>
-                <th scope="col">{t('hw.camBit')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {profile.bitOrder.map((bit, dotIndex) => (
-                <tr key={dotIndex}>
-                  <th scope="row" className="num">
-                    {t('hw.dotN', { dot: dotIndex + 1 })}
-                  </th>
-                  <td>
-                    <select
-                      className="select num"
-                      value={bit}
-                      name={`bit-for-dot-${dotIndex + 1}`}
-                      data-testid={`bit-for-dot-${dotIndex + 1}`}
-                      onChange={(event) => changeBit(dotIndex, Number(event.target.value))}
-                    >
-                      {Array.from({ length: DOT_COUNT }, (_, b) => (
-                        <option key={b} value={b}>
-                          {t('hw.bitN', { bit: b })}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          <label className="switch">
-            <input
-              type="checkbox"
-              checked={profile.reversed}
-              data-testid="reversed"
-              onChange={(event) => setReversed(event.target.checked)}
-            />
-            <span>{t('hw.reversed')}</span>
-          </label>
-
-          <div className="hw__actions">
-            <button type="button" className="btn" onClick={() => void homeDisplay()} data-testid="home">
-              {t('hw.home')}
-            </button>
-            <button type="button" className="btn" onClick={() => void copyCalibration()} data-testid="copy-calibration">
-              {copied ? t('hw.copied') : t('hw.copyConfig')}
-            </button>
-          </div>
-
-          <p className="hw__note">
-            <code>{maskToUnicode(dotsToMask([1, 2, 5]))}</code>{' '}
-            {t('hw.sanity', { position: toCam(profile, dotsToMask([1, 2, 5])) })}
-          </p>
-        </section>
       </div>
 
-      <section className="panel" aria-labelledby="proto-heading">
+      <button
+        type="button"
+        className="hw__disclosure"
+        aria-expanded={showAdvanced}
+        data-testid="show-advanced"
+        onClick={() => setShowAdvanced((current) => !current)}
+      >
+        <span className="hw__disclosurehead">
+          <strong>{t('hw.advanced')}</strong>
+          <small>{t('hw.advancedHint')}</small>
+        </span>
+        <span className="hw__disclosureaction">{showAdvanced ? t('hw.hide') : t('hw.show')}</span>
+      </button>
+
+      {/* ------------------------------------------------------------------ calibration */}
+      <section className="panel" aria-labelledby="cal-heading" hidden={!showAdvanced}>
+        <h2 id="cal-heading" className="panel__title">
+          {t('hw.calibration')}
+        </h2>
+        <p className="panel__lede">{t('hw.calLede')}</p>
+
+        <div className="dottest" role="group" aria-label={t('hw.raiseDot')}>
+          {DOTS.map((dot) => (
+            <button
+              key={dot}
+              type="button"
+              className={`dottest__btn${testingDot === dot ? ' is-current' : ''}`}
+              data-testid={`test-dot-${dot}`}
+              onClick={() => void testDot(testingDot === dot ? null : dot)}
+            >
+              <span className="dottest__num num">{dot}</span>
+              <span className="dottest__cam num">{t('hw.cam', { position: toCam(profile, dotsToMask([dot])) })}</span>
+            </button>
+          ))}
+          <button type="button" className="btn" onClick={() => void testDot(null)} data-testid="test-clear">
+            {t('hw.clear')}
+          </button>
+        </div>
+
+        <table className="bitmap">
+          <caption className="visually-hidden">{t('hw.whichTrack')}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{t('hw.dot')}</th>
+              <th scope="col">{t('hw.camBit')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {profile.bitOrder.map((bit, dotIndex) => (
+              <tr key={dotIndex}>
+                <th scope="row" className="num">
+                  {t('hw.dotN', { dot: dotIndex + 1 })}
+                </th>
+                <td>
+                  <select
+                    className="select num"
+                    value={bit}
+                    name={`bit-for-dot-${dotIndex + 1}`}
+                    data-testid={`bit-for-dot-${dotIndex + 1}`}
+                    onChange={(event) => changeBit(dotIndex, Number(event.target.value))}
+                  >
+                    {Array.from({ length: DOT_COUNT }, (_, b) => (
+                      <option key={b} value={b}>
+                        {t('hw.bitN', { bit: b })}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <label className="switch">
+          <input
+            type="checkbox"
+            checked={profile.reversed}
+            data-testid="reversed"
+            onChange={(event) => setReversed(event.target.checked)}
+          />
+          <span>{t('hw.reversed')}</span>
+        </label>
+
+        <div className="hw__actions">
+          <button type="button" className="btn" onClick={() => void homeDisplay()} data-testid="home">
+            {t('hw.home')}
+          </button>
+          <button type="button" className="btn" onClick={() => void copyCalibration()} data-testid="copy-calibration">
+            {copied ? t('hw.copied') : t('hw.copyConfig')}
+          </button>
+        </div>
+
+        <p className="hw__note">
+          <code>{maskToUnicode(dotsToMask([1, 2, 5]))}</code>{' '}
+          {t('hw.sanity', { position: toCam(profile, dotsToMask([1, 2, 5])) })}
+        </p>
+      </section>
+
+      <section className="panel" aria-labelledby="proto-heading" hidden={!showAdvanced}>
         <h2 id="proto-heading" className="panel__title">
           {t('hw.wire')}
         </h2>
