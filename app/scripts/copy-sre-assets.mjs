@@ -67,11 +67,22 @@ async function copyOnnxRuntimeWasm() {
   const dest = join(appRoot, 'public', 'ort');
   await mkdir(dest, { recursive: true });
 
+  /**
+   * The `ort-wasm-simd-threaded` family, all of it.
+   *
+   * ONNX Runtime picks a variant at runtime and Transformers.js reaches for the **asyncify** build
+   * in a worker. Copying only the plain one produced "no available backend found … failed to fetch
+   * ort-wasm-simd-threaded.asyncify.mjs" — so take the whole family and let the runtime choose.
+   * The `ort.*.mjs` bundles and the `transformers.node.*` files are deliberately left behind:
+   * they are for Node, and shipping them would only bloat the app.
+   */
+  const WANTED = /^ort-wasm-simd-threaded[.\w-]*\.(wasm|mjs)$/;
+
   let copied = 0;
   for (const dir of candidates) {
     if (!existsSync(dir)) continue;
     for (const entry of await readdir(dir)) {
-      if (!/\.(wasm|mjs)$/.test(entry)) continue;
+      if (!WANTED.test(entry)) continue;
       const from = join(dir, entry);
       if (!(await stat(from)).isFile()) continue;
       await cp(from, join(dest, entry));

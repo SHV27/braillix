@@ -1,0 +1,109 @@
+/**
+ * The recognition journey.
+ *
+ * The model is downloaded by `npm run fetch:model`, not committed (it is AGPL-3.0 and 76 MB), so
+ * these tests check BOTH states honestly:
+ *
+ *   · model absent  — the feature says so, offers the fix, and nothing else is affected
+ *   · model present — a real image is read by a real model, in a real browser, offline
+ *
+ * The second half skips itself when the model is not installed. A skipped test is honest; a test
+ * that quietly passes without exercising anything is not.
+ */
+
+import { expect, test } from '@playwright/test';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+
+const MODEL_PRESENT = existsSync(join(process.cwd(), 'public', 'models', 'formulanet', 'onnx', 'encoder_model.onnx'));
+
+test.describe('reading handwriting', () => {
+  test('offers samples so a demo never depends on the room’s lighting', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Read handwriting' }).click();
+    await expect(page.getByRole('heading', { name: 'Read handwriting', level: 1 })).toBeVisible();
+    await expect(page.locator('.samples__btn')).toHaveCount(6);
+  });
+
+  test('shows the recogniser exactly what it will see', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Read handwriting' }).click();
+    await page.getByTestId('sample-quadratic.svg').click();
+
+    // The preview is the cropped, normalised image — not the original. Being able to see that is
+    // the difference between "it didn't work" and "it only got half the equation".
+    await expect(page.locator('.rec__canvas')).toBeVisible();
+    await expect(page.getByText('cropped to the writing')).toBeVisible();
+  });
+
+  test('lets you write an equation with the mouse', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Read handwriting' }).click();
+    await page.getByTestId('mode-draw').click();
+
+    const pad = page.getByTestId('draw-pad');
+    await expect(pad).toBeVisible();
+    const box = (await pad.boundingBox())!;
+
+    // Draw a rough "1 + 1".
+    await page.mouse.move(box.x + 80, box.y + 40);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 80, box.y + 140, { steps: 8 });
+    await page.mouse.up();
+
+    await page.getByTestId('pad-done').click();
+    await expect(page.locator('.rec__canvas')).toBeVisible();
+  });
+
+  test('the rest of the app is untouched when recognition is unavailable', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
+    // Whatever recognition's state, the core journey still works — that is the whole design law.
+    await page.getByTestId('latex-input').fill('2+3=5');
+    await expect(page.getByTestId('braille-unicode')).toHaveText('⠼⠆⠬⠒⠀⠨⠅⠀⠼⠢');
+  });
+});
+
+test.describe('reading handwriting — with the model installed', () => {
+  test.skip(!MODEL_PRESENT, 'run `npm run fetch:model` to exercise the real recogniser');
+
+  test('reads a real image, on this device, and hands the result over for correction', async ({ page }) => {
+    test.setTimeout(180_000);
+
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Read handwriting' }).click();
+    await page.getByTestId('sample-fraction.svg').click();
+
+    await page.getByTestId('run-recognition').click();
+
+    // First run loads ~76 MB from disk into WASM, which takes a while on a cold cache.
+    await expect(page.getByTestId('rec-latex')).toBeVisible({ timeout: 150_000 });
+
+    const latex = await page.getByTestId('rec-latex').inputValue();
+    expect(latex.trim().length, 'the recogniser returned nothing').toBeGreaterThan(0);
+    console.log('recognised:', JSON.stringify(latex));
+
+    // It reports a quality judgement with reasons, never a bare number.
+    await expect(page.getByTestId('rec-quality')).toBeVisible();
+
+    // Nothing reached the display until a human said so.
+    await page.getByTestId('send-to-display').click();
+    await expect(page.getByRole('heading', { name: 'Read mathematics with your hands' })).toBeVisible();
+    await expect(page.getByTestId('latex-input')).toHaveValue(latex);
+  });
+
+  test('a correction by hand is what actually gets read', async ({ page }) => {
+    test.setTimeout(180_000);
+
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Read handwriting' }).click();
+    await page.getByTestId('sample-quadratic.svg').click();
+    await page.getByTestId('run-recognition').click();
+    await expect(page.getByTestId('rec-latex')).toBeVisible({ timeout: 150_000 });
+
+    // Whatever the model said, the human has the last word.
+    await page.getByTestId('rec-latex').fill('2+3=5');
+    await page.getByTestId('send-to-display').click();
+    await expect(page.getByTestId('braille-unicode')).toHaveText('⠼⠆⠬⠒⠀⠨⠅⠀⠼⠢');
+  });
+});

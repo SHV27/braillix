@@ -65,7 +65,7 @@ const INITIAL_CAPABILITIES: CapabilityMap = {
 
 /* ------------------------------------------------------------------ view + settings */
 
-export type ViewId = 'read' | 'hardware' | 'atlas';
+export type ViewId = 'read' | 'recognise' | 'hardware' | 'atlas';
 
 /**
  * How the display is being driven.

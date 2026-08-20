@@ -286,3 +286,22 @@ Veto any of these with one word:
 - **D3.11 (Arc 3)** — The status-strip capability tooltips were anchored to their left edge, which
   pushed the page 61 px sideways at 1440. Anchored to the right and the strip clips on X only.
   Caught by the "no horizontal overflow" assertion in the appearance test, not by looking.
+- **D3.12 (Arc 4)** — **Recognition reports a *quality judgement*, not a percentage.** FormulaNet
+  emits no calibrated probability, so a "94% confident" badge would be fabricated. Instead the app
+  reports observations it can defend: does the output parse as maths (checked by running it through
+  the same engine that drives the display), did the decoder start repeating itself (what an
+  autoregressive model does when it loses the thread), and how much of the frame the writing filled.
+- **D3.13 (Arc 4)** — **The tokenizer is constructed explicitly from its two JSON files** rather
+  than via `from_pretrained`. That loader silently hands the constructor `null` when a file does not
+  arrive, surfacing as "Tokenizer must be a valid object" with no indication of which file. Ours
+  names the missing file and tells the user to run `npm run fetch:model`.
+- **D3.14 (Arc 4)** — **Ship the whole `ort-wasm-simd-threaded` family.** Trimming to the plain
+  build to save space broke recognition entirely: Transformers.js reaches for the *asyncify* variant
+  inside a worker and failed with "no available backend found". Node-only ORT bundles are still
+  excluded.
+- **D3.15 (Arc 4)** — **Images are decoded through an `<img>` element, not `createImageBitmap`.**
+  Chrome refuses SVG blobs in `createImageBitmap`, and Braillix's own sample images are SVG. The
+  image element handles SVG, PNG, JPEG and phone output identically.
+- **D3.16 (Arc 4)** — Recogniser output is tidied (`\frac { 2 2 } { 7 }` → `\frac{22}{7}`) because
+  token-spaced LaTeX reads as broken to a human. The tidy pass is proven meaning-preserving by
+  tests that compare the BRAILLE before and after, not the text.

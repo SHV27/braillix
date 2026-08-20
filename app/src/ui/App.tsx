@@ -5,9 +5,11 @@ import { StatusStrip } from './StatusStrip';
 import { ReadScreen } from './ReadScreen';
 import { AtlasScreen } from './AtlasScreen';
 import { HardwareScreen } from './HardwareScreen';
+import { RecogniseScreen } from './RecogniseScreen';
 
 const VIEWS: { id: ViewId; label: string; hint: string }[] = [
   { id: 'read', label: 'Read', hint: 'Type maths and read it on the display' },
+  { id: 'recognise', label: 'Read handwriting', hint: 'Photograph or write an equation and have it read' },
   { id: 'hardware', label: 'Hardware', hint: 'Connect a pod, and calibrate the cam wiring' },
   { id: 'atlas', label: 'Cell atlas', hint: 'All 64 cam positions and what they mean' },
 ];
@@ -63,6 +65,7 @@ export function App() {
 
       <main id="main" className="main">
         {view === 'read' && <ReadScreen />}
+        {view === 'recognise' && <RecogniseScreen />}
         {view === 'hardware' && <HardwareScreen />}
         {view === 'atlas' && <AtlasScreen />}
       </main>
