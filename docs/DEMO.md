@@ -32,6 +32,16 @@ installs. Keep the local one for the demo: it has the model.
 The app opens on the **Board**, with a quadratic already loaded and the display set to **one cell**
 — which is what the hardware team will actually have built.
 
+On a machine that has never run Braillix there is a **"New here? Sixty seconds"** panel with three
+things to press. Press the first one and let it do the talking:
+
+> "That is the whole onboarding. Three things a teacher can press, each of which does what it says.
+> No tour, no arrows, no 'next'. It disappears when they dismiss it and never comes back."
+
+*(To get it back for a rehearsal: open the console and run
+`localStorage.removeItem('braillix.firstrun.done')`, then reload. Or just skip it — the panel says
+"I know it already".)*
+
 Clear the box and type, slowly, in front of them: `2/3 + 1/6`
 
 > "That is how a maths teacher writes. Not `\frac{2}{3}`. The person who will own this device is a

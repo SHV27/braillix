@@ -65,3 +65,43 @@ test.describe('what the student hears', () => {
     }
   });
 });
+
+/**
+ * A question read aloud.
+ *
+ * "Say it" used to be silent on exactly the lines a class most wants to hear — a question with
+ * words in it has no expression tree to walk, so there was nothing for the maths engine to speak.
+ * Now the words are spoken as words and the maths inside them as mathematics, each in its own
+ * language, and the transcript on screen shows both halves whether or not this machine has the
+ * voices to say them.
+ */
+test.describe('reading a question aloud', () => {
+  test('says the words and the maths, and shows the transcript of both', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
+
+    await page.getByTestId('latex-input').fill('वृत्त का क्षेत्रफल pi r^2 है');
+    await expect(page.getByTestId('question-strip')).toBeVisible({ timeout: 10_000 });
+
+    // What each utterance would be, without needing a voice installed on the machine.
+    const said = await page.evaluate(async () => {
+      const spoken: { text: string; lang: string }[] = [];
+      const original = window.speechSynthesis.speak.bind(window.speechSynthesis);
+      window.speechSynthesis.speak = (utterance: SpeechSynthesisUtterance) => {
+        spoken.push({ text: utterance.text, lang: utterance.lang });
+      };
+      (window as unknown as { __braillix: { getState: () => { sayCurrent: () => void } } }).__braillix
+        .getState()
+        .sayCurrent();
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+      window.speechSynthesis.speak = original;
+      return spoken;
+    });
+
+    expect(said.length, 'each part is its own utterance').toBeGreaterThanOrEqual(2);
+    // The Hindi words go to a Hindi voice even though the interface is in English.
+    expect(said.some((part) => part.lang.startsWith('hi') && part.text.includes('क्षेत्रफल'))).toBe(true);
+    // And the maths is spoken as mathematics, not read out as characters.
+    expect(said.some((part) => /squared/i.test(part.text))).toBe(true);
+  });
+});

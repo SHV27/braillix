@@ -59,4 +59,14 @@ export interface ClassData {
   readonly records: readonly AttemptRecord[];
 }
 
+/**
+ * How a worksheet's id appears in a record when the worksheet was practised as a drill.
+ *
+ * Prefixed so a record can never be mistaken for one of the built-in lessons, and stripped again
+ * when the records are read back — otherwise a teacher's own worksheet would appear in the
+ * spreadsheet as a blank column, which is the sort of small wrongness nobody reports and everybody
+ * notices.
+ */
+export const WORKSHEET_LESSON_PREFIX = 'ws:';
+
 export const EMPTY_CLASS: ClassData = { version: 1, students: [], worksheets: [], records: [] };

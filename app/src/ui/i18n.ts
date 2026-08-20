@@ -794,7 +794,7 @@ export function translate(key: StringKey, vars?: Record<string, string | number>
  */
 export type Bilingual = readonly [en: string, hi: string];
 
-export function pick(text: Bilingual, forLang: Lang = current): string {
+function pick(text: Bilingual, forLang: Lang = current): string {
   return forLang === 'hi' ? text[1] : text[0];
 }
 

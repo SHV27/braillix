@@ -25,10 +25,11 @@ import { PATTERN_COUNT, type DotMask } from './braille';
  */
 const BRAILLE_ASCII = ' A1B\'K2L@CIF/MSP"E3H9O6R^DJG>NTQ,*5<-U8V.%[$+X!&;:4\\0Z7(_?W]#Y)=';
 
-export const BRF_DEFAULT_LINE_LENGTH = 40;
-export const BRF_DEFAULT_PAGE_LINES = 25;
+/** What an embosser is set to unless somebody says otherwise. */
+const BRF_DEFAULT_LINE_LENGTH = 40;
+const BRF_DEFAULT_PAGE_LINES = 25;
 
-export class BrfError extends Error {}
+class BrfError extends Error {}
 
 if (BRAILLE_ASCII.length !== PATTERN_COUNT) {
   // A module-level check rather than a test-only one: a wrong table would emboss silent nonsense,

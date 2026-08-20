@@ -38,7 +38,7 @@ import { DisplayLink } from './transport/link';
 import { HttpPodTransport, type PodMode } from './transport/httppod';
 import { WebSerialTransport, webSerialSupported } from './transport/webserial';
 import { TransportError, type ButtonEvent, type TransportStatus } from './transport/types';
-import { cancelSpeech, speak, speechAvailable, voiceFor, whenVoicesReady } from './ui/speech';
+import { cancelSpeech, speak, speakSequence, speechAvailable, voiceFor, whenVoicesReady } from './ui/speech';
 import { lang, translate } from './ui/i18n';
 
 /* ------------------------------------------------------------------ capabilities */
@@ -677,14 +677,18 @@ export const useBraillix = create<BraillixState>((set, get) => {
        */
       if (mixedLine) {
         void Promise.all(
-          mixedLine.segments.map((segment) =>
-            segment.kind === 'maths' && segment.latex
-              ? speakMaths(segment.latex, lang()).catch(() => segment.text)
-              : Promise.resolve(segment.text),
-          ),
+          mixedLine.segments.map(async (segment) => {
+            // Devanagari words go to a Hindi voice whatever language the interface is in: an
+            // English voice handed Devanagari says nothing a child can use.
+            if (segment.kind !== 'maths' || !segment.latex) {
+              return { text: segment.text, locale: segment.code === 'bharati' ? ('hi' as const) : lang() };
+            }
+            const spoken = await speakMaths(segment.latex, lang()).catch(() => segment.text);
+            return { text: spoken, locale: lang() };
+          }),
         ).then((parts) => {
-          set({ spokenText: parts.join(' ') });
-          speak(parts.join(' '), lang(), settings.speechRate);
+          set({ spokenText: parts.map((part) => part.text).join(' ') });
+          speakSequence(parts, settings.speechRate);
         });
         return;
       }

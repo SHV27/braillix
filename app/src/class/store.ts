@@ -12,7 +12,7 @@
 
 import { create } from 'zustand';
 import { loadClassData, mergeClassData, newId, saveClassData, eraseClassData } from './storage';
-import type { AttemptRecord, ClassData, Student, Worksheet, WorksheetItem } from './types';
+import { WORKSHEET_LESSON_PREFIX, type AttemptRecord, type ClassData, type Student, type Worksheet, type WorksheetItem } from './types';
 
 interface ClassState extends ClassData {
   /** Which student the practice screen is recording against, if any. */
@@ -201,6 +201,9 @@ export function recordsToCsv(data: ClassData): string {
   const studentName = new Map(data.students.map((student) => [student.id, student.name]));
 
   const escape = (value: string) => `"${value.replace(/"/g, '""')}"`;
+  /** A worksheet practised as a drill is recorded under a prefixed id; the sheet is the same sheet. */
+  const sheetOf = (id: string) =>
+    worksheetTitle.get(id.startsWith(WORKSHEET_LESSON_PREFIX) ? id.slice(WORKSHEET_LESSON_PREFIX.length) : id) ?? '';
   const rows = [['student', 'group', 'worksheet', 'item', 'correct', 'when'].join(',')];
 
   for (const entry of [...data.records].sort((a, b) => a.at - b.at)) {
@@ -209,7 +212,7 @@ export function recordsToCsv(data: ClassData): string {
       [
         escape(studentName.get(entry.studentId) ?? entry.studentId),
         escape(student?.group ?? ''),
-        escape(worksheetTitle.get(entry.worksheetId) ?? ''),
+        escape(sheetOf(entry.worksheetId)),
         escape(entry.label ?? itemSource.get(entry.itemId) ?? entry.itemId),
         entry.correct ? 'yes' : 'no',
         escape(new Date(entry.at).toISOString()),

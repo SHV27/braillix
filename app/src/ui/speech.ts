@@ -85,3 +85,29 @@ export function speak(text: string, locale: SpeechLocale, rate = 1): void {
 
   window.speechSynthesis.speak(utterance);
 }
+
+/**
+ * Say several things in a row, each in its own language.
+ *
+ * A question is "दो संख्याओं का योग 12 है" — Hindi words around English-spoken mathematics, or the
+ * other way round. Handing all of that to one voice means one of the halves is read by a voice
+ * that cannot pronounce it: an English voice given Devanagari says nothing useful, and it is the
+ * half a child was listening for.
+ *
+ * So each part is its own utterance with its own locale, queued rather than interrupting — the
+ * cancel happens once, at the start.
+ */
+export function speakSequence(parts: readonly { text: string; locale: SpeechLocale }[], rate = 1): void {
+  if (!speechAvailable()) return;
+  window.speechSynthesis.cancel();
+
+  for (const part of parts) {
+    if (!part.text.trim()) continue;
+    const utterance = new SpeechSynthesisUtterance(part.text);
+    utterance.lang = VOICE_LANG[part.locale];
+    utterance.rate = Math.min(Math.max(rate, 0.5), 2);
+    const voice = pickVoice(part.locale);
+    if (voice) utterance.voice = voice;
+    window.speechSynthesis.speak(utterance);
+  }
+}

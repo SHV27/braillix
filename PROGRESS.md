@@ -34,8 +34,8 @@ parked idea from `NOTES.md` into a new arc rather than starting anything ad hoc.
 
 | Gate | Result |
 |---|---|
-| Unit tests | **511 passing** |
-| Journey tests | **117 passing** across board / reader / hardware / recognition / practice / class / offline / screens / a11y |
+| Unit tests | **516 passing** |
+| Journey tests | **118 passing** across board / reader / hardware / recognition / practice / class / offline / screens / a11y |
 | Syllabus accuracy | **69 of 69** lines translate cleanly — `npm run accuracy`, evidence in `docs/ACCURACY.md` |
 | Lighthouse (deployed) | **accessibility 100 · best practices 100 · SEO 100**, zero failed audits |
 | Deployed LCP / CLS | **349 ms / 0.00** |

@@ -212,3 +212,24 @@ describe('ids', () => {
     expect(ids.size).toBe(500);
   });
 });
+
+describe('a worksheet practised as a drill', () => {
+  it('still names its worksheet in the spreadsheet', () => {
+    /*
+     * A worksheet played as a drill is recorded under a prefixed id, so a record can never be
+     * mistaken for one of the built-in lessons. The spreadsheet has to undo that, or a teacher's
+     * own worksheet appears as a blank column — the sort of small wrongness nobody reports and
+     * everybody notices.
+     */
+    const csv = recordsToCsv({
+      version: 1,
+      students: [{ id: 's1', name: 'Asha' }],
+      worksheets: [{ id: 'w1', title: 'Tuesday, fractions', items: [], createdAt: 0, updatedAt: 0 }],
+      records: [
+        { studentId: 's1', worksheetId: 'ws:w1', itemId: 'ws:w1#0', correct: true, at: 1, label: '1/2' },
+      ],
+    });
+    expect(csv).toContain('"Tuesday, fractions"');
+    expect(csv).toContain('"1/2"');
+  });
+});

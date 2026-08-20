@@ -11,19 +11,12 @@
  * that teaches.
  */
 
-import type { Worksheet } from '../class/types';
+import { WORKSHEET_LESSON_PREFIX, type Worksheet } from '../class/types';
 import type { Lesson } from './lessons';
-
-/** Lesson ids for worksheets are prefixed so a record can never be mistaken for a built-in lesson. */
-export const WORKSHEET_PREFIX = 'ws:';
-
-export function isWorksheetLesson(id: string): boolean {
-  return id.startsWith(WORKSHEET_PREFIX);
-}
 
 export function worksheetToLesson(worksheet: Worksheet): Lesson {
   return {
-    id: `${WORKSHEET_PREFIX}${worksheet.id}`,
+    id: `${WORKSHEET_LESSON_PREFIX}${worksheet.id}`,
     title: [worksheet.title, worksheet.title],
     teaches: ['', ''],
     rule: ['', ''],
