@@ -22,7 +22,9 @@ app/public/ort/
 # Vercel's local project link. Not a secret, but not ours to commit either.
 .vercel/
 
-# Test output
+# Test output. The root-level one appears when Playwright is run from the repo root rather than
+# from app/ — it is still test output, and it was committed once before this line existed.
+test-results/
 app/test-results/
 app/playwright-report/
 app/screenshots/*.png
