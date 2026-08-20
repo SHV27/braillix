@@ -28,8 +28,8 @@ NOTES.md into a new arc.
 
 | Gate | Result |
 |---|---|
-| Unit tests | **278 passing** (golden Nemeth, all 26 letters + 10 digits cross-checked against the engine, XML reader, protocol conformance, six-key entry, feedback) |
-| Journey tests | **83 passing** across read / reader / hardware / recognition / practice / offline / screens |
+| Unit tests | **299 passing** (golden Nemeth, all 26 letters + 10 digits cross-checked against the engine, XML reader, protocol conformance, six-key entry, feedback) |
+| Journey tests | **87 passing** across read / reader / hardware / recognition / practice / offline / screens |
 | Lighthouse accessibility | **100** |
 | Lighthouse best practices | **100** |
 | LCP | **650 ms** (target < 2.5 s) |
@@ -39,7 +39,7 @@ NOTES.md into a new arc.
 | Horizontal overflow | none, asserted at 390 / 834 / 1440 on every screen |
 | Keyboard only | every screen tabbable, no traps, reader fully operable |
 | Screen-reader structure | landmarks, one h1 per screen, every control named, live regions |
-| Fresh clone | clone + npm ci + 278 tests pass on a cold machine (21 MB repo) |
+| Fresh clone | clone + npm ci + 299 tests pass on a cold machine (21 MB repo) |
 
 ## What exists
 

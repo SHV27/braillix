@@ -87,9 +87,14 @@ test.describe('Braillix — the core journey', () => {
 
     // The maths engine must come up ready…
     await expect(strip.getByText('Maths engine')).toBeVisible();
-    // …and recognition must honestly report that its model is not installed.
-    await expect(strip.getByText('Recognition')).toBeVisible();
-    await expect(strip.getByText('on-device model not installed')).toBeAttached();
+    // …and recognition must report whichever state is TRUE on this machine, with a fix when it is
+    // not ready. Asserting one particular state would make this test a statement about the tester's
+    // laptop rather than about the product.
+    const recognition = strip.locator('.cap', { hasText: 'Recognition' });
+    await expect(recognition).toBeVisible();
+    const state = (await recognition.locator('.cap__state').textContent())?.trim();
+    expect(['ready', 'off', 'checking']).toContain(state);
+    if (state === 'off') await expect(recognition.locator('.cap__fix')).toContainText('fetch:model');
   });
 
   test('the whole app is reachable by keyboard alone', async ({ page }) => {

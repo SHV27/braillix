@@ -12,7 +12,7 @@
  */
 
 import { create } from 'zustand';
-import { DEFAULT_SIMULATED_CELLS } from './config';
+import { DEFAULT_SIMULATED_CELLS, LOCAL_MODEL_PATH } from './config';
 import { renderFrame, windowFollowingCursor, type Frame } from './core/frame';
 import { simulatedProfile, type BitOrder, type DisplayProfile } from './core/profile';
 import { initSre, type SpeechLocale } from './core/sre-service';
@@ -149,6 +149,14 @@ interface BraillixState {
   updateSettings: (patch: Partial<Settings>) => void;
   sayCurrent: () => void;
 
+  /**
+   * What the speech engine would say for the current node, as text.
+   *
+   * Shown on screen because a machine without a Hindi voice installed can still demonstrate Hindi
+   * output, and because a sighted teacher wants to see what the student is hearing.
+   */
+  spokenText: string;
+
   /** Announcement for the ARIA live region — every state change says what happened. */
   announcement: string;
 
@@ -234,9 +242,12 @@ export const useBraillix = create<BraillixState>((set, get) => {
       ...project({ activeCells: rendering.cells, windowStart: 0, cursor: null }),
     });
 
+    // Always compute the transcript, even with speech switched off — it is shown on screen.
+    const spoken = await speakNode(node, settings.speechLocale);
+    if (get().cursorId !== node.id) return;
+    set({ spokenText: spoken });
     if (settings.speechOn && options.announce !== false) {
-      const spoken = await speakNode(node, settings.speechLocale);
-      if (get().cursorId === node.id) speak(`${label}. ${spoken}`, settings.speechLocale, settings.speechRate);
+      speak(`${label}. ${spoken}`, settings.speechLocale, settings.speechRate);
     }
   }
 
@@ -575,6 +586,7 @@ export const useBraillix = create<BraillixState>((set, get) => {
       });
     },
 
+    spokenText: '',
     announcement: '',
 
     /** Probe every optional capability once, at startup, and report each honestly. */
@@ -627,12 +639,27 @@ export const useBraillix = create<BraillixState>((set, get) => {
             },
       );
 
-      setCapability('recognition', {
-        state: 'unavailable',
-        label: 'Recognition',
-        reason: 'on-device model not installed',
-        fix: 'Run `npm run fetch:model` to enable reading handwriting.',
-      });
+      // Ask the disk rather than assuming. A badge that says 'not installed' about a model that IS
+      // installed is exactly the kind of small dishonesty this status strip exists to prevent.
+      try {
+        const url = new URL(`${LOCAL_MODEL_PATH}formulanet/config.json`, document.baseURI).href;
+        const response = await fetch(url);
+        const body = response.ok ? await response.text() : '';
+        const installed = body.trimStart().startsWith('{');
+        setCapability('recognition', {
+          state: installed ? 'ready' : 'unavailable',
+          label: 'Recognition',
+          reason: installed ? 'on this device, offline' : 'on-device model not installed',
+          fix: installed ? undefined : 'Run `npm run fetch:model` once (76 MB) to enable reading handwriting.',
+        });
+      } catch {
+        setCapability('recognition', {
+          state: 'unavailable',
+          label: 'Recognition',
+          reason: 'could not check whether the model is installed',
+          fix: 'Run `npm run fetch:model` once (76 MB) to enable reading handwriting.',
+        });
+      }
     },
   };
 });

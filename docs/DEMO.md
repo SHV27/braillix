@@ -59,6 +59,15 @@ Press **↓ In**, then **→ Next**. Watch the breadcrumb: *Fraction ▸ Numerat
 > "Both offline, both free. The research on braille maths is unambiguous: readers want to hear the
 > expression while their fingers read it."
 
+The **Spoken** line shows the transcript either way — so even on a laptop with no Hindi voice
+installed, you can point at *एक्स वर्ग धन चिह्न 1* and show that the Hindi maths engine is real.
+
+> **To actually HEAR Hindi on Windows** (do this the night before, it takes two minutes):
+> Settings → Time & language → Language & region → **Add a language** → search **हिन्दी / Hindi** →
+> Next → tick **Text-to-speech** → Install. Then restart the browser.
+> This laptop currently has English (India) voices — Heera and Ravi — but no Hindi voice, so the
+> status strip will say so honestly rather than playing nothing.
+
 ---
 
 ## 2 · Any number of cells (30 sec)
@@ -154,7 +163,7 @@ Finish on **Cell atlas**.
 npm run verify
 ```
 
-> "278 unit tests and 62 browser tests. The braille is checked against the published Nemeth code —
+> "299 unit tests and 87 browser tests. The braille is checked against the published Nemeth code —
 > every letter, every digit, and ten full expressions. There are tests that fail the build if
 > anyone hardcodes a cell count or does hardware bit arithmetic outside the one file allowed to.
 > And there is a test that blocks every external network request and walks the whole product — it

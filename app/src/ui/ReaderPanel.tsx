@@ -32,6 +32,7 @@ export function ReaderPanel() {
   const updateSettings = useBraillix((s) => s.updateSettings);
   const speechCap = useBraillix((s) => s.capabilities.speech);
   const activeCells = useBraillix((s) => s.activeCells);
+  const spokenText = useBraillix((s) => s.spokenText);
 
   // Keyboard navigation. Bound at the document so the reader never has to hunt for focus —
   // suppressed while typing, because the expression field needs its own arrow keys.
@@ -194,6 +195,13 @@ export function ReaderPanel() {
               <kbd>E</kbd> expand
             </p>
           </div>
+
+          {spokenText && (
+            <p className="reader__spoken" data-testid="spoken-text">
+              <span className="reader__spokenlabel">Spoken</span>
+              <span lang={settings.speechLocale}>{spokenText}</span>
+            </p>
+          )}
 
           <p className="reader__pod">
             The same three moves are the pod’s three buttons: <strong>Prev</strong>,{' '}
