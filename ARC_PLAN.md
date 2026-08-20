@@ -246,4 +246,7 @@ Acceptance (frozen):
 - [x] A line does not open with a one-letter island of algebra
 - [x] A comma does not stop the maths parser
 - [x] ऋ and ऌ after a consonant read back as matras
-- [x] Thirteen whole questions added to the corpus permanently — **162 lines, all round-tripping**
+- [x] A binary operator cannot open a BRACKET either — "(in cm)" was reaching the display as (∈ cm)
+- [x] A hyphen between two whole words is a hyphen, not a minus sign
+- [x] A comma is read at the baseline, not up inside a superscript
+- [x] Sixteen whole questions added to the corpus permanently — **165 lines, all round-tripping**

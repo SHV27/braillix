@@ -311,6 +311,9 @@ export const SYLLABUS: readonly SyllabusTopic[] = [
       { source: 'दो संख्याओं का योग 25 है और उनका अंतर 7 है।', says: 'a Hindi question with two numbers', words: true },
       { source: 'দুটি সংখ্যার যোগফল 25 এবং তাদের অন্তর 7।', says: 'the same question in Bengali', words: true },
       { source: 'Ravi ke paas 5 सेब हैं और Sita ke paas 3 सेब हैं।', says: 'Latin and Devanagari alternating', words: true },
+      { source: 'A right-angled triangle has sides 3 cm, 4 cm and 5 cm.', says: 'a hyphenated English adjective', words: true },
+      { source: 'The angles are 30 degrees, 60 degrees and 90 degrees.', says: 'a list of angles separated by commas', words: true },
+      { source: 'Find the value of x (in cm).', says: 'an English word inside brackets', words: true },
     ],
   },
   {

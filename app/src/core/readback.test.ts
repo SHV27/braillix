@@ -139,6 +139,13 @@ describe('the symbols a senior class needs', () => {
     expect(read('⠼⠆⠀⠐⠂⠀⠼⠒')).toBe('2:3');
   });
 
+  it('reads a comma at the baseline, not up in the superscript', () => {
+    // `30°, 60°` puts the comma straight after the degree sign with no baseline indicator, because
+    // Nemeth does not need one — a comma is never part of a superscript. The reader used to leave it
+    // up there, so a list of angles came back as 30^(°,)60^(°).
+    expect(read('⠼⠒⠴⠘⠨⠡⠠⠖⠴⠘⠨⠡')).toBe('30^(°),60^(°)');
+  });
+
   it('reads a capital Greek letter from the same cells as the small one', () => {
     expect(read('⠨⠠⠙')).toBe('Δ');
     expect(read('⠨⠙')).toBe('δ');

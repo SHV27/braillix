@@ -659,3 +659,13 @@ Run before calling this shipped. Result: **nothing to rotate, nothing to hide, n
   "twelve by four" and "twelve divided by four" both come out as one division sign.
 - **D15.8** — ऋ and ऌ after a consonant are that consonant's matra, like every other vowel in
   Bharati. Without it वृत्त — the radius of a circle — read back as वऋत्त.
+- **D15.9** — The "needs a left operand" rule applies inside a bracket too, and lives in the parser
+  as well as the splitter. "(in cm)" was reaching the display as (∈ cm): the bracket opened and the
+  very next thing said "is a member of". Two short lists, each with its own test, because the two
+  decisions happen at different times.
+- **D15.10** — A hyphen between two whole words is a hyphen. "A right-angled triangle has sides"
+  was read as algebra because of the dash in the middle of an ordinary English adjective. `a-b`
+  keeps its minus, because single letters either side of a dash are a subtraction.
+- **D15.11** — A comma is read at the baseline. `30°, 60°` writes the comma straight after the
+  degree sign with no baseline indicator, because Nemeth does not need one — punctuation is never
+  part of a superscript — and the reader was leaving it up there.

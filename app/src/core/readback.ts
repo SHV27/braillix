@@ -393,6 +393,10 @@ class Reader {
     // the members of a set (⠂⠠⠆⠠⠒), or separating the terms of a progression, where it is followed
     // by a space rather than by a digit — which is how this rule came to be written.
     if (run === 1 && (after in DIGITS || after === '\u2800' || after === '')) {
+      // Punctuation is read at the baseline. `30^\u00b0, 60^\u00b0` puts the comma straight after the degree
+      // sign with no baseline indicator, and Nemeth does not need one — a comma is never part of a
+      // superscript. Without this the comma was read as though it were up there with the degree.
+      this.closeLevels();
       this.out.push(',');
       this.last = 'other';
       return 1;

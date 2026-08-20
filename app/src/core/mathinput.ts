@@ -132,6 +132,16 @@ const WORD_SYMBOLS: Readonly<Record<string, string>> = {
   integral: '\\int',
 };
 
+/**
+ * Words in the table above that stand for a BINARY operator.
+ *
+ * They need something on their left, so where there is nothing — the start of a line, the inside of
+ * a freshly opened bracket, straight after another operator — the word is a word. `mixed.ts` keeps
+ * its own copy of this rule for the start of a line, because it decides before this parser is ever
+ * called; the two lists are short and each is checked by its own test.
+ */
+const NEEDS_A_LEFT_OPERAND = new Set(['in', 'by', 'to', 'cup', 'cap', 'subset', 'subseteq', 'supset', 'notin']);
+
 /** Two- and three-character sequences that mean one thing. Longest first — order matters. */
 const MULTI: readonly (readonly [string, string])[] = [
   ['<=', '\\le'],
@@ -719,7 +729,15 @@ class Parser {
     if (CAPITAL_GREEK.has(word)) return `\\${word}`;
 
     const symbol = WORD_SYMBOLS[lower];
-    if (symbol !== undefined) return symbol;
+    if (symbol !== undefined) {
+      // A binary operator needs something on its left. "(in cm)" was reaching the display as
+      // (∈ cm) — the bracket opened and the very next thing said "is a member of". Same rule as the
+      // one `mixed.ts` applies at the start of a line, applied here at the start of a bracket.
+      const previous = this.#tokens[this.#index - 2];
+      const nothingToTheLeft = !previous || previous.kind === 'open' || previous.kind === 'op';
+      if (nothingToTheLeft && NEEDS_A_LEFT_OPERAND.has(lower)) return word.split('').join('');
+      return symbol;
+    }
 
     // Anything else is variables: a run of letters is a product of them, as `ab` is on a maths line.
     return word.split('').join('');

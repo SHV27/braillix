@@ -220,3 +220,24 @@ describe('a comma does not end the mathematics', () => {
     expect(toLatex('a, b, c').latex).toBe('a,b,c');
   });
 });
+
+describe('the three that a real sentence found', () => {
+  it('does not open a BRACKET with "is a member of" either', () => {
+    // "(in cm)" reached the display as (∈ cm). The rule is about what is on the operator's left,
+    // and inside a freshly opened bracket there is nothing there any more than at the start of a
+    // line. Where there IS something, it is still membership.
+    expect(toLatex('x (in cm)').latex).toBe('x(incm)');
+    expect(toLatex('x in A').latex).toBe('x\\in A');
+    expect(toLatex('A cup B').latex).toBe('A\\cup B');
+  });
+
+  it('reads a hyphen between two words as a hyphen, not a minus', async () => {
+    // "A right-angled triangle has sides" was being read as algebra, because of the dash in the
+    // middle of an ordinary English adjective.
+    const line = await translateMixed('A right-angled triangle has sides 3 cm');
+    expect(line.segments[0].kind).toBe('text');
+    expect(line.segments[0].text).toContain('right-angled');
+    // ...and a dash between single letters is still a subtraction.
+    expect(toLatex('a-b').latex).toBe('a-b');
+  });
+});

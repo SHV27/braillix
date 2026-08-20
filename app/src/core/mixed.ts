@@ -201,6 +201,10 @@ function strengthOf(token: string): Strength {
   if (!bare) return 'weak'; // a lone punctuation mark: the colon in "2 : 3", a stray dash
   if (hasIndic(bare)) return 'text'; // Nemeth has no cells for any Indian script, so never maths
   if (NEVER_MATHS.has(bare.toLowerCase())) return 'text'; // decided outright, before any neighbour can vote
+  // A hyphen between two whole words is a hyphen, not a minus sign: "a right-angled triangle" was
+  // being read as algebra because of the dash in the middle of an ordinary English adjective.
+  // `a-b` keeps its minus, because single letters either side of a dash are a subtraction.
+  if (/^[A-Za-z]{2,}(-[A-Za-z]{2,})+$/.test(bare)) return 'text';
   if (MATHS_CHARS.test(bare)) return 'maths';
   if (/^[A-Za-z]$/.test(bare)) return 'maths'; // a single letter is a variable
   if (/^[A-Z]{2,}$/.test(bare)) return 'maths'; // ABC — a geometry label, not a word
