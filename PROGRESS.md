@@ -21,15 +21,16 @@ Repo: **github.com/SHV27/braillix** (private — going public is Shaurya's call,
 
 ## The one next action
 
-Nothing is blocking. Hand docs/DEMO.md to Shaurya to rehearse; or promote one parked idea from
-NOTES.md into a new arc.
+Nothing is blocking, and nothing is half-finished. Shaurya should read `docs/DEMO.md` and rehearse
+the seven-minute run once. If more building is wanted, promote a parked idea from `NOTES.md` into a
+new arc rather than starting anything ad hoc.
 
 ## Gate status
 
 | Gate | Result |
 |---|---|
 | Unit tests | **299 passing** (golden Nemeth, all 26 letters + 10 digits cross-checked against the engine, XML reader, protocol conformance, six-key entry, feedback) |
-| Journey tests | **87 passing** across read / reader / hardware / recognition / practice / offline / screens |
+| Journey tests | **88 passing** across read / reader / hardware / recognition / practice / offline / screens |
 | Lighthouse accessibility | **100** |
 | Lighthouse best practices | **100** |
 | LCP | **650 ms** (target < 2.5 s) |
@@ -40,6 +41,8 @@ NOTES.md into a new arc.
 | Keyboard only | every screen tabbable, no traps, reader fully operable |
 | Screen-reader structure | landmarks, one h1 per screen, every control named, live regions |
 | Fresh clone | clone + npm ci + 299 tests pass on a cold machine (21 MB repo) |
+| Recognition accuracy | all 6 shipped samples read correctly, measured by `e2e/samples.spec.ts` |
+| Dead code | zero unused exports (`npm run lint:dead`) |
 
 ## What exists
 
