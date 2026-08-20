@@ -669,3 +669,9 @@ Run before calling this shipped. Result: **nothing to rotate, nothing to hide, n
 - **D15.11** — A comma is read at the baseline. `30°, 60°` writes the comma straight after the
   degree sign with no baseline indicator, because Nemeth does not need one — punctuation is never
   part of a superscript — and the reader was leaving it up there.
+- **D15.12** — Every practice drill is round-tripped too. It is the highest-stakes content in the
+  product: a wrong cell on the Board is a teacher's problem for a minute, but a wrong cell in a
+  *lesson* is a child taught something false and then marked wrong for getting it right. The lessons
+  are generated from the same engine that drives the display and so cannot drift from it — but
+  "cannot drift" is a claim about the code, and `lessons.roundtrip.test.ts` is the check. All 34
+  items agree.

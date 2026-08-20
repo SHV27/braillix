@@ -32,20 +32,32 @@ through it and fixed the six things they found.
 
 ## The one next action
 
-Nothing is blocking. Read `docs/DEMO.md` and rehearse the nine-minute run once — it is written in
-the order the product should be shown, with what to say, and it now has a place for the strongest
-thing in the product: the **What the dots say** panel on the Board, where a second engine reads the
-braille back and the teacher sees the two agree. If more building is wanted, promote a parked idea
-from `NOTES.md` into a new arc rather than starting anything ad hoc.
+**Use it, and write down every line where the dots and the reading disagree.**
+
+Nothing is blocking and nothing is half-built. What the product now needs is the one thing no test
+can supply: real questions typed by a real teacher. Every round of that so far has found something
+— twenty-six exam questions found six defects, and a handful of ordinary phrasings found three more
+— and each one was a translation error that had been on screen for days without anybody noticing,
+because nobody had typed that sentence yet.
+
+Open the Board, type a page out of whatever textbook is to hand, and watch the **What the dots say**
+panel. Anything that is not "matches what you typed" is a finding. So is anything that IS matching
+but reads oddly.
+
+Before showing it to anyone: read `docs/DEMO.md` and rehearse the nine-minute run once. It is
+written in the order the product should be shown, with what to say.
+
+If more building is wanted, promote a parked idea from `NOTES.md` into a new arc rather than
+starting anything ad hoc.
 
 ## Gate status
 
 | Gate | Result |
 |---|---|
-| Unit tests | **703 passing** |
+| Unit tests | **738 passing** |
 | Journey tests | **134 passing** across board / read-back / reader / hardware / recognition / practice / class / offline / screens / a11y |
 | Syllabus accuracy | **165 of 165** lines translate cleanly **and read back correctly** — `npm run accuracy`, evidence in `docs/ACCURACY.md` |
-| Round trip | every segment of every syllabus line, in all three braille codes, read back by an engine that never saw the input |
+| Round trip | every segment of every syllabus line **and every practice drill**, in all three braille codes, read back by an engine that never saw the input |
 | Lighthouse (deployed) | **accessibility 100 · best practices 100 · SEO 100**, zero failed audits |
 | Deployed LCP / CLS | **349 ms / 0.00** |
 | The deployed site itself | `npm run check:deployed` — 17 checks against the live URL, all green |
