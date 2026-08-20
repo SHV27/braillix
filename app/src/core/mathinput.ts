@@ -104,8 +104,10 @@ const WORD_SYMBOLS: Readonly<Record<string, string>> = {
   times: '\\times',
   into: '\\times',
   div: '\\div',
-  divided: '\\div',
-  by: '',
+  // "twelve by four" is division in Indian English, and "divided by" must not come out as two
+  // division signs — so the word that carries the meaning is `by`, and `divided` introduces it.
+  divided: '',
+  by: '\\div',
   plusminus: '\\pm',
   therefore: '\\therefore',
   because: '\\because',
@@ -418,8 +420,12 @@ class Parser {
         continue;
       }
       if (token.kind === 'op' && [',', ';', '.', ':', "'", '"', '!'].includes(token.text)) {
+        // Keep parsing after it. This used to take the mark and `continue`, so everything past the
+        // first comma fell through to the stray branch below and was appended letter by letter:
+        // `triangle ABC, angle A` reached the display as △ABC, then the LETTERS a-n-g-l-e, then A.
+        // A comma separates two pieces of mathematics; it does not end the mathematics.
         this.#take();
-        latex = cat(latex, token.text);
+        latex = cat(cat(latex, token.text), this.#sum());
         continue;
       }
       // Anything else at this level is a stray; take it verbatim rather than dropping it silently.

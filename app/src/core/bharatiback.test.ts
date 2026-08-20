@@ -36,6 +36,14 @@ describe('reading the words back', () => {
     expect(readBharatiUnicode('⠼⠃⠁').text).toBe('21'); // at the start of a word: a number
   });
 
+  it('reads a vocalic matra as a matra, not as the whole vowel', () => {
+    // वृत्त — the radius question. ऋ after a consonant is that consonant’s matra, the same rule as
+    // every other vowel here, and without it the word came back as वऋत्त.
+    expect(readBharatiUnicode(braille('वृत्त')).text).toBe('वृत्त');
+    // Standing alone it is still the whole vowel.
+    expect(readBharatiUnicode(braille('ऋषि')).text).toBe('ऋषि');
+  });
+
   it('reads the marks', () => {
     for (const word of ['संख्या', 'दुःख', 'हँस', 'क्लिक', 'ज़्यादा', 'क्षेत्रफल', 'ज्ञान']) {
       expect(readBharatiUnicode(braille(word)).text, word).toBe(word.normalize('NFC'));

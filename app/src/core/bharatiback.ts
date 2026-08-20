@@ -118,6 +118,9 @@ const SIGNS: Readonly<Record<string, string>> = {
   [cell([4])]: '्', // halant
 };
 
+/** ऋ and ऌ written after a consonant: the vocalic matras, as in वृत्त. */
+const VOCALIC_MATRA: Readonly<Record<string, string>> = { 'ऋ': 'ृ', 'ऌ': 'ॢ' };
+
 const VISARGA = cell([6]);
 const NUKTA_PREFIX = cell([5]);
 const NUMBER_SIGN = cell([3, 4, 5, 6]);
@@ -243,9 +246,11 @@ export function readBharatiUnicode(braille: string): BharatiReadback {
       const letter = CONSONANTS[next];
       const mapped = letter ? AFTER_NUKTA[letter] : undefined;
       if (mapped) {
-        out.push(mapped);
-        // ऋ and ऌ are vowels; the rest are consonants and can carry a matra.
-        afterConsonant = mapped !== 'ऋ' && mapped !== 'ऌ';
+        // ऋ and ऌ are vowels, so after a consonant they are that consonant's matra — the same rule
+        // as every other vowel here. Without it वृत्त, a circle's radius, came back as वऋत्त.
+        const vowel = mapped === 'ऋ' || mapped === 'ऌ';
+        out.push(vowel && afterConsonant ? VOCALIC_MATRA[mapped] : mapped);
+        afterConsonant = !vowel;
         wordStart = false;
         i += 2;
         continue;

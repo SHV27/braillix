@@ -126,6 +126,44 @@ const UNITS = new Set([
  * Indian classroom: "in" is set membership, "by" is division, "into" is multiplication, "to" is an
  * arrow. None of those appear here. A word earns its place only by being unambiguous.
  */
+/**
+ * Words that are a symbol in one place and English in another.
+ *
+ * "in" is set membership and also the commonest preposition in the language; "by" is division in
+ * Indian English ("twelve by four") and also "increased by 20%"; "to" is the arrow of a limit and
+ * also half of "to find". None of them can be decided by looking at the word — only by looking at
+ * what is either side, which is what `weak` is for.
+ */
+const AMBIGUOUS = new Set(['in', 'by', 'to']);
+
+/**
+ * Words that stand for a BINARY operator: they need something on their left.
+ *
+ * A line cannot open with one, however maths-like the rest of it looks. "In triangle ABC" was
+ * reaching the display as ∈ △ ABC — the sentence began with "is a member of", which is not a thing
+ * anybody wrote, and a braille reader would have had no way to guess what was meant.
+ */
+const NEEDS_A_LEFT_OPERAND = new Set([
+  'in',
+  'by',
+  'to',
+  'cup',
+  'cap',
+  'subset',
+  'subseteq',
+  'supset',
+  'notin',
+  'perp',
+  'parallel',
+  'equiv',
+  'propto',
+  'approx',
+  'times',
+  'into',
+  'div',
+  'divided',
+]);
+
 const NEVER_MATHS = new Set([
   'of',
   'is',
@@ -166,6 +204,7 @@ function strengthOf(token: string): Strength {
   if (MATHS_CHARS.test(bare)) return 'maths';
   if (/^[A-Za-z]$/.test(bare)) return 'maths'; // a single letter is a variable
   if (/^[A-Z]{2,}$/.test(bare)) return 'maths'; // ABC — a geometry label, not a word
+  if (AMBIGUOUS.has(bare.toLowerCase())) return 'weak'; // decided by the neighbours, never by the word
   if (isMathWord(bare)) return 'maths'; // sin, theta, Rs
   if (UNITS.has(bare.toLowerCase())) return 'maths'; // cm, kg, min
   if (/^[A-Za-z]{2}$/.test(bare)) return 'weak'; // ab, or of
@@ -190,6 +229,8 @@ export function splitLine(line: string, overrides: Readonly<Record<string, Segme
   // part of an expression ("ab + bc"); otherwise it is a word ("the value of 2x"). A lone
   // punctuation mark between two pieces of maths belongs to the maths ("2 : 3").
   const kinds: SegmentKind[] = strength.map((value, i) => {
+    // A binary operator with nothing on its left is a word, whatever else it might have been.
+    if (i === 0 && NEEDS_A_LEFT_OPERAND.has(tokens[0].replace(/[.,;:!?।]+$/, '').toLowerCase())) return 'text';
     if (value !== 'weak') return value;
     if (isOperator[i - 1] || isOperator[i + 1]) return 'maths';
     if (strength[i - 1] === 'maths' && strength[i + 1] === 'maths') return 'maths';
@@ -205,7 +246,11 @@ export function splitLine(line: string, overrides: Readonly<Record<string, Segme
     while (end + 1 < kinds.length && kinds[end + 1] === 'maths') end += 1;
     const symbolic = tokens.slice(start, end + 1).some((token) => MATHS_CHARS.test(token));
     const between = start > 0 && end < kinds.length - 1 && kinds[start - 1] === 'text' && kinds[end + 1] === 'text';
-    if (!symbolic && between) {
+    // ...and the same at the START of a line, where there is no left-hand side to be between. "A
+    // shopkeeper bought a pen" was opening with a one-letter island of mathematics called A.
+    // Only at the start: "Find angle C" ends in mathematics, and should.
+    const opening = start === 0 && end < kinds.length - 1 && kinds[end + 1] === 'text';
+    if (!symbolic && (between || opening)) {
       for (let i = start; i <= end; i += 1) kinds[i] = 'text';
     }
     start = end;
@@ -223,7 +268,9 @@ export function splitLine(line: string, overrides: Readonly<Record<string, Segme
 
   // Apply the teacher's corrections, then merge again — flipping a segment may join it to a
   // neighbour, and two adjacent segments of the same kind would otherwise render a stray boundary.
-  const corrected = segments.map((segment) => ({ ...segment, kind: overrides[segment.text] ?? segment.kind }));
+  const corrected = punctuationBelongsToTheSentence(
+    segments.map((segment) => ({ ...segment, kind: overrides[segment.text] ?? segment.kind })),
+  );
   const merged: Segment[] = [];
   for (const segment of corrected) {
     const previous = merged[merged.length - 1];
@@ -234,6 +281,42 @@ export function splitLine(line: string, overrides: Readonly<Record<string, Segme
     }
   }
   return merged;
+}
+
+/**
+ * The full stop at the end of a sentence is not part of the mathematics.
+ *
+ * This is the worst thing the splitter did, and it did it quietly. "The difference is 7." put the
+ * full stop inside the maths, where Nemeth writes a dot after a numeral as ⠨ — the DECIMAL POINT.
+ * A child read "seven point", the sentence never ended, and every cell was faithful Nemeth for an
+ * expression nobody had written.
+ *
+ * So trailing sentence punctuation is moved out of a maths run and into the words beside it, which
+ * is also what BANA asks for: the punctuation after a Nemeth passage belongs to the surrounding
+ * text and is written in the literary code, after the terminator.
+ *
+ * The exclamation mark is left alone: `5!` is a factorial, and it is real mathematics.
+ */
+const SENTENCE_END = /[.,;:।॥?]+$/;
+
+function punctuationBelongsToTheSentence(segments: readonly Segment[]): Segment[] {
+  const out: Segment[] = [];
+  for (const segment of segments) {
+    if (segment.kind !== 'maths') {
+      out.push(segment);
+      continue;
+    }
+    const match = SENTENCE_END.exec(segment.text);
+    // A lone punctuation mark IS the segment (the colon of `2 : 3`); there is nothing to move.
+    const body = match ? segment.text.slice(0, -match[0].length) : segment.text;
+    if (!match || !body.trim()) {
+      out.push(segment);
+      continue;
+    }
+    out.push({ kind: 'maths', text: body });
+    out.push({ kind: 'text', text: match[0] });
+  }
+  return out;
 }
 
 /**
@@ -327,7 +410,10 @@ export async function translateMixed(
   const cells: DotMask[] = [];
   const codes: BrailleCode[] = [];
   for (const [index, segment] of rendered.entries()) {
-    if (index > 0) {
+    // Punctuation hugs what it follows. Every other join gets a blank between the two runs, but a
+    // full stop set off by a space is not a full stop — in braille as on paper, the mark belongs to
+    // the word or the expression in front of it.
+    if (index > 0 && !hugsWhatCameBefore(segment.text)) {
       cells.push(BLANK);
       codes.push(segment.code); // the blank between two runs belongs to the run it introduces
     }
@@ -338,6 +424,17 @@ export async function translateMixed(
   }
 
   return { segments: rendered, cells, codes, mixed };
+}
+
+/**
+ * A segment that BEGINS with sentence punctuation sits against the run before it, not apart.
+ *
+ * Begins with, not consists of: the full stop is split off the mathematics as its own segment and
+ * then merges with the words that follow it, so by the time the cells are joined the segment reads
+ * ".  Find its area." — and it is the leading mark that has to hug what came before.
+ */
+function hugsWhatCameBefore(text: string): boolean {
+  return /^[.,;:।॥?!]/.test(text.trim());
 }
 
 /** Does this line contain anything that is not mathematics? Cheap check, no translation. */

@@ -230,3 +230,20 @@ Acceptance (frozen):
 - [x] A hostile pass over every screen: 43 malformed expressions, corrupt class files, a bad pod
       address, walking off both ends of a lesson — **zero console errors**, and two real defects
       found and fixed (Clear did not clear; fractions nested deeper than one level were unreadable)
+
+
+## Arc 14 — WHOLE QUESTIONS
+*Not expressions with words near them — the sentences an exam paper actually prints.*
+
+Twenty-six real exam questions, in five scripts, run through the round trip. Fifteen agreed. The
+other eleven found six defects that had been on screen since arc 7 and that nothing had ever asked
+about, because every earlier test used an expression rather than a question.
+
+Acceptance (frozen):
+- [x] A sentence's full stop can never become a decimal point
+- [x] Punctuation sits against the run it follows, in the literary code, after the terminator
+- [x] A binary operator cannot open a line; `in`, `by` and `to` are decided by their neighbours
+- [x] A line does not open with a one-letter island of algebra
+- [x] A comma does not stop the maths parser
+- [x] ऋ and ऌ after a consonant read back as matras
+- [x] Thirteen whole questions added to the corpus permanently — **162 lines, all round-tripping**

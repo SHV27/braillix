@@ -148,3 +148,75 @@ describe('a line that changes script half way through', () => {
     expect(line.segments.filter((segment) => segment.code === 'bharati').length).toBe(2);
   });
 });
+
+describe('a question is a sentence, and a sentence has punctuation', () => {
+  it('does not let a full stop become a decimal point', async () => {
+    // This was the worst thing the splitter did, and it did it quietly. "The difference is 7." put
+    // the full stop inside the mathematics, where Nemeth writes a dot after a numeral as ⠨ — the
+    // DECIMAL POINT. A child read "seven point", the sentence never ended, and every cell was
+    // faithful Nemeth for an expression nobody had written.
+    const line = await translateMixed('The difference is 7. Find the numbers.');
+    const maths = line.segments.filter((segment) => segment.kind === 'maths');
+    expect(maths.map((segment) => segment.text)).toEqual(['7']);
+    expect(cellsToUnicode(maths[0].cells)).not.toContain('\u2828');
+  });
+
+  it('leaves a factorial alone — 5! is mathematics, not a shout', async () => {
+    const line = await translateMixed('Find 5! and 6!');
+    expect(line.segments.filter((s) => s.kind === 'maths').map((s) => s.text)).toContain('5!');
+  });
+
+  it('keeps a comma that is inside the mathematics inside it', async () => {
+    const line = await translateMixed('1,00,000');
+    expect(line.segments).toHaveLength(1);
+    expect(line.segments[0].text).toBe('1,00,000');
+  });
+
+  it('sets the punctuation against what it follows, with no space before it', async () => {
+    const line = await translateMixed('The area is 12. Find the perimeter.');
+    const braille = cellsToUnicode(line.cells);
+    // ⠸⠱ is the Nemeth terminator; the full stop must sit straight after it.
+    expect(braille).toContain('\u2838\u2831\u2832');
+  });
+});
+
+describe('English words that are also operators', () => {
+  it('does not open a question with "is a member of"', async () => {
+    // "In triangle ABC" reached the display as ∈ △ ABC. A binary operator needs something on its
+    // left; a line cannot begin with one, however maths-like the rest of it looks.
+    const line = await translateMixed('In triangle ABC, angle A = 50 degrees');
+    expect(line.segments[0]).toMatchObject({ kind: 'text', text: 'In' });
+    // ...and where it genuinely IS membership, it still is.
+    const set = await translateMixed('x in A');
+    expect(set.segments.every((segment) => segment.kind === 'maths')).toBe(true);
+  });
+
+  it('does not open a question with a one-letter island of algebra', async () => {
+    const line = await translateMixed('A shopkeeper bought a pen for Rs 40');
+    expect(line.segments[0].kind).toBe('text');
+    expect(line.segments[0].text).toContain('shopkeeper');
+    // ...but A is still a set when it is one.
+    const set = await translateMixed('A cup B');
+    expect(set.segments.every((segment) => segment.kind === 'maths')).toBe(true);
+  });
+
+  it('knows "by" as English and as division, by what is either side of it', async () => {
+    const english = await translateMixed('A number is increased by 20%');
+    expect(english.segments.find((s) => s.text.includes('by'))?.kind).toBe('text');
+
+    const division = await translateMixed('12 by 4');
+    expect(division.segments.every((segment) => segment.kind === 'maths')).toBe(true);
+    expect(toLatex('12 by 4').latex).toBe('12\\div 4');
+    expect(toLatex('12 divided by 4').latex).toBe('12\\div 4');
+  });
+});
+
+describe('a comma does not end the mathematics', () => {
+  it('keeps parsing after one', () => {
+    // Everything past the first comma used to fall through to the stray branch and be appended
+    // letter by letter: `triangle ABC, angle A` reached the display as △ABC and then the LETTERS
+    // a-n-g-l-e, which a child would have read as a word in the middle of a geometry question.
+    expect(toLatex('triangle ABC, angle A').latex).toBe('\\triangle ABC,\\angle A');
+    expect(toLatex('a, b, c').latex).toBe('a,b,c');
+  });
+});

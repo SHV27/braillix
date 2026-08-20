@@ -635,3 +635,27 @@ Run before calling this shipped. Result: **nothing to rotate, nothing to hide, n
   level on all three of a fraction's cells, and the reader knew only about one — so `1/2/3/4/5` came
   out right by luck while reporting nine cells it had no rule for. Found by a hostile pass, not by a
   test that already existed.
+- **D15.1** — Sentence punctuation is moved out of a maths run and into the words beside it. This was
+  the worst thing the splitter did, and it did it quietly: "the difference is 7." put the full stop
+  inside the mathematics, where Nemeth writes a dot after a numeral as the DECIMAL POINT. A child
+  read "seven point", the sentence never ended, and every cell was faithful Nemeth for an expression
+  nobody had written. It is also what BANA asks for — punctuation after a Nemeth passage belongs to
+  the surrounding text, in the literary code, after the terminator. The exclamation mark is left
+  alone, because `5!` is a factorial.
+- **D15.2** — The punctuation hugs what it follows: no blank cell between the Nemeth terminator and
+  the full stop. A mark set off by a space is not a mark.
+- **D15.3** — A word that stands for a binary operator cannot be the first token of a line. "In
+  triangle ABC" was reaching the display as ∈ △ ABC — the sentence began with "is a member of",
+  which is not a thing anybody wrote. The rule is about arity, not about a list of exceptions.
+- **D15.4** — `in`, `by` and `to` are decided by their neighbours, never by the word. Each is a
+  symbol in one place and English in another, and no amount of staring at the word will say which.
+- **D15.5** — A wordless run at the START of a line, with words after it, is a phrase. "A shopkeeper
+  bought a pen" was opening with a one-letter island of algebra called A. Only at the start: "Find
+  angle C" ends in mathematics, and should.
+- **D15.6** — A comma does not end the mathematics. The parser took the mark and stopped, so
+  everything past the first comma was appended letter by letter — `triangle ABC, angle A` reached
+  the display as △ABC and then the LETTERS a-n-g-l-e.
+- **D15.7** — `by` carries the division and `divided` introduces it, not the other way round, so
+  "twelve by four" and "twelve divided by four" both come out as one division sign.
+- **D15.8** — ऋ and ऌ after a consonant are that consonant's matra, like every other vowel in
+  Bharati. Without it वृत्त — the radius of a circle — read back as वऋत्त.

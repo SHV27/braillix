@@ -109,6 +109,11 @@ const SYMBOLS: ReadonlyArray<readonly [string, string]> = ([
   ['⠌⠈⠑', '∉'],
   ['⠸⠇', '≡'],
   ['⠸⠒', ':'],
+  ['⠸⠲', '.'], // the punctuation indicator, for a mark that is punctuation and not mathematics
+  ['⠸⠂', ','],
+  ['⠸⠆', ';'],
+  ['⠸⠦', '?'],
+  ['⠸⠖', '!'],
   ['⠠⠡', '∴'],
   ['⠈⠌', '∵'],
   ['⠫⠏', '⊥'],

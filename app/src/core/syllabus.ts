@@ -295,6 +295,25 @@ export const SYLLABUS: readonly SyllabusTopic[] = [
     ],
   },
   {
+    topic: 'Whole questions, as an exam paper writes them',
+    classes: 'all',
+    entries: [
+      { source: 'The sum of two numbers is 25 and their difference is 7. Find the numbers.', says: 'a two-sentence word problem', words: true },
+      { source: 'If 2x + 3 = 11, find the value of x.', says: 'a condition and an instruction', words: true },
+      { source: 'The length of a rectangle is 12 cm and its breadth is 5 cm. Find its area.', says: 'two measurements in one question', words: true },
+      { source: 'In triangle ABC, angle A = 50 degrees and angle B = 60 degrees. Find angle C.', says: 'a question that opens with the word "In"', words: true },
+      { source: 'A shopkeeper bought a pen for Rs 40 and sold it for Rs 50. Find his profit per cent.', says: 'a question that opens with the article "A"', words: true },
+      { source: 'The radius of a circle is 7 cm. Find its area, taking pi = 22/7.', says: 'a value given at the end of a sentence', words: true },
+      { source: 'If a = 3 and b = 4, find sqrt(a^2 + b^2).', says: 'three separate pieces of mathematics', words: true },
+      { source: 'A number is increased by 20% and then decreased by 20%. What is the net change?', says: '"by" as English, not as division', words: true },
+      { source: 'Find the value of sin 30 degrees + cos 60 degrees.', says: 'a trigonometric instruction', words: true },
+      { source: 'एक वृत्त की त्रिज्या 7 cm है। pi = 22/7 लेकर क्षेत्रफल ज्ञात कीजिए।', says: 'a Hindi question in two sentences', words: true },
+      { source: 'दो संख्याओं का योग 25 है और उनका अंतर 7 है।', says: 'a Hindi question with two numbers', words: true },
+      { source: 'দুটি সংখ্যার যোগফল 25 এবং তাদের অন্তর 7।', says: 'the same question in Bengali', words: true },
+      { source: 'Ravi ke paas 5 सेब हैं और Sita ke paas 3 सेब हैं।', says: 'Latin and Devanagari alternating', words: true },
+    ],
+  },
+  {
     topic: 'Questions with words in them',
     classes: 'all',
     entries: [
