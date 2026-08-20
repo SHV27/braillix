@@ -1,5 +1,5 @@
 /**
- * The Recognise screen — a photograph of handwritten maths becomes moving dots.
+ * Reading handwriting — a photograph of maths becomes moving dots.
  *
  * Three ways in (camera, file, drawing) and one rule that governs all of them: **the model never
  * gets the last word**. Every result lands in an editable field with an honest quality note, and
@@ -13,15 +13,22 @@ import { NORM_MEAN, NORM_STD, imageWarning, prepareImage, type PreparedImage } f
 import { OnDeviceRecogniser } from '../recognise/ondevice';
 import type { ProviderStatus, RecognitionResult } from '../recognise/types';
 import { DrawPad } from './DrawPad';
+import { MathPreview } from './MathPreview';
+import { useT, type StringKey } from './i18n';
 import './RecogniseScreen.css';
 
 const recogniser = new OnDeviceRecogniser();
 
 type Source = { url: string; label: string } | null;
 
-export function RecogniseScreen() {
+export interface RecognisePanelProps {
+  /** Called once the recognised maths has been put on the board, so the caller can show it. */
+  onSent: () => void;
+}
+
+export function RecognisePanel({ onSent }: RecognisePanelProps) {
+  const t = useT();
   const setLatex = useBraillix((s) => s.setLatex);
-  const setView = useBraillix((s) => s.setView);
   const setCapability = useBraillix((s) => s.setCapability);
 
   const [status, setStatus] = useState<ProviderStatus>({ state: 'unavailable', reason: 'checking…' });
@@ -44,7 +51,6 @@ export function RecogniseScreen() {
       setStatus(probed);
       setCapability('recognition', {
         state: probed.state === 'unavailable' ? 'unavailable' : 'ready',
-        label: 'Recognition',
         reason: probed.state === 'unavailable' ? (probed.reason ?? 'unavailable') : 'on this device, offline',
         fix: probed.fix,
       });
@@ -120,46 +126,35 @@ export function RecogniseScreen() {
   function sendToDisplay() {
     if (!draft.trim()) return;
     setLatex(draft);
-    setView('read');
+    onSent();
   }
 
   const warning = prepared ? imageWarning(prepared) : null;
 
   return (
     <div className="rec">
-      <header className="rec__head">
-        <h1 className="read__title">Read handwriting</h1>
-        <p className="read__lede">
-          Photograph an equation, upload a picture, or write one with the mouse. It is recognised{' '}
-          <strong>on this laptop</strong> — nothing is uploaded anywhere, ever.
-        </p>
-      </header>
-
       {status.state === 'unavailable' && (
         <p className="notice notice--warn" data-testid="rec-unavailable">
-          <strong>Recognition is not installed.</strong> {status.reason}
+          <strong>{t('rec.notInstalled')}</strong> {status.reason}
           {status.fix && <span className="notice__fix">{status.fix}</span>}
-          <span className="notice__fix">
-            Everything else in Braillix works exactly as it does with it — you can type the
-            expression on the Read screen instead.
-          </span>
+          <span className="notice__fix">{t('rec.notInstalledFix')}</span>
         </p>
       )}
 
       <div className="rec__grid">
-        <section className="panel" aria-labelledby="input-heading">
-          <h2 id="input-heading" className="panel__title">
-            The image
+        <section className="panel" aria-labelledby="rec-input-heading">
+          <h2 id="rec-input-heading" className="panel__title">
+            {t('rec.image')}
           </h2>
 
-          <div className="segmented" role="group" aria-label="How to provide the maths">
+          <div className="segmented" role="group" aria-label={t('rec.how')}>
             <button
               type="button"
               className={`segmented__btn${mode === 'photo' ? ' is-current' : ''}`}
               aria-pressed={mode === 'photo'}
               onClick={() => setMode('photo')}
             >
-              Photo or file
+              {t('rec.photoOrFile')}
             </button>
             <button
               type="button"
@@ -168,7 +163,7 @@ export function RecogniseScreen() {
               data-testid="mode-draw"
               onClick={() => setMode('draw')}
             >
-              Write it
+              {t('rec.writeIt')}
             </button>
           </div>
 
@@ -182,19 +177,16 @@ export function RecogniseScreen() {
                   capture="environment"
                   className="visually-hidden"
                   name="image"
-                  aria-label="Choose a photo of an equation"
+                  aria-label={t('rec.chooseLabel')}
                   data-testid="file-input"
                   onChange={(event) => onFile(event.target.files?.[0])}
                 />
                 <button type="button" className="btn" onClick={() => fileInput.current?.click()}>
-                  Choose a photo
+                  {t('rec.choosePhoto')}
                 </button>
               </div>
-              <p className="hw__note">
-                On a phone this opens the camera. On a laptop, pick a picture — there are some
-                ready-made ones below.
-              </p>
-              <SampleImages onPick={accept} />
+              <p className="hw__note">{t('rec.cameraNote')}</p>
+              <SampleImages onPick={accept} label={t('rec.samples')} />
             </>
           ) : (
             <DrawPad onDone={(url) => accept(url, 'drawing')} />
@@ -203,19 +195,19 @@ export function RecogniseScreen() {
 
         <section className="panel" aria-labelledby="result-heading">
           <h2 id="result-heading" className="panel__title">
-            What it read
+            {t('rec.whatItRead')}
           </h2>
 
-          {!prepared && <p className="evidence__empty">Choose or draw something and it will appear here.</p>}
+          {!prepared && <p className="evidence__empty">{t('rec.chooseSomething')}</p>}
 
           {prepared && (
             <>
               <div className="rec__preview">
-                <canvas ref={previewCanvas} className="rec__canvas" aria-label="What the recogniser sees" />
+                <canvas ref={previewCanvas} className="rec__canvas" aria-label={t('rec.whatItSees')} />
                 <ul className="rec__facts num">
                   <li>{source?.label}</li>
-                  {prepared.inverted && <li>inverted (light writing on a dark background)</li>}
-                  <li>cropped to the writing</li>
+                  {prepared.inverted && <li>{t('rec.inverted')}</li>}
+                  <li>{t('rec.cropped')}</li>
                 </ul>
               </div>
 
@@ -229,7 +221,7 @@ export function RecogniseScreen() {
                   disabled={busy || status.state === 'unavailable'}
                   data-testid="run-recognition"
                 >
-                  {busy ? 'Reading…' : 'Read this image'}
+                  {busy ? t('rec.reading') : t('rec.readThis')}
                 </button>
               </div>
 
@@ -243,9 +235,7 @@ export function RecogniseScreen() {
               {error && (
                 <p className="notice notice--bad" role="alert" data-testid="rec-error">
                   {error}
-                  <span className="notice__fix">
-                    You can always type the expression by hand on the Read screen.
-                  </span>
+                  <span className="notice__fix">{t('rec.typeInstead')}</span>
                 </p>
               )}
             </>
@@ -254,8 +244,8 @@ export function RecogniseScreen() {
           {result && (
             <>
               <p className={`quality quality--${result.quality}`} data-testid="rec-quality">
-                <strong>{qualityLabel(result.quality)}</strong>
-                <span className="num"> · {result.ms} ms · on this device</span>
+                <strong>{t(QUALITY_LABEL[result.quality])}</strong>
+                <span className="num"> · {t('rec.onDevice', { ms: result.ms })}</span>
               </p>
               <ul className="rec__notes">
                 {result.notes.map((note) => (
@@ -264,7 +254,7 @@ export function RecogniseScreen() {
               </ul>
 
               <label className="field">
-                <span className="field__label">Recognised maths — correct it if it is wrong</span>
+                <span className="field__label">{t('rec.correctIt')}</span>
                 <textarea
                   className="field__input num"
                   rows={3}
@@ -275,6 +265,11 @@ export function RecogniseScreen() {
                 />
               </label>
 
+              {/* The teacher checks the model's reading as *maths*, not as LaTeX. This is the
+                  whole correction loop: see it in print, fix the field, see it again. */}
+              <p className="field__label rec__checklabel">{t('rec.checkPrint')}</p>
+              <MathPreview latex={draft} size="large" label={draft} />
+
               <div className="rec__actions">
                 <button
                   type="button"
@@ -283,13 +278,10 @@ export function RecogniseScreen() {
                   disabled={!draft.trim()}
                   data-testid="send-to-display"
                 >
-                  Read this on the display →
+                  {t('rec.send')} →
                 </button>
               </div>
-              <p className="hw__note">
-                Nothing reaches the display until you press that. The model’s answer is a suggestion,
-                not a verdict.
-              </p>
+              <p className="hw__note">{t('rec.lastWord')}</p>
             </>
           )}
         </section>
@@ -298,11 +290,11 @@ export function RecogniseScreen() {
   );
 }
 
-function qualityLabel(quality: RecognitionResult['quality']): string {
-  if (quality === 'good') return 'Looks right';
-  if (quality === 'uncertain') return 'Check this one';
-  return 'Probably misread';
-}
+const QUALITY_LABEL: Record<RecognitionResult['quality'], StringKey> = {
+  good: 'rec.good',
+  uncertain: 'rec.uncertain',
+  poor: 'rec.bad',
+};
 
 /**
  * Known-good images, committed to the repository.
@@ -310,7 +302,7 @@ function qualityLabel(quality: RecognitionResult['quality']): string {
  * The demo must never depend on the room's lighting or on a phone being to hand — a point the
  * boardroom made about OCR generally, and the cheapest insurance in the whole project.
  */
-function SampleImages({ onPick }: { onPick: (url: string, label: string) => Promise<void> }) {
+function SampleImages({ onPick, label }: { onPick: (url: string, label: string) => Promise<void>; label: string }) {
   const samples = [
     { file: 'quadratic.svg', label: 'Quadratic' },
     { file: 'fraction.svg', label: 'Fraction' },
@@ -321,7 +313,7 @@ function SampleImages({ onPick }: { onPick: (url: string, label: string) => Prom
   ];
 
   return (
-    <div className="samples" role="group" aria-label="Sample images">
+    <div className="samples" role="group" aria-label={label}>
       {samples.map((sample) => (
         <button
           key={sample.file}

@@ -88,12 +88,19 @@ describe('bundle hygiene — Node-only backends must never reach the browser', (
 });
 
 describe('Law 3 — nothing degrades silently', () => {
-  it('every capability id declared in the store has a human-readable label', () => {
+  it('every capability id has a name the interface can show, in both languages', () => {
     const store = FILES.find((f) => f.path === 'store.ts');
     expect(store, 'store.ts should exist').toBeDefined();
-    const ids = [...store!.text.matchAll(/^\s{2}(\w+):\s*\{\s*state:/gm)].map((m) => m[1]);
+    const union = /export type CapabilityId =([^;]+);/.exec(store!.text);
+    expect(union, 'CapabilityId union should exist').toBeTruthy();
+    const ids = [...union![1].matchAll(/'([a-z]+)'/g)].map((match) => match[1]);
+    expect(ids.length).toBeGreaterThan(0);
+
+    const strip = FILES.find((f) => f.path === 'ui/StatusStrip.tsx');
+    const i18n = FILES.find((f) => f.path === 'ui/i18n.ts');
     for (const id of ids) {
-      expect(store!.text, `capability "${id}" has no label`).toMatch(new RegExp(`${id}:[\\s\\S]{0,200}label:`));
+      expect(strip!.text, `capability "${id}" is not named in the status strip`).toContain(`${id}: 'cap.`);
+      expect(i18n!.text, `capability "${id}" has no translated name`).toContain(`'cap.${id}'`);
     }
   });
 });

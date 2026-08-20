@@ -23,8 +23,11 @@ export interface Frame {
   readonly total: number;
   /** Which display cell (if any) holds the reader's cursor. */
   readonly cursorCell: number | null;
-  /** Short human label — "cells 4–7 of 19". Shown on screen and announced to screen readers. */
-  readonly label: string;
+  /**
+   * How wide the window is. The *words* for this ("cells 4–7 of 19") are built in the interface,
+   * where the language is known — core deals in numbers only.
+   */
+  readonly width: number;
 }
 
 export interface RenderOptions {
@@ -69,17 +72,10 @@ export function renderFrame(profile: DisplayProfile, options: RenderOptions): Fr
     windowStart,
     total,
     cursorCell: orderedCursor,
-    label: describeWindow(windowStart, width, total),
+    width,
   };
 }
 
-function describeWindow(start: number, width: number, total: number): string {
-  if (total === 0) return 'nothing to read';
-  const last = Math.min(start + width, total);
-  if (width >= total) return `all ${total} cell${total === 1 ? '' : 's'}`;
-  if (width === 1) return `cell ${start + 1} of ${total}`;
-  return `cells ${start + 1}–${last} of ${total}`;
-}
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);

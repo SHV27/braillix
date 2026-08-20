@@ -114,7 +114,8 @@ test.describe('Braillix — the core journey', () => {
 
   test('the cell atlas lists all 64 cam positions', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Cell atlas' }).click();
+    await page.getByTestId('nav-device').click();
+    await page.getByTestId('device-atlas').click();
     await expect(page.getByRole('heading', { name: 'Cell atlas' })).toBeVisible();
     await expect(page.locator('.atlas__item')).toHaveCount(64);
   });
@@ -148,7 +149,8 @@ test.describe('appearance', () => {
   test('captures the cell atlas', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/');
-    await page.getByRole('button', { name: 'Cell atlas' }).click();
+    await page.getByTestId('nav-device').click();
+    await page.getByTestId('device-atlas').click();
     await expect(page.locator('.atlas__item')).toHaveCount(64);
     await page.screenshot({ path: `${SHOTS}/atlas-desktop.png`, fullPage: true });
   });

@@ -12,9 +12,11 @@
 
 import { useEffect } from 'react';
 import { useBraillix } from '../store';
+import { useLang, useT } from './i18n';
 import './ReaderPanel.css';
 
 export function ReaderPanel() {
+  const t = useT();
   const mode = useBraillix((s) => s.mode);
   const setMode = useBraillix((s) => s.setMode);
   const tree = useBraillix((s) => s.tree);
@@ -29,10 +31,12 @@ export function ReaderPanel() {
   const goParent = useBraillix((s) => s.goParent);
   const sayCurrent = useBraillix((s) => s.sayCurrent);
   const settings = useBraillix((s) => s.settings);
+  const language = useLang();
   const updateSettings = useBraillix((s) => s.updateSettings);
   const speechCap = useBraillix((s) => s.capabilities.speech);
   const activeCells = useBraillix((s) => s.activeCells);
   const spokenText = useBraillix((s) => s.spokenText);
+  const mixedLine = useBraillix((s) => s.mixedLine);
 
   // Keyboard navigation. Bound at the document so the reader never has to hunt for focus —
   // suppressed while typing, because the expression field needs its own arrow keys.
@@ -88,16 +92,16 @@ export function ReaderPanel() {
     <section className="reader" aria-labelledby="reader-heading">
       <div className="reader__head">
         <h2 id="reader-heading" className="read__h2">
-          How to read it
+          {t('reader.title')}
         </h2>
-        <div className="segmented" role="group" aria-label="Reading mode">
+        <div className="segmented" role="group" aria-label={t('reader.mode')}>
           <button
             type="button"
             className={`segmented__btn${mode === 'whole' ? ' is-current' : ''}`}
             aria-pressed={mode === 'whole'}
             onClick={() => setMode('whole')}
           >
-            Whole expression
+            {t('reader.whole')}
           </button>
           <button
             type="button"
@@ -107,17 +111,13 @@ export function ReaderPanel() {
             data-testid="mode-explore"
             onClick={() => setMode('explore')}
           >
-            Explore structure
+            {t('reader.explore')}
           </button>
         </div>
       </div>
 
       {mode === 'whole' ? (
-        <p className="reader__blurb">
-          Every cell of the expression in order — what a conventional braille display does. On{' '}
-          <strong>one</strong> cell that is {activeCells.length} separate readings, with nothing to
-          tell you where you are. Try <em>Explore structure</em>.
-        </p>
+        <p className="reader__blurb">{t('reader.wholeBlurb', { count: activeCells.length })}</p>
       ) : (
         <>
           <p className="reader__crumbs" data-testid="breadcrumb">
@@ -125,15 +125,15 @@ export function ReaderPanel() {
           </p>
 
           <p className="reader__blurb" data-testid="fold-state">
-            You are on <strong>{nodeLabel || 'nothing'}</strong>.{' '}
+            {t('reader.youAreOn', { label: nodeLabel || t('reader.nothing') })}{' '}
             {expanded
-              ? 'Showing it in full.'
+              ? t('reader.showingFull')
               : foldReason
-                ? `Shown in full — ${foldReason}.`
-                : 'Its parts are folded into ⠿ — step into one to read it.'}
+                ? t('reader.shownBecause', { reason: foldReason })
+                : t('reader.folded')}
           </p>
 
-          <div className="dpad" role="group" aria-label="Move through the expression">
+          <div className="dpad" role="group" aria-label={t('reader.move')}>
             <button
               type="button"
               className="dpad__btn dpad__btn--up"
@@ -142,7 +142,7 @@ export function ReaderPanel() {
               onClick={goParent}
             >
               <span aria-hidden="true">↑</span>
-              <span className="dpad__label">Out</span>
+              <span className="dpad__label">{t('reader.out')}</span>
             </button>
             <button
               type="button"
@@ -152,7 +152,7 @@ export function ReaderPanel() {
               onClick={() => goSibling(-1)}
             >
               <span aria-hidden="true">←</span>
-              <span className="dpad__label">Prev</span>
+              <span className="dpad__label">{t('reader.prev')}</span>
             </button>
             <button
               type="button"
@@ -162,7 +162,7 @@ export function ReaderPanel() {
               disabled={!settings.speechOn || speechCap.state === 'unavailable'}
             >
               <span aria-hidden="true">♪</span>
-              <span className="dpad__label">Say</span>
+              <span className="dpad__label">{t('reader.say')}</span>
             </button>
             <button
               type="button"
@@ -172,7 +172,7 @@ export function ReaderPanel() {
               onClick={() => goSibling(1)}
             >
               <span aria-hidden="true">→</span>
-              <span className="dpad__label">Next</span>
+              <span className="dpad__label">{t('reader.next')}</span>
             </button>
             <button
               type="button"
@@ -182,31 +182,29 @@ export function ReaderPanel() {
               onClick={goChild}
             >
               <span aria-hidden="true">↓</span>
-              <span className="dpad__label">In</span>
+              <span className="dpad__label">{t('reader.in')}</span>
             </button>
           </div>
 
           <div className="reader__row">
             <button type="button" className="btn" onClick={toggleExpanded} data-testid="toggle-expanded">
-              {expanded ? 'Fold the parts back up' : 'Show this part in full'}
+              {expanded ? t('reader.foldUp') : t('reader.showFull')}
             </button>
             <p className="reader__keys">
-              <kbd>←</kbd> <kbd>→</kbd> move · <kbd>↓</kbd> in · <kbd>↑</kbd> out · <kbd>space</kbd> say ·{' '}
-              <kbd>E</kbd> expand
+              <kbd>←</kbd> <kbd>→</kbd> {t('reader.keysMove')} · <kbd>↓</kbd> {t('reader.in')} ·{' '}
+              <kbd>↑</kbd> {t('reader.out')} · <kbd>space</kbd> {t('reader.say')} · <kbd>E</kbd>{' '}
+              {t('reader.keysExpand')}
             </p>
           </div>
 
           {spokenText && (
             <p className="reader__spoken" data-testid="spoken-text">
-              <span className="reader__spokenlabel">Spoken</span>
-              <span lang={settings.speechLocale}>{spokenText}</span>
+              <span className="reader__spokenlabel">{t('reader.spoken')}</span>
+              <span lang={language}>{spokenText}</span>
             </p>
           )}
 
-          <p className="reader__pod">
-            The same three moves are the pod’s three buttons: <strong>Prev</strong>,{' '}
-            <strong>Select</strong> (in; hold to go out), <strong>Next</strong>.
-          </p>
+          <p className="reader__pod">{t('reader.pod')}</p>
         </>
       )}
 
@@ -217,24 +215,12 @@ export function ReaderPanel() {
             checked={settings.speechOn}
             onChange={(event) => updateSettings({ speechOn: event.target.checked })}
           />
-          <span>Speak as I read</span>
+          <span>{t('reader.speakAsIRead')}</span>
         </label>
 
-        <label className="switch">
-          <span className="switch__label">Voice</span>
-          <select
-            className="select"
-            value={settings.speechLocale}
-            name="speech-locale" data-testid="speech-locale"
-            onChange={(event) => updateSettings({ speechLocale: event.target.value as 'en' | 'hi' })}
-          >
-            <option value="en">English</option>
-            <option value="hi">हिन्दी</option>
-          </select>
-        </label>
 
         <label className="switch">
-          <span className="switch__label">Rate</span>
+          <span className="switch__label">{t('reader.rate')}</span>
           <input
             type="range"
             min={0.6}
@@ -248,10 +234,7 @@ export function ReaderPanel() {
       </div>
 
       {structureUnavailable && (
-        <p className="notice notice--warn">
-          Structure analysis isn’t available for this expression, so exploring is switched off.
-          Reading the whole expression still works.
-        </p>
+        <p className="notice notice--warn">{t(mixedLine ? 'reader.noStructureQuestion' : 'reader.noStructure')}</p>
       )}
     </section>
   );

@@ -15,7 +15,9 @@ import { create } from 'zustand';
 import { DEFAULT_SIMULATED_CELLS, LOCAL_MODEL_PATH } from './config';
 import { renderFrame, windowFollowingCursor, type Frame } from './core/frame';
 import { simulatedProfile, type BitOrder, type DisplayProfile } from './core/profile';
-import { initSre, type SpeechLocale } from './core/sre-service';
+import { initSre } from './core/sre-service';
+import { toLatex, type MathInputIssue } from './core/mathinput';
+import { hasWords, translateMixed, type MixedLine, type SegmentKind } from './core/mixed';
 import { translateLatex, type Translation } from './core/translate';
 import { BLANK, dotsToMask, type DotMask, type DotNumber } from './core/braille';
 import type { RefreshPlan } from './core/scheduler';
@@ -36,6 +38,7 @@ import { HttpPodTransport } from './transport/httppod';
 import { WebSerialTransport, webSerialSupported } from './transport/webserial';
 import { TransportError, type ButtonEvent, type TransportStatus } from './transport/types';
 import { cancelSpeech, speak, speechAvailable, voiceFor, whenVoicesReady } from './ui/speech';
+import { lang, translate } from './ui/i18n';
 
 /* ------------------------------------------------------------------ capabilities */
 
@@ -43,8 +46,6 @@ export type CapabilityState = 'checking' | 'ready' | 'unavailable' | 'degraded';
 
 export interface Capability {
   readonly state: CapabilityState;
-  /** What this is, in the user's words. */
-  readonly label: string;
   /** Why it is not ready. Present whenever state is not 'ready'. */
   readonly reason?: string;
   /** Something the user can actually do about it. */
@@ -56,16 +57,16 @@ export type CapabilityId = 'sre' | 'speech' | 'recognition' | 'usb' | 'pod';
 export type CapabilityMap = Record<CapabilityId, Capability>;
 
 const INITIAL_CAPABILITIES: CapabilityMap = {
-  sre: { state: 'checking', label: 'Maths engine' },
-  speech: { state: 'checking', label: 'Speech' },
-  recognition: { state: 'checking', label: 'Recognition' },
-  usb: { state: 'checking', label: 'USB display' },
-  pod: { state: 'unavailable', label: 'Display', reason: 'simulated', fix: 'Connect real hardware on the Hardware screen.' },
+  sre: { state: 'checking' },
+  speech: { state: 'checking' },
+  recognition: { state: 'checking' },
+  usb: { state: 'checking' },
+  pod: { state: 'unavailable', reason: 'simulated', fix: 'Connect real hardware on the Hardware screen.' },
 };
 
 /* ------------------------------------------------------------------ view + settings */
 
-export type ViewId = 'read' | 'practice' | 'recognise' | 'hardware' | 'atlas';
+export type ViewId = 'board' | 'practice' | 'device';
 
 /**
  * How the display is being driven.
@@ -76,7 +77,6 @@ export type ReadMode = 'whole' | 'explore';
 
 export interface Settings {
   speechOn: boolean;
-  speechLocale: SpeechLocale;
   speechRate: number;
 }
 
@@ -108,10 +108,28 @@ interface BraillixState {
   testDot: (dot: DotNumber | null) => Promise<void>;
   testingDot: DotNumber | null;
 
+  /** Exactly what the teacher typed — natural maths, LaTeX, or a mixture. */
+  source: string;
+  /** The LaTeX it became. Derived, never typed into directly. */
   latex: string;
+  /** What the input parser could not make sense of. Never fatal; always said out loud. */
+  inputIssues: readonly MathInputIssue[];
   translation: Translation | null;
+  /**
+   * Set when the line contains words as well as maths — a textbook question rather than an
+   * expression. Null for a pure expression, which is the case everything else in the app assumes.
+   */
+  mixedLine: MixedLine | null;
+  /** The teacher's corrections to the words/maths split, keyed by the exact text of the segment. */
+  segmentOverrides: Record<string, SegmentKind>;
+  /** Switch one segment between words and maths, and re-render the line. */
+  flipSegment: (text: string) => void;
   translating: boolean;
+  /** Put an expression on the board, in whatever notation it was written. */
+  setSource: (text: string) => void;
   setLatex: (latex: string) => void;
+  /** Re-check which voice the current language has. Called when the language changes. */
+  refreshSpeech: () => void;
 
   /* --- the reader --- */
   mode: ReadMode;
@@ -238,16 +256,16 @@ export const useBraillix = create<BraillixState>((set, get) => {
       announcement:
         options.announce === false
           ? get().announcement
-          : `${label}. ${rendering.cells.length} cell${rendering.cells.length === 1 ? '' : 's'}.`,
+          : translate('say.node', { label, count: rendering.cells.length }),
       ...project({ activeCells: rendering.cells, windowStart: 0, cursor: null }),
     });
 
     // Always compute the transcript, even with speech switched off — it is shown on screen.
-    const spoken = await speakNode(node, settings.speechLocale);
+    const spoken = await speakNode(node, lang());
     if (get().cursorId !== node.id) return;
     set({ spokenText: spoken });
     if (settings.speechOn && options.announce !== false) {
-      speak(`${label}. ${spoken}`, settings.speechLocale, settings.speechRate);
+      speak(`${label}. ${spoken}`, lang(), settings.speechRate);
     }
   }
 
@@ -297,7 +315,10 @@ export const useBraillix = create<BraillixState>((set, get) => {
       linkFirmware: next.chain.firmware ?? null,
       linkError: null,
       linkFix: null,
-      announcement: `Display: ${nextProfile.cellCount} cell${nextProfile.cellCount === 1 ? '' : 's'}, ${next.transport.label}.`,
+      announcement:
+        nextProfile.cellCount === 1
+          ? translate('say.displayOne', { label: next.transport.label })
+          : translate('say.display', { count: nextProfile.cellCount, label: next.transport.label }),
       ...project({ profile: nextProfile }),
     });
     get().setCapability('pod', capability);
@@ -306,7 +327,7 @@ export const useBraillix = create<BraillixState>((set, get) => {
   const initialProfile = simulatedProfile(DEFAULT_SIMULATED_CELLS);
 
   return {
-    view: 'read',
+    view: 'board',
     setView: (view) => set({ view }),
 
     profile: initialProfile,
@@ -321,7 +342,7 @@ export const useBraillix = create<BraillixState>((set, get) => {
       const next = link.profile(get().profile);
       set({
         profile: next,
-        announcement: `Display is now ${count} cell${count === 1 ? '' : 's'}.`,
+        announcement: count === 1 ? translate('say.cellsNowOne') : translate('say.cellsNow', { count }),
         ...project({ profile: next }),
       });
     },
@@ -350,7 +371,6 @@ export const useBraillix = create<BraillixState>((set, get) => {
       const next = await DisplayLink.simulated(get().profile.cellCount);
       await adopt(next, {
         state: 'ready',
-        label: 'Display',
         reason: 'simulated — no hardware attached',
       });
     },
@@ -368,7 +388,6 @@ export const useBraillix = create<BraillixState>((set, get) => {
         const chain = await transport.connect();
         await adopt(new DisplayLink(transport, chain), {
           state: 'ready',
-          label: 'Display',
           reason: `${chain.cellCount} cells over USB · ${chain.firmware ?? 'unknown firmware'}`,
         });
       } catch (err) {
@@ -390,7 +409,6 @@ export const useBraillix = create<BraillixState>((set, get) => {
         const chain = await transport.connect();
         await adopt(new DisplayLink(transport, chain), {
           state: 'ready',
-          label: 'Display',
           reason: `${chain.cellCount} cells over Wi-Fi · ${chain.pods.length} pod${chain.pods.length === 1 ? '' : 's'}`,
         });
       } catch (err) {
@@ -404,7 +422,7 @@ export const useBraillix = create<BraillixState>((set, get) => {
     homeDisplay: async () => {
       if (!link) return;
       await link.home();
-      set({ announcement: 'Every cell homed to blank.', ...project() });
+      set({ announcement: translate('say.homed'), ...project() });
     },
 
     /**
@@ -428,18 +446,66 @@ export const useBraillix = create<BraillixState>((set, get) => {
       const cells = new Array<DotMask>(profile.cellCount).fill(mask);
       set({
         testingDot: dot,
-        announcement: dot === null ? 'Test pattern cleared.' : `Raising dot ${dot} on every cell.`,
+        announcement: dot === null ? translate('say.testCleared') : translate('say.testDot', { dot }),
         ...project({ activeCells: cells, windowStart: 0, cursor: null }),
       });
     },
 
+    source: '',
     latex: '',
+    inputIssues: [],
     translation: null,
+    mixedLine: null,
+    segmentOverrides: {},
     translating: false,
-    setLatex: (latex) => {
-      set({ latex, translating: true, testingDot: null });
-      void translateLatex(latex).then((translation) => {
-        if (get().latex !== latex) return; // a newer keystroke already won
+
+    flipSegment: (text) => {
+      const current = get().segmentOverrides;
+      const segment = get().mixedLine?.segments.find((entry) => entry.text === text);
+      if (!segment) return;
+      const next = { ...current, [text]: segment.kind === 'maths' ? ('text' as const) : ('maths' as const) };
+      set({ segmentOverrides: next });
+      get().setSource(get().source);
+    },
+
+    /**
+     * Put an expression on the board.
+     *
+     * One entry point for every source — the keyboard, the keypad, the recogniser, a worksheet —
+     * so that natural maths and LaTeX cannot diverge into two pipelines with two sets of bugs.
+     * `toLatex` passes LaTeX through untouched, so this is safe for callers that already have it.
+     */
+    setSource: (text) => {
+      const parsed = toLatex(text);
+      set({ source: text, latex: parsed.latex, inputIssues: parsed.issues, translating: true, testingDot: null });
+
+      // A line with words in it is a textbook question, not an expression: it needs two braille
+      // codes and a visible boundary between them (core/mixed.ts). A line without words takes
+      // exactly the path it always has, so nothing that already worked can change.
+      if (hasWords(text)) {
+        void translateMixed(text, get().segmentOverrides).then((line) => {
+          if (get().source !== text) return;
+          set({
+            translating: false,
+            mixedLine: line,
+            translation: null,
+            tree: null,
+            cursorId: null,
+            breadcrumb: '',
+            nodeLabel: '',
+            canGo: { left: false, right: false, in: false, out: false },
+            foldedChildCells: [],
+            foldReason: null,
+            mode: 'whole',
+            announcement: translate('say.cells', { count: line.cells.length }),
+            ...project({ activeCells: line.cells, windowStart: 0, cursor: null }),
+          });
+        });
+        return;
+      }
+
+      void translateLatex(parsed.latex).then((translation) => {
+        if (get().source !== text) return; // a newer keystroke already won
 
         const tree = buildTree(translation.enriched);
         const rootId = tree?.rootId ?? null;
@@ -450,7 +516,6 @@ export const useBraillix = create<BraillixState>((set, get) => {
         if (translation.degraded === 'literal') {
           get().setCapability('sre', {
             state: 'degraded',
-            label: 'Maths engine',
             reason: 'unavailable — cells show Grade-1 literary braille, NOT Nemeth',
             fix: 'Reload; if it persists run `npm install` again to restore public/sre/mathmaps.',
           });
@@ -459,6 +524,7 @@ export const useBraillix = create<BraillixState>((set, get) => {
         set({
           translating: false,
           translation,
+          mixedLine: null,
           tree,
           cursorId: rootId,
           breadcrumb: tree && rootId ? breadcrumb(tree, rootId) : '',
@@ -467,8 +533,8 @@ export const useBraillix = create<BraillixState>((set, get) => {
           foldedChildCells: [],
           foldReason: null,
           announcement: translation.issues.some((i) => i.kind === 'parse')
-            ? 'That expression could not be read.'
-            : `${translation.cells.length} braille cells.`,
+            ? translate('board.parseFailed')
+            : translate('say.cells', { count: translation.cells.length }),
           ...project({ activeCells: translation.cells, windowStart: 0, cursor: null }),
         });
 
@@ -477,6 +543,9 @@ export const useBraillix = create<BraillixState>((set, get) => {
         }
       });
     },
+
+    /** LaTeX is just one of the notations `setSource` understands. */
+    setLatex: (latex) => get().setSource(latex),
 
     /* --- the reader --- */
     mode: 'whole',
@@ -490,7 +559,7 @@ export const useBraillix = create<BraillixState>((set, get) => {
         set({
           foldedChildCells: [],
           foldReason: null,
-          announcement: `Reading the whole expression — ${translation.cells.length} cells.`,
+          announcement: translate('say.whole', { count: translation.cells.length }),
           ...project({ activeCells: translation.cells, windowStart: 0, cursor: null }),
         });
       }
@@ -559,19 +628,32 @@ export const useBraillix = create<BraillixState>((set, get) => {
     setCapability: (id, capability) =>
       set((state) => ({ capabilities: { ...state.capabilities, [id]: capability } })),
 
-    settings: { speechOn: true, speechLocale: 'en', speechRate: 1 },
+    settings: { speechOn: true, speechRate: 1 },
     updateSettings: (patch) => {
       cancelSpeech();
       set((state) => ({ settings: { ...state.settings, ...patch } }));
-      if (patch.speechLocale) {
-        const voice = voiceFor(patch.speechLocale);
-        const language = patch.speechLocale === 'hi' ? 'Hindi' : 'English';
-        get().setCapability('speech', {
-          state: voice.available ? 'ready' : 'degraded',
-          label: 'Speech',
-          reason: voice.available ? `${language} · ${voice.name ?? 'system voice'}` : `no ${language} voice on this machine`,
-          fix: voice.available ? undefined : 'Install the language pack in your OS settings, or switch language.',
-        });
+    },
+
+    /**
+     * The language changed, so the voice may have too.
+     *
+     * A machine with no Hindi voice is common — this laptop is one — and the honest thing is to say
+     * so on the badge rather than to fall silent and let the teacher wonder what broke.
+     */
+    refreshSpeech: () => {
+      cancelSpeech();
+      const locale = lang();
+      const voice = voiceFor(locale);
+      const language = locale === 'hi' ? 'Hindi' : 'English';
+      get().setCapability('speech', {
+        state: voice.available ? 'ready' : 'degraded',
+        reason: voice.available ? `${language} · ${voice.name ?? 'system voice'}` : `no ${language} voice on this machine`,
+        fix: voice.available ? undefined : 'Braille is unaffected. Install the voice in your OS settings, or switch language.',
+      });
+      const { tree, cursorId, mode } = get();
+      if (mode === 'explore' && tree && cursorId) {
+        const node = tree.nodes.get(cursorId);
+        if (node) void showNode(node, { announce: false });
       }
     },
     sayCurrent: () => {
@@ -580,9 +662,9 @@ export const useBraillix = create<BraillixState>((set, get) => {
       const id = mode === 'explore' && cursorId ? cursorId : tree.rootId;
       const node = tree.nodes.get(id);
       if (!node) return;
-      void speakNode(node, settings.speechLocale).then((text) => {
+      void speakNode(node, lang()).then((text) => {
         const prefix = mode === 'explore' ? `${describeNode(tree, node)}. ` : '';
-        speak(`${prefix}${text}`, settings.speechLocale, settings.speechRate);
+        speak(`${prefix}${text}`, lang(), settings.speechRate);
       });
     },
 
@@ -600,10 +682,9 @@ export const useBraillix = create<BraillixState>((set, get) => {
       setCapability(
         'sre',
         sreStatus.ok
-          ? { state: 'ready', label: 'Maths engine', reason: `Nemeth · SRE ${sreStatus.version ?? ''}`.trim() }
+          ? { state: 'ready', reason: `Nemeth · SRE ${sreStatus.version ?? ''}`.trim() }
           : {
               state: 'unavailable',
-              label: 'Maths engine',
               reason: sreStatus.reason ?? 'failed to start',
               fix: 'Run `npm install` again — the locale files in public/sre/mathmaps may be missing.',
             },
@@ -611,17 +692,15 @@ export const useBraillix = create<BraillixState>((set, get) => {
 
       if (speechAvailable()) {
         await whenVoicesReady();
-        const voice = voiceFor(get().settings.speechLocale);
+        const voice = voiceFor(lang());
         setCapability('speech', {
           state: voice.available ? 'ready' : 'degraded',
-          label: 'Speech',
           reason: voice.available ? (voice.name ?? 'system voice') : 'no matching voice installed',
           fix: voice.available ? undefined : 'Braille is unaffected. Install a voice in your OS settings.',
         });
       } else {
         setCapability('speech', {
           state: 'unavailable',
-          label: 'Speech',
           reason: 'this browser has no speech synthesis',
           fix: 'Braille and on-screen reading are unaffected.',
         });
@@ -630,10 +709,9 @@ export const useBraillix = create<BraillixState>((set, get) => {
       setCapability(
         'usb',
         webSerialSupported()
-          ? { state: 'ready', label: 'USB display', reason: 'Web Serial available' }
+          ? { state: 'ready', reason: 'Web Serial available' }
           : {
               state: 'unavailable',
-              label: 'USB display',
               reason: 'Web Serial is not supported here',
               fix: 'Use Chrome or Edge on a desktop to connect a pod over USB.',
             },
@@ -648,14 +726,12 @@ export const useBraillix = create<BraillixState>((set, get) => {
         const installed = body.trimStart().startsWith('{');
         setCapability('recognition', {
           state: installed ? 'ready' : 'unavailable',
-          label: 'Recognition',
           reason: installed ? 'on this device, offline' : 'on-device model not installed',
           fix: installed ? undefined : 'Run `npm run fetch:model` once (76 MB) to enable reading handwriting.',
         });
       } catch {
         setCapability('recognition', {
           state: 'unavailable',
-          label: 'Recognition',
           reason: 'could not check whether the model is installed',
           fix: 'Run `npm run fetch:model` once (76 MB) to enable reading handwriting.',
         });

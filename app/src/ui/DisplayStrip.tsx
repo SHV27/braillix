@@ -11,9 +11,12 @@ import { useBraillix } from '../store';
 import { maskToDots, maskToUnicode } from '../core/braille';
 import { toCam } from '../core/profile';
 import { cellsToUnicode } from '../core/translate';
+import { NEMETH_MEANINGS } from '../core/nemeth-meanings';
+import { useT } from './i18n';
 import './DisplayStrip.css';
 
 export function DisplayStrip() {
+  const t = useT();
   const activeCells = useBraillix((s) => s.activeCells);
   const profile = useBraillix((s) => s.profile);
   const windowStart = useBraillix((s) => s.windowStart);
@@ -25,12 +28,9 @@ export function DisplayStrip() {
     return (
       <section className="evidence" aria-labelledby="evidence-heading">
         <h2 id="evidence-heading" className="read__h2">
-          The braille
+          {t('display.braille')}
         </h2>
-        <p className="evidence__empty">
-          Nothing translated yet. Type an expression above — or pick an example — and every cell,
-          dot and cam number will be listed here.
-        </p>
+        <p className="evidence__empty">{t('evidence.empty')}</p>
       </section>
     );
   }
@@ -42,10 +42,10 @@ export function DisplayStrip() {
     <section className="evidence" aria-labelledby="evidence-heading">
       <div className="evidence__head">
         <h2 id="evidence-heading" className="read__h2">
-          The braille
+          {t('display.braille')}
         </h2>
         <p className="evidence__count num">
-          {cells.length} cell{cells.length === 1 ? '' : 's'} · Nemeth
+          {cells.length === 1 ? t('evidence.countOne') : t('evidence.count', { count: cells.length })}
         </p>
       </div>
 
@@ -55,16 +55,14 @@ export function DisplayStrip() {
 
       <div className="evidence__scroll">
         <table className="wire">
-          <caption className="visually-hidden">
-            Every braille cell in this expression, with its raised dots and the cam position sent to
-            the hardware.
-          </caption>
+          <caption className="visually-hidden">{t('evidence.caption')}</caption>
           <thead>
             <tr>
-              <th scope="col">#</th>
-              <th scope="col">Cell</th>
-              <th scope="col">Dots</th>
-              <th scope="col">Cam</th>
+              <th scope="col">{t('evidence.col.index')}</th>
+              <th scope="col">{t('evidence.col.cell')}</th>
+              <th scope="col">{t('evidence.col.dots')}</th>
+              <th scope="col">{t('evidence.col.meaning')}</th>
+              <th scope="col">{t('evidence.col.cam')}</th>
             </tr>
           </thead>
           <tbody>
@@ -77,13 +75,15 @@ export function DisplayStrip() {
                     <button
                       type="button"
                       className="wire__jump"
-                      title={`Scroll the display to cell ${index + 1}`}
+                      title={t('evidence.jump', { index: index + 1 })}
                       onClick={() => setWindowStart(index)}
                     >
                       {maskToUnicode(mask)}
                     </button>
                   </td>
                   <td className="num">{maskToDots(mask).join('-') || '—'}</td>
+                  {/* The column that lets a teacher who does not read Nemeth follow the line. */}
+                  <td className="wire__meaning">{NEMETH_MEANINGS[mask]}</td>
                   <td className="num wire__cam">{toCam(profile, mask)}</td>
                 </tr>
               );
@@ -92,10 +92,7 @@ export function DisplayStrip() {
         </table>
       </div>
 
-      <p className="evidence__foot">
-        Cam positions follow the current wiring profile. If the physical cam is wired differently,
-        change it once on the hardware screen — the braille above never changes.
-      </p>
+      <p className="evidence__foot">{t('evidence.foot')}</p>
     </section>
   );
 }

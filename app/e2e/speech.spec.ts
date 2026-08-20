@@ -12,7 +12,7 @@ import { expect, test, type Page } from '@playwright/test';
 async function openReader(page: Page, latex: string) {
   await page.goto('/');
   await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
-  await page.getByLabel('Speak as I read').uncheck();
+  await page.getByRole('checkbox', { name: /speak as i read|पढ़ते समय बोलिए/i }).uncheck();
   await page.getByTestId('latex-input').fill(latex);
   await expect(page.getByTestId('latex-input')).toHaveValue(latex);
   await page.waitForTimeout(500);
@@ -28,7 +28,7 @@ test.describe('what the student hears', () => {
 
   test('shows the Hindi transcript, whether or not a Hindi voice is installed', async ({ page }) => {
     await openReader(page, 'x^2 + 1');
-    await page.getByTestId('speech-locale').selectOption('hi');
+    await page.getByTestId('lang-hi').click();
     // Re-render the current node in the new language.
     await page.getByTestId('go-in').click();
     // वर्ग = "squared". If this appears, the Hindi maths engine is genuinely working.

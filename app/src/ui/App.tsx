@@ -2,21 +2,28 @@ import { useEffect } from 'react';
 import { useBraillix, type ViewId } from '../store';
 import { APP_NAME } from '../config';
 import { StatusStrip } from './StatusStrip';
-import { ReadScreen } from './ReadScreen';
-import { AtlasScreen } from './AtlasScreen';
-import { HardwareScreen } from './HardwareScreen';
-import { RecogniseScreen } from './RecogniseScreen';
+import { BoardScreen } from './BoardScreen';
+import { DeviceScreen } from './DeviceScreen';
 import { PracticeScreen } from './PracticeScreen';
+import { LanguageSwitch } from './LanguageSwitch';
+import { useT, type StringKey } from './i18n';
 
-const VIEWS: { id: ViewId; label: string; hint: string }[] = [
-  { id: 'read', label: 'Read', hint: 'Type maths and read it on the display' },
-  { id: 'practice', label: 'Practice', hint: 'Learn Nemeth by reading and writing braille' },
-  { id: 'recognise', label: 'Read handwriting', hint: 'Photograph or write an equation and have it read' },
-  { id: 'hardware', label: 'Hardware', hint: 'Connect a pod, and calibrate the cam wiring' },
-  { id: 'atlas', label: 'Cell atlas', hint: 'All 64 cam positions and what they mean' },
+/**
+ * The sections, in a teacher's words.
+ *
+ * These used to be named after the technology inside them ("Read handwriting", "Cell atlas").
+ * They are now named after the job: write maths on the **board**, **practise** the code, look after
+ * the **device**. Photographing an equation is an input method on the board, and the cam atlas is
+ * reference material about the device — neither is a place you go.
+ */
+const VIEWS: { id: ViewId; label: StringKey; hint: StringKey }[] = [
+  { id: 'board', label: 'nav.board', hint: 'nav.board.hint' },
+  { id: 'practice', label: 'nav.practice', hint: 'nav.practice.hint' },
+  { id: 'device', label: 'nav.device', hint: 'nav.device.hint' },
 ];
 
 export function App() {
+  const t = useT();
   const view = useBraillix((s) => s.view);
   const setView = useBraillix((s) => s.setView);
   const bootstrap = useBraillix((s) => s.bootstrap);
@@ -28,7 +35,7 @@ export function App() {
   return (
     <div className="shell">
       <a className="skip-link" href="#main">
-        Skip to the display
+        {t('app.skip')}
       </a>
 
       <header className="masthead">
@@ -45,32 +52,34 @@ export function App() {
           </span>
           <span className="masthead__words">
             <strong>{APP_NAME}</strong>
-            <span className="masthead__sub">refreshable braille for mathematics</span>
+            <span className="masthead__sub">{t('app.tagline')}</span>
           </span>
         </div>
 
-        <nav className="masthead__nav" aria-label="Sections">
-          {VIEWS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={`tab${view === item.id ? ' is-current' : ''}`}
-              aria-current={view === item.id ? 'page' : undefined}
-              title={item.hint}
-              onClick={() => setView(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </nav>
+        <div className="masthead__controls">
+          <nav className="masthead__nav" aria-label={t('app.sections')}>
+            {VIEWS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`tab${view === item.id ? ' is-current' : ''}`}
+                aria-current={view === item.id ? 'page' : undefined}
+                title={t(item.hint)}
+                data-testid={`nav-${item.id}`}
+                onClick={() => setView(item.id)}
+              >
+                {t(item.label)}
+              </button>
+            ))}
+          </nav>
+          <LanguageSwitch />
+        </div>
       </header>
 
       <main id="main" className="main">
-        {view === 'read' && <ReadScreen />}
+        {view === 'board' && <BoardScreen />}
         {view === 'practice' && <PracticeScreen />}
-        {view === 'recognise' && <RecogniseScreen />}
-        {view === 'hardware' && <HardwareScreen />}
-        {view === 'atlas' && <AtlasScreen />}
+        {view === 'device' && <DeviceScreen />}
       </main>
 
       <StatusStrip />

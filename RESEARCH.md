@@ -205,3 +205,63 @@ All checked on **2026-08-20** on this laptop unless noted.
 - [MDN — Web Serial API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API)
 - [liblouis](https://liblouis.io/) · [npm `liblouis`](https://www.npmjs.com/package/liblouis)
 - [Groq model deprecations](https://console.groq.com/docs/deprecations)
+
+---
+
+# PART TWO — THE CLASSROOM (20 Aug 2026, 17:00)
+
+*Second recon, run before arcs 7–10. Question: what does the person who will actually own this
+device — a teacher at an Indian school for the blind — need on a Tuesday morning?*
+
+## Verdicts that changed the design
+
+1. **The teacher very often cannot read braille.** The strongest documented value of a refreshable
+   display in exactly our market is that it "allows sighted teachers who might not know Braille to
+   create a more inclusive educational experience… convert any text into Braille format and push the
+   content into the device". Consequence: every braille surface in Braillix must have a *print*
+   counterpart the teacher can read, and the app must never require braille literacy to operate.
+   → arc 7 rendered-maths preview; → arc 9 print+braille handout.
+
+2. **The teacher very often cannot read LaTeX either.** Nothing in the research suggests a school
+   teacher will type `\frac{1}{2}`. They will type `1/2`. → arc 7 natural input + keypad.
+
+3. **Maths is the documented weak point, and the tools are ancient.** Indian schools teach arithmetic
+   on the **Taylor frame** and the **abacus**; surveys report visually-impaired students performing
+   worse in mathematics than in arts subjects, and name *"lack of trained teachers in teaching the
+   maths subject"* and *"inadequate skilled manpower in operating these devices"* as primary causes.
+   The gap Braillix fills is not "a braille display" — it is *maths*, for teachers who were never
+   trained in maths braille. → arc 9 self-check + accuracy evidence; → practice lessons are for
+   teachers as much as students.
+
+4. **The market shape is already proven, in literacy, by an Indian company.** Thinkerbell Labs'
+   Annie (80+ centres, 16 states, 5,000+ students) pairs the device with a companion app that lets
+   the teacher **create content, set homework, and see class analytics**, works **offline and
+   online**, and speaks **regional languages**. That is the shape a school expects. Annie teaches
+   *literacy*; nobody is doing this for *mathematics*. → arc 8 is exactly this shape, for maths.
+
+5. **Price is why this matters.** Commercial refreshable displays run $3,500–$15,000 (₹61k–₹155k
+   even at the Indian low end), and "in global south countries like India these items are usually
+   too expensive". A one-cell device that a school can afford is only useful if the software makes
+   one cell readable — which is what the Reader (arc 2) exists to do.
+
+6. **Bharati Braille has a current, official, Unicode-mapped standard.** DEPwD + NIEPVD published
+   *Standard Bharati Braille Codes* on 4 Jan 2025 covering 13 languages and 9 scripts, with a 2.1
+   draft dated 4 Jan 2026. The **Devanagari letter table is well documented and stable**, so Hindi
+   text braille is buildable and verifiable today. The **mathematics** notation is not available as
+   an open machine-readable table (the published PDF is a scanned, subset-font document about
+   language codes; NIEPVD's maths notation work is not published in extractable form). D2.1 stands:
+   Nemeth for the maths, and now **Bharati for the words around it**, each labelled on screen.
+   → arc 7 mixed-code lines.
+
+7. **Word problems are the real classroom artefact.** A Hindi-medium maths textbook is Hindi prose
+   with maths inside it. A tool that can only do the maths half cannot carry a textbook question.
+   This is the recombination arcs 7–8 are built on, and it is absent from every reference product
+   found in either recon pass.
+
+## Sources (part two)
+
+- [Microsoft Accessibility — an Indian company breaking barriers with a refreshable Braille device](https://blogs.microsoft.com/accessibility/an-indian-company-is-breaking-down-the-barriers-in-education-through-their-refreshable-braille-device/)
+- [Thinkerbell Labs](https://www.thinkerbelllabs.com/) · [NITI Frontier Tech — reimagining braille education](https://frontiertech.niti.gov.in/story/reimagining-braille-education-a-self-learning-braille-tutor-empowers-visually-impaired-learners-through-ai-and-gamification/)
+- [JETIR — survey on common difficulties faced by visually impaired students](https://www.jetir.org/papers/JETIR2010118.pdf) · [Application of abacus and Taylor Frame for learning mathematics](https://archive.conscientiabeam.com/index.php/61/article/view/4462)
+- [DEPwD — Standard Bharati Braille Codes with Unicode Mapping Chart](https://depwd.gov.in/en/draft-of-standard-bharati-braille-codes-with-unicode-mapping-chart/) · [liblouis braille-specs — Indian languages](http://liblouis.io/braille-specs/indian-languages/) · [Bharati Braille (Wikipedia)](https://en.wikipedia.org/wiki/Bharati_Braille)
+- [AssisTech IIT Delhi — TacRead low-cost refreshable braille display](https://assistech.iitd.ac.in/rbd.php) · [Refreshable braille displays, Indian pricing](https://sakshamlife.in/collections/electronic-braille-display)

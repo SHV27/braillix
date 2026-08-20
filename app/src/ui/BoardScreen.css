@@ -1,0 +1,26 @@
+/* The Board — layout for the input column. The shared grid lives in ReadScreen.css. */
+
+.board__title {
+  max-width: 18ch;
+}
+
+.board__tabs {
+  margin-bottom: var(--s4);
+}
+
+.board__printhead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-top: var(--s5);
+}
+
+.board__printlabel {
+  margin: 0 0 var(--s2);
+  font-weight: 500;
+}
+
+.board__examples {
+  margin-top: var(--s4);
+}

@@ -52,12 +52,13 @@ test.describe('with the network unplugged', () => {
     await page.getByTestId('go-in').click();
     await expect(page.getByTestId('breadcrumb')).toHaveText('Fraction ▸ Numerator');
 
-    await page.getByRole('button', { name: 'Practice', exact: true }).click();
+    await page.getByTestId('nav-practice').click();
     await page.getByTestId('answer-input').fill('1');
     await page.getByTestId('check-answer').click();
     await expect(page.getByTestId('verdict')).toContainText('Correct');
 
-    await page.getByRole('button', { name: 'Cell atlas', exact: true }).click();
+    await page.getByTestId('nav-device').click();
+    await page.getByTestId('device-atlas').click();
     await expect(page.locator('.atlas__item')).toHaveCount(64);
 
     expect(blocked, `blocked external requests:\n${blocked.join('\n')}`).toEqual([]);

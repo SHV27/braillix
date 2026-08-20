@@ -7,11 +7,13 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { useT } from './i18n';
 import './DrawPad.css';
 
 const STROKE_WIDTH = 4;
 
 export function DrawPad({ onDone }: { onDone: (dataUrl: string) => void }) {
+  const t = useT();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
   const [hasInk, setHasInk] = useState(false);
@@ -91,7 +93,7 @@ export function DrawPad({ onDone }: { onDone: (dataUrl: string) => void }) {
         ref={canvasRef}
         className="pad__canvas"
         data-testid="draw-pad"
-        aria-label="Draw an equation here"
+        aria-label={t('rec.draw')}
         onPointerDown={start}
         onPointerMove={move}
         onPointerUp={end}

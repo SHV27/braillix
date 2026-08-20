@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { BLANK, dotsToMask } from './braille';
 import { pageCount, pageWindow, renderFrame, windowFollowingCursor } from './frame';
 import { simulatedProfile } from './profile';
+import { describeWindow } from '../ui/window-label';
+import { translate } from '../ui/i18n';
 
 const RUN = [1, 2, 3, 4, 5, 6, 7]; // seven distinguishable dot masks
 
@@ -31,7 +33,7 @@ describe('renderFrame — works at any cell count', () => {
   it('renders an empty run as an all-blank display rather than failing', () => {
     const frame = renderFrame(simulatedProfile(4), { cells: [] });
     expect(frame.cells).toEqual([BLANK, BLANK, BLANK, BLANK]);
-    expect(frame.label).toBe('nothing to read');
+    expect(frame.total).toBe(0);
   });
 
   it('clamps a window that would run off the end', () => {
@@ -79,11 +81,33 @@ describe('renderFrame — the cursor', () => {
 });
 
 describe('window labels', () => {
+  // Core reports numbers; `describeWindow` in the interface turns them into a sentence in whichever
+  // language is on. These assertions cover both halves of that contract.
+  it('reports the window as numbers', () => {
+    const one = renderFrame(simulatedProfile(1), { cells: RUN });
+    expect([one.windowStart, one.width, one.total]).toEqual([0, 1, 7]);
+    const three = renderFrame(simulatedProfile(3), { cells: RUN, windowStart: 2 });
+    expect([three.windowStart, three.width, three.total]).toEqual([2, 3, 7]);
+  });
+
   it('reads naturally at every width', () => {
-    expect(renderFrame(simulatedProfile(1), { cells: RUN }).label).toBe('cell 1 of 7');
-    expect(renderFrame(simulatedProfile(3), { cells: RUN }).label).toBe('cells 1–3 of 7');
-    expect(renderFrame(simulatedProfile(20), { cells: RUN }).label).toBe('all 7 cells');
-    expect(renderFrame(simulatedProfile(2), { cells: [9] }).label).toBe('all 1 cell');
+    const say = (cells: number[], width: number, start = 0) => {
+      const frame = renderFrame(simulatedProfile(width), { cells, windowStart: start });
+      return describeWindow((key, vars) => translate(key, vars, 'en'), frame);
+    };
+    expect(say(RUN, 1)).toBe('cell 1 of 7');
+    expect(say(RUN, 3)).toBe('cells 1–3 of 7');
+    expect(say(RUN, 3, 5)).toBe('cells 5–7 of 7');
+    expect(say(RUN, 20)).toBe('all 7 cells');
+    expect(say([9], 2)).toBe('one cell');
+    expect(say([], 4)).toBe('nothing to read');
+  });
+
+  it('says the same thing in Hindi', () => {
+    const frame = renderFrame(simulatedProfile(1), { cells: RUN });
+    const hindi = describeWindow((key, vars) => translate(key, vars, 'hi'), frame);
+    expect(hindi).toContain('7');
+    expect(hindi).not.toMatch(/[a-z]/);
   });
 });
 

@@ -376,3 +376,32 @@ Run before calling this shipped. Result: **nothing to rotate, nothing to hide, n
 - **D6.5** — The two `npm audit` findings (`sharp`, `onnxruntime-node`) are **Node-only optional
   dependencies of `@huggingface/transformers`** and never reach the browser bundle. They are
   externalised in `vite.config.ts` and a unit test fails the build if either is ever imported.
+
+---
+
+## Part two — the classroom (20 Aug 2026)
+
+- **D7.1** — The owner of this product is a **teacher**, not a developer. Every arc-7-to-10 feature is
+  judged by one question: can a person who does not read braille, does not write LaTeX, and has not
+  been trained on this software do it on their first try? Anything failing that is a defect, not a
+  learning curve.
+- **D7.2** — LaTeX stays as the internal representation, but stops being an input requirement.
+  `core/mathinput.ts` accepts what a maths teacher actually writes (`1/2`, `sqrt(9)`, `x^2`, `<=`,
+  `pi`, `45 degrees`) and produces LaTeX. Rejected: building a WYSIWYG equation editor — a week of
+  work, and the keypad plus natural text covers the school syllabus.
+- **D7.3** — Bharati Braille (Devanagari) is built for the **words**, Nemeth stays for the **maths**,
+  and every run of cells is labelled with the code it is written in. Rejected: guessing at an
+  unpublished Indian maths code (see RESEARCH part two, verdict 6) — a wrong maths table taught
+  confidently is the worst outcome this project could produce.
+- **D7.4** — The interface speaks **Hindi and English**, switchable, persisted, with the language
+  affecting UI text and speech but never the braille standard in use.
+- **D7.5** — Information architecture rebuilt in teacher words: **Board · Practice · Class · Device ·
+  Help**. "Read handwriting" was a *technology* tab; photographing maths is an *input method*, so it
+  now lives inside the Board. The Cell Atlas is reference material for the hardware team, so it
+  lives inside Device.
+- **D7.6** — Class data (students, worksheets, records) lives in `localStorage` and moves between
+  machines as an exported file. Rejected: any account, server or sync — D6.4 says student data has
+  nowhere to go, and that is a feature. A school laptop with no Wi-Fi must be a first-class citizen.
+- **D7.7** — Mirror mode is added to the pod transport: several pods, all showing the same cells, for
+  a class reading together. The existing chain mode (pods concatenated into one long display) stays.
+  The mode is explicit, never inferred.

@@ -43,10 +43,14 @@ import { translateLatex } from '../core/translate';
 import { maskToUnicode, type DotMask } from '../core/braille';
 import { BrailleCell } from './BrailleCell';
 import { DisplayDock } from './DisplayDock';
+import { MathPreview } from './MathPreview';
+import { useT, usePick } from './i18n';
 import { toCam } from '../core/profile';
 import './PracticeScreen.css';
 
 export function PracticeScreen() {
+  const t = useT();
+  const say = usePick();
   const showCells = useBraillix((s) => s.showCells);
   const profile = useBraillix((s) => s.profile);
   const settings = useBraillix((s) => s.settings);
@@ -72,23 +76,23 @@ export function PracticeScreen() {
       if (cancelled) return;
       setExpected([...translated.cells]);
       if (drill === 'read') {
-        showCells(
-          translated.cells,
-          `Reading drill: ${translated.cells.length} cells on the display. Type what they say.`,
-        );
+        showCells(translated.cells, t('prac.sayReading', { count: translated.cells.length }));
       }
     });
     return () => {
       cancelled = true;
     };
-  }, [item.latex, drill, showCells]);
+  }, [item.latex, drill, showCells, t]);
 
   /* In a writing drill the display shows what the student has written so far — their own braille
      under their own fingers, which is the point of writing it. */
   useEffect(() => {
     if (drill !== 'write') return;
-    showCells(entry.cells, entry.cells.length === 0 ? 'Nothing written yet.' : `${entry.cells.length} cells written.`);
-  }, [drill, entry.cells, showCells]);
+    showCells(
+      entry.cells,
+      entry.cells.length === 0 ? t('prac.sayNothing') : t('prac.sayWritten', { count: entry.cells.length }),
+    );
+  }, [drill, entry.cells, showCells, t]);
 
   const reset = useCallback(() => {
     setTyped('');
@@ -183,25 +187,15 @@ export function PracticeScreen() {
   return (
     <div className="prac">
       <header className="prac__head">
-        <h1 className="read__title">Practice</h1>
-        <p className="read__lede">
-          Read the dots, or write them yourself. Answers are marked on the <strong>braille</strong>,
-          so any correct way of writing the maths counts.
-        </p>
+        <h1 className="read__title">{t('prac.title')}</h1>
+        <p className="read__lede">{t('prac.lede')}</p>
       </header>
 
-      <DisplayDock
-        title="The display"
-        hint={
-          drill === 'read'
-            ? 'Read these dots — with your fingers on a connected display, or here on screen.'
-            : 'What you write appears here, cell by cell.'
-        }
-      />
+      <DisplayDock hint={drill === 'read' ? 'prac.hintRead' : 'prac.hintWrite'} />
 
       <div className="prac__grid">
-        <nav className="panel prac__lessons" aria-label="Lessons">
-          <h2 className="panel__title">Lessons</h2>
+        <nav className="panel prac__lessons" aria-label={t('prac.lessons')}>
+          <h2 className="panel__title">{t('prac.lessons')}</h2>
           <ol className="lessons">
             {LESSONS.map((entryLesson) => {
               const done = summariseLesson(progress, entryLesson.id, entryLesson.items.length);
@@ -213,7 +207,7 @@ export function PracticeScreen() {
                     data-testid={`lesson-${entryLesson.id}`}
                     onClick={() => chooseLesson(entryLesson)}
                   >
-                    <span className="lessons__title">{entryLesson.title}</span>
+                    <span className="lessons__title">{say(entryLesson.title)}</span>
                     <span className="lessons__score num">
                       {done.correct}/{done.total}
                     </span>
@@ -232,19 +226,17 @@ export function PracticeScreen() {
               setProgress({});
             }}
           >
-            Erase my progress
+            {t('prac.erase')}
           </button>
-          <p className="hw__note">
-            Progress is stored on this computer only. Nothing is uploaded, and there is no account.
-          </p>
+          <p className="hw__note">{t('prac.privacy')}</p>
         </nav>
 
         <section className="panel prac__drill" aria-labelledby="drill-heading">
           <div className="prac__drillhead">
             <h2 id="drill-heading" className="panel__title">
-              {lesson.title}
+              {say(lesson.title)}
             </h2>
-            <div className="segmented" role="group" aria-label="Drill type">
+            <div className="segmented" role="group" aria-label={t('prac.drillType')}>
               <button
                 type="button"
                 className={`segmented__btn${drill === 'read' ? ' is-current' : ''}`}
@@ -255,7 +247,7 @@ export function PracticeScreen() {
                   reset();
                 }}
               >
-                Read the dots
+                {t('prac.drillRead')}
               </button>
               <button
                 type="button"
@@ -267,37 +259,34 @@ export function PracticeScreen() {
                   reset();
                 }}
               >
-                Write the braille
+                {t('prac.drillWrite')}
               </button>
             </div>
           </div>
 
-          <p className="prac__rule">{lesson.rule}</p>
+          <p className="prac__rule">{say(lesson.rule)}</p>
 
           <div className="prac__meta num">
-            <span>
-              Question {index + 1} of {lesson.items.length}
-            </span>
+            <span>{t('prac.question', { index: index + 1, total: lesson.items.length })}</span>
             <span>·</span>
-            <span>
-              {summary.correct} of {summary.total} answered correctly
-            </span>
+            <span>{t('prac.score', { correct: summary.correct, total: summary.total })}</span>
           </div>
 
           {drill === 'read' ? (
             <>
               <p className="prac__prompt">
-                {expected.length} cell{expected.length === 1 ? '' : 's'} are on the display
-                {profile.cellCount < expected.length ? ` (${profile.cellCount} at a time)` : ''}. What does it say?
+                {profile.cellCount < expected.length
+                  ? t('prac.promptReadPaged', { count: expected.length, width: profile.cellCount })
+                  : t('prac.promptRead', { count: expected.length })}
               </p>
               <label className="field">
-                <span className="field__label">Your answer</span>
+                <span className="field__label">{t('prac.yourAnswer')}</span>
                 <input
                   className="field__input num"
                   value={typed}
                   spellCheck={false}
                   name="answer" data-testid="answer-input"
-                  placeholder="for example  1/2  or  x^2+1"
+                  placeholder={t('prac.answerHint')}
                   onChange={(event) => setTyped(event.target.value)}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter') void check();
@@ -307,9 +296,11 @@ export function PracticeScreen() {
             </>
           ) : (
             <>
-              <p className="prac__prompt">
-                Write this in braille: <strong className="prac__latex num">{item.latex}</strong>
-              </p>
+              <p className="prac__prompt">{t('prac.promptWrite')}</p>
+              {/* Shown as real maths, not as LaTeX: a student writing braille should be reading
+                  mathematics, and a teacher checking over their shoulder should not have to parse
+                  a backslash. */}
+              <MathPreview latex={item.latex} size="large" label={item.latex} />
 
               <div className="pad6" ref={padRef} tabIndex={-1} data-testid="six-key">
                 <div className="pad6__keys" aria-hidden="true">
@@ -322,18 +313,18 @@ export function PracticeScreen() {
                       onPointerLeave={() => setEntry((state) => keyUp(state, key))}
                     >
                       <strong>{key.toUpperCase()}</strong>
-                      <small>dot {KEY_TO_DOT[key]}</small>
+                      <small>{t('prac.dot', { dot: KEY_TO_DOT[key] })}</small>
                     </span>
                   ))}
                 </div>
                 <p className="pad6__hint num" data-testid="chord-hint">
-                  {describeChord(entry) || 'press the dots together, then let go'}
+                  {describeChord(entry) || t('prac.chordHint')}
                 </p>
               </div>
 
               <div className="written" data-testid="written-cells">
                 {entry.cells.length === 0 ? (
-                  <span className="written__empty">nothing written yet</span>
+                  <span className="written__empty">{t('prac.nothingWritten')}</span>
                 ) : (
                   entry.cells.map((mask, cellIndex) => (
                     <BrailleCell
@@ -350,13 +341,13 @@ export function PracticeScreen() {
 
               <div className="rec__actions">
                 <button type="button" className="btn" onClick={() => setEntry((s) => writeSpace(s))}>
-                  Space
+                  {t('prac.space')}
                 </button>
                 <button type="button" className="btn" onClick={() => setEntry((s) => backspace(s))}>
-                  Delete last
+                  {t('prac.deleteLast')}
                 </button>
                 <button type="button" className="btn" onClick={() => setEntry(clear())}>
-                  Start again
+                  {t('prac.startAgain')}
                 </button>
               </div>
             </>
@@ -364,13 +355,13 @@ export function PracticeScreen() {
 
           <div className="rec__actions">
             <button type="button" className="btn btn--primary" onClick={() => void check()} data-testid="check-answer">
-              Check my answer
+              {t('prac.check')}
             </button>
             <button type="button" className="btn" onClick={() => setRevealed(true)} data-testid="reveal">
-              Show me
+              {t('prac.reveal')}
             </button>
             <button type="button" className="btn" onClick={() => move(-1)} disabled={index === 0}>
-              ← Previous
+              ← {t('display.previous')}
             </button>
             <button
               type="button"
@@ -379,7 +370,7 @@ export function PracticeScreen() {
               disabled={index >= lesson.items.length - 1}
               data-testid="next-question"
             >
-              Next →
+              {t('display.next')} →
             </button>
           </div>
 
@@ -394,21 +385,21 @@ export function PracticeScreen() {
                 {verdict.details.map((detail) => (
                   <li key={detail}>{detail}</li>
                 ))}
-                {!verdict.correct && <li>{item.hint}</li>}
+                {!verdict.correct && <li>{say(item.hint)}</li>}
               </ul>
             </div>
           )}
 
           {revealed && (
             <p className="prac__answer" data-testid="revealed">
-              <span className="prac__answerlabel">The answer</span>
+              <span className="prac__answerlabel">{t('prac.theAnswer')}</span>
               <span className="prac__braille">{expected.map((mask) => maskToUnicode(mask)).join('')}</span>
               <span className="num">{item.latex}</span>
             </p>
           )}
 
           {!settings.speechOn && drill === 'write' && (
-            <p className="hw__note">Speech is switched off — turn it on from the Read screen to hear each question.</p>
+            <p className="hw__note">{t('prac.speechOff')}</p>
           )}
         </section>
       </div>

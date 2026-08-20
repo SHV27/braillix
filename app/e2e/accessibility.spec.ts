@@ -12,22 +12,23 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const SCREENS = [
-  { tab: 'Read', heading: 'Read mathematics with your hands' },
-  { tab: 'Practice', heading: 'Practice' },
-  { tab: 'Read handwriting', heading: 'Read handwriting' },
-  { tab: 'Hardware', heading: 'Hardware' },
-  { tab: 'Cell atlas', heading: 'Cell atlas' },
+  { tab: 'board', steps: [], heading: 'Write maths. Read it with your hands.' },
+  { tab: 'practice', steps: ['nav-practice'], heading: 'Practice' },
+  { tab: 'photo', steps: ['source-photo'], heading: 'Write maths. Read it with your hands.' },
+  { tab: 'device', steps: ['nav-device'], heading: 'Hardware' },
+  { tab: 'atlas', steps: ['nav-device', 'device-atlas'], heading: 'Cell atlas' },
 ] as const;
 
 async function open(page: Page, tab: string) {
   await page.goto('/');
   await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
-  if (tab !== 'Read') await page.getByRole('button', { name: tab, exact: true }).click();
+  const screen = SCREENS.find((entry) => entry.tab === tab);
+  for (const step of screen?.steps ?? []) await page.getByTestId(step).click();
 }
 
 test.describe('structure a screen reader can navigate', () => {
   test('has the landmarks a screen reader jumps between', async ({ page }) => {
-    await open(page, 'Read');
+    await open(page, 'board');
     await expect(page.getByRole('banner')).toBeVisible();
     await expect(page.getByRole('main')).toBeVisible();
     await expect(page.getByRole('contentinfo', { name: 'System status' })).toBeVisible();
@@ -80,7 +81,7 @@ test.describe('structure a screen reader can navigate', () => {
   }
 
   test('the braille cells announce what they are showing', async ({ page }) => {
-    await open(page, 'Read');
+    await open(page, 'board');
     // A cell is a picture of a braille character; its label must say the dots AND the cam position,
     // because both are what the reader and the hardware team need.
     const label = await page.getByTestId('cell-0').getAttribute('aria-label');
@@ -88,7 +89,7 @@ test.describe('structure a screen reader can navigate', () => {
   });
 
   test('state changes are announced through a live region', async ({ page }) => {
-    await open(page, 'Read');
+    await open(page, 'board');
     const live = page.getByTestId('live-region');
     await expect(live).toHaveAttribute('aria-live', 'polite');
 
@@ -100,7 +101,7 @@ test.describe('structure a screen reader can navigate', () => {
   });
 
   test('the skip link is the first thing keyboard focus reaches, and it works', async ({ page }) => {
-    await open(page, 'Read');
+    await open(page, 'board');
     await page.keyboard.press('Tab');
     const skip = page.getByRole('link', { name: /skip to the display/i });
     await expect(skip).toBeFocused();
@@ -158,7 +159,7 @@ test.describe('keyboard only', () => {
   }
 
   test('the reader is fully operable without a mouse', async ({ page }) => {
-    await open(page, 'Read');
+    await open(page, 'board');
     await page.getByLabel('Speak as I read').uncheck();
     await page.getByTestId('latex-input').fill(String.raw`\frac{1}{2a}`);
     await page.waitForTimeout(400);
@@ -175,7 +176,7 @@ test.describe('keyboard only', () => {
 
   test('respects prefers-reduced-motion', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await open(page, 'Read');
+    await open(page, 'board');
     const duration = await page.evaluate(() =>
       getComputedStyle(document.documentElement).getPropertyValue('--dur-cam').trim(),
     );

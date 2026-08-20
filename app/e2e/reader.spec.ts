@@ -114,11 +114,13 @@ test.describe('exploring an expression', () => {
     await expect(page.locator('[data-testid="cell-row"] .cell')).toHaveCount(1);
   });
 
-  test('offers Hindi as well as English speech', async ({ page }) => {
+  test('offers Hindi as well as English, for the whole interface and the speech', async ({ page }) => {
     await openWith(page, QUADRATIC_FORMULA);
-    const locale = page.getByTestId('speech-locale');
-    await expect(locale).toBeVisible();
-    await locale.selectOption('hi');
-    await expect(locale).toHaveValue('hi');
+    await page.getByTestId('lang-hi').click();
+    await expect(page.getByTestId('lang-hi')).toHaveAttribute('aria-pressed', 'true');
+    // The switch changes the words, never the braille: the cells must be the same either way.
+    const before = await page.getByTestId('braille-unicode').textContent();
+    await page.getByTestId('lang-en').click();
+    await expect(page.getByTestId('braille-unicode')).toHaveText(before ?? '');
   });
 });

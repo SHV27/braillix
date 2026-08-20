@@ -18,12 +18,16 @@ const WIDTHS = [
   { name: 'desktop', width: 1440, height: 900 },
 ] as const;
 
+/**
+ * Every screen a teacher can reach, by the control they would press to get there.
+ * `steps` is the sequence of test ids to click from a cold start; the Board needs none.
+ */
 const SCREENS = [
-  { id: 'read', tab: 'Read', heading: 'Read mathematics with your hands' },
-  { id: 'practice', tab: 'Practice', heading: 'Practice' },
-  { id: 'recognise', tab: 'Read handwriting', heading: 'Read handwriting' },
-  { id: 'hardware', tab: 'Hardware', heading: 'Hardware' },
-  { id: 'atlas', tab: 'Cell atlas', heading: 'Cell atlas' },
+  { id: 'board', steps: [], heading: 'Write maths. Read it with your hands.' },
+  { id: 'practice', steps: ['nav-practice'], heading: 'Practice' },
+  { id: 'recognise', steps: ['source-photo'], heading: 'Write maths. Read it with your hands.' },
+  { id: 'device', steps: ['nav-device'], heading: 'Hardware' },
+  { id: 'atlas', steps: ['nav-device', 'device-atlas'], heading: 'Cell atlas' },
 ] as const;
 
 async function noSidewaysScroll(page: Page, where: string) {
@@ -41,9 +45,7 @@ for (const size of WIDTHS) {
         await page.goto('/');
         await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
 
-        if (screen.id !== 'read') {
-          await page.getByRole('button', { name: screen.tab, exact: true }).click();
-        }
+        for (const step of screen.steps) await page.getByTestId(step).click();
         await expect(page.getByRole('heading', { name: screen.heading, level: 1 })).toBeVisible();
 
         // Give the cam animation time to settle so captures are not caught mid-transition.
@@ -75,7 +77,7 @@ test.describe('states worth capturing', () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/');
     await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
-    await page.getByRole('button', { name: 'Practice', exact: true }).click();
+    await page.getByTestId('nav-practice').click();
     await page.getByTestId('drill-write').click();
     await page.getByRole('heading', { name: 'Practice', level: 1 }).click();
 

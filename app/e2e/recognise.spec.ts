@@ -20,14 +20,14 @@ const MODEL_PRESENT = existsSync(join(process.cwd(), 'public', 'models', 'formul
 test.describe('reading handwriting', () => {
   test('offers samples so a demo never depends on the room’s lighting', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Read handwriting' }).click();
-    await expect(page.getByRole('heading', { name: 'Read handwriting', level: 1 })).toBeVisible();
+    await page.getByTestId('source-photo').click();
+    await expect(page.getByRole('heading', { name: 'What it read' })).toBeVisible();
     await expect(page.locator('.samples__btn')).toHaveCount(6);
   });
 
   test('shows the recogniser exactly what it will see', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Read handwriting' }).click();
+    await page.getByTestId('source-photo').click();
     await page.getByTestId('sample-quadratic.svg').click();
 
     // The preview is the cropped, normalised image — not the original. Being able to see that is
@@ -38,7 +38,7 @@ test.describe('reading handwriting', () => {
 
   test('lets you write an equation with the mouse', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Read handwriting' }).click();
+    await page.getByTestId('source-photo').click();
     await page.getByTestId('mode-draw').click();
 
     const pad = page.getByTestId('draw-pad');
@@ -71,7 +71,7 @@ test.describe('reading handwriting — with the model installed', () => {
     test.setTimeout(180_000);
 
     await page.goto('/');
-    await page.getByRole('button', { name: 'Read handwriting' }).click();
+    await page.getByTestId('source-photo').click();
     await page.getByTestId('sample-fraction.svg').click();
 
     await page.getByTestId('run-recognition').click();
@@ -88,7 +88,8 @@ test.describe('reading handwriting — with the model installed', () => {
 
     // Nothing reached the display until a human said so.
     await page.getByTestId('send-to-display').click();
-    await expect(page.getByRole('heading', { name: 'Read mathematics with your hands' })).toBeVisible();
+    // Sending it lands back on the typing tab, where it can be corrected and read.
+    await expect(page.getByTestId('latex-input')).toBeVisible();
     await expect(page.getByTestId('latex-input')).toHaveValue(latex);
   });
 
@@ -96,7 +97,7 @@ test.describe('reading handwriting — with the model installed', () => {
     test.setTimeout(180_000);
 
     await page.goto('/');
-    await page.getByRole('button', { name: 'Read handwriting' }).click();
+    await page.getByTestId('source-photo').click();
     await page.getByTestId('sample-quadratic.svg').click();
     await page.getByTestId('run-recognition').click();
     await expect(page.getByTestId('rec-latex')).toBeVisible({ timeout: 150_000 });

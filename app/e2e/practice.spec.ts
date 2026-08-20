@@ -11,7 +11,7 @@ import { expect, test, type Page } from '@playwright/test';
 async function openPractice(page: Page) {
   await page.goto('/');
   await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
-  await page.getByRole('button', { name: 'Practice' }).click();
+  await page.getByTestId('nav-practice').click();
   await expect(page.getByRole('heading', { name: 'Practice', level: 1 })).toBeVisible();
 }
 
@@ -116,7 +116,7 @@ test.describe('practice', () => {
 
     // It survives a reload, because it is real storage and not component state…
     await page.reload();
-    await page.getByRole('button', { name: 'Practice' }).click();
+    await page.getByTestId('nav-practice').click();
     await expect(page.getByTestId('lesson-digits')).toContainText('1/6');
 
     // …and the erase control genuinely erases it.
@@ -129,7 +129,7 @@ test.describe('practice', () => {
     await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
     await expect(page.getByTestId('cell-count')).toHaveValue('1');
 
-    await page.getByRole('button', { name: 'Practice' }).click();
+    await page.getByTestId('nav-practice').click();
     await page.getByTestId('lesson-together').click();
     // A long expression on one cell still works — it pages, and the count is honest about it.
     await expect(page.getByText(/cells are on the display \(1 at a time\)/)).toBeVisible();

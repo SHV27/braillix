@@ -6,18 +6,35 @@
  * merely broken; and a panel should be able to see, at a glance, that nothing is being hidden.
  */
 
-import { rankedCapabilities, useBraillix } from '../store';
+import { rankedCapabilities, useBraillix, type CapabilityId, type CapabilityState } from '../store';
 import { describeProfile } from '../core/profile';
+import { useT, type StringKey } from './i18n';
 import './StatusStrip.css';
 
-const STATE_LABEL: Record<string, string> = {
-  ready: 'ready',
-  checking: 'checking',
-  degraded: 'degraded',
-  unavailable: 'off',
+const STATE_LABEL: Record<CapabilityState, StringKey> = {
+  ready: 'status.ready',
+  checking: 'status.checking',
+  degraded: 'status.degraded',
+  unavailable: 'status.off',
+};
+
+/**
+ * What each capability is called, in the interface's language.
+ *
+ * The *reasons* and *fixes* below stay in English on purpose: they name Web Serial, npm commands
+ * and file paths, and a half-translated `npm install` helps nobody. The frame is translated; the
+ * diagnostics are quoted. (DECISIONS D7.8.)
+ */
+const CAP_LABEL: Record<CapabilityId, StringKey> = {
+  sre: 'cap.sre',
+  speech: 'cap.speech',
+  recognition: 'cap.recognition',
+  usb: 'cap.usb',
+  pod: 'cap.pod',
 };
 
 export function StatusStrip() {
+  const t = useT();
   const capabilities = useBraillix((s) => s.capabilities);
   const profile = useBraillix((s) => s.profile);
   const planSummary = useBraillix((s) => s.planSummary);
@@ -25,16 +42,16 @@ export function StatusStrip() {
   const items = rankedCapabilities(capabilities);
 
   return (
-    <footer className="strip" aria-label="System status">
+    <footer className="strip" aria-label={t('status.title')}>
       <div className="strip__group">
-        <span className="strip__key">Display</span>
+        <span className="strip__key">{t('status.display')}</span>
         <span className="strip__value num">{describeProfile(profile)}</span>
       </div>
 
       <div className="strip__group strip__group--grow">
-        <span className="strip__key">Motion</span>
+        <span className="strip__key">{t('status.motion')}</span>
         <span className="strip__value num" data-testid="plan-summary">
-          {planSummary || 'idle'}
+          {planSummary || t('status.idle')}
         </span>
       </div>
 
@@ -42,8 +59,8 @@ export function StatusStrip() {
         {items.map(({ id, capability }) => (
           <li key={id} className={`cap cap--${capability.state}`}>
             <span className="cap__led" aria-hidden="true" />
-            <span className="cap__label">{capability.label}</span>
-            <span className="cap__state">{STATE_LABEL[capability.state] ?? capability.state}</span>
+            <span className="cap__label">{t(CAP_LABEL[id])}</span>
+            <span className="cap__state">{t(STATE_LABEL[capability.state])}</span>
             {capability.reason && <span className="cap__reason">{capability.reason}</span>}
             {capability.fix && <span className="cap__fix">{capability.fix}</span>}
           </li>

@@ -31,7 +31,7 @@ test.describe('recognition quality on the shipped samples', () => {
     test.setTimeout(300_000);
 
     await page.goto('/');
-    await page.getByRole('button', { name: 'Read handwriting' }).click();
+    await page.getByTestId('source-photo').click();
 
     const results: string[] = [];
 

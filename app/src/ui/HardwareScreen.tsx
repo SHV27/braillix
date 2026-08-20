@@ -18,11 +18,13 @@ import { SIMULATOR_MAX_CELLS, SIMULATOR_MIN_CELLS } from '../config';
 import { DOT_COUNT, maskToUnicode, type DotNumber } from '../core/braille';
 import { exportCalibration, toCam, type BitOrder } from '../core/profile';
 import { dotsToMask } from '../core/braille';
+import { useT } from './i18n';
 import './HardwareScreen.css';
 
 const DOTS: DotNumber[] = [1, 2, 3, 4, 5, 6];
 
 export function HardwareScreen() {
+  const t = useT();
   const profile = useBraillix((s) => s.profile);
   const linkStatus = useBraillix((s) => s.linkStatus);
   const linkLabel = useBraillix((s) => s.linkLabel);
@@ -69,41 +71,38 @@ export function HardwareScreen() {
   return (
     <div className="hw">
       <header className="hw__head">
-        <h1 className="read__title">Hardware</h1>
-        <p className="read__lede">
-          Braillix is complete without any of this. Connect a pod and the same frames go out over
-          the wire instead of onto the screen — nothing else changes.
-        </p>
+        <h1 className="read__title">{t('hw.title')}</h1>
+        <p className="read__lede">{t('hw.lede')}</p>
       </header>
 
       <div className="hw__grid">
         {/* ------------------------------------------------------------------ connection */}
         <section className="panel" aria-labelledby="conn-heading">
           <h2 id="conn-heading" className="panel__title">
-            Connection
+            {t('hw.connection')}
           </h2>
 
           <dl className="facts">
             <div className="facts__row">
-              <dt>Now</dt>
+              <dt>{t('hw.now')}</dt>
               <dd className="num" data-testid="link-label">
                 {linkLabel} · <span className={`state state--${linkStatus}`}>{linkStatus}</span>
               </dd>
             </div>
             <div className="facts__row">
-              <dt>Cells</dt>
+              <dt>{t('hw.cells')}</dt>
               <dd className="num" data-testid="link-cells">
-                {profile.cellCount} {simulated ? '(simulated)' : '(reported by the hardware)'}
+                {profile.cellCount} {simulated ? t('hw.simulated') : t('hw.reported')}
               </dd>
             </div>
             {linkFirmware && (
               <div className="facts__row">
-                <dt>Firmware</dt>
+                <dt>{t('hw.firmware')}</dt>
                 <dd className="num">{linkFirmware}</dd>
               </div>
             )}
             <div className="facts__row">
-              <dt>Pods</dt>
+              <dt>{t('hw.pods')}</dt>
               <dd className="num">
                 {profile.pods
                   .map((pod) =>
@@ -118,7 +117,7 @@ export function HardwareScreen() {
 
           <div className="hw__actions">
             <button type="button" className="btn" onClick={() => void switchToSimulator()} data-testid="use-sim">
-              Use the simulator
+              {t('hw.useSim')}
             </button>
             <button
               type="button"
@@ -126,14 +125,14 @@ export function HardwareScreen() {
               onClick={() => void connectUsb()}
               disabled={usbCap.state === 'unavailable'}
               data-testid="connect-usb"
-              title={usbCap.state === 'unavailable' ? (usbCap.reason ?? '') : 'Recommended for demos — no network needed'}
+              title={usbCap.state === 'unavailable' ? (usbCap.reason ?? '') : t('hw.usbHint')}
             >
-              Connect over USB
+              {t('hw.connectUsb')}
             </button>
           </div>
 
           <label className="field field--inline">
-            <span className="field__label">Wi-Fi pods (comma separated)</span>
+            <span className="field__label">{t('hw.wifiPods')}</span>
             <div className="hw__row">
               <input
                 className="field__input num"
@@ -148,14 +147,11 @@ export function HardwareScreen() {
                 data-testid="connect-pods"
                 onClick={() => void connectPods(podAddresses.split(','))}
               >
-                Connect
+                {t('hw.connect')}
               </button>
             </div>
           </label>
-          <p className="hw__note">
-            No pod on the bench? Run <code>npm run pod</code> and connect to{' '}
-            <code>127.0.0.1:8080</code> — it speaks the real protocol.
-          </p>
+          <p className="hw__note">{t('hw.noPod')}</p>
 
           {linkError && (
             <p className="notice notice--bad" role="alert" data-testid="link-error">
@@ -166,7 +162,7 @@ export function HardwareScreen() {
 
           {simulated && (
             <label className="cellcount cellcount--block">
-              <span className="cellcount__label">Simulated cells</span>
+              <span className="cellcount__label">{t('hw.simCells')}</span>
               <input
                 className="cellcount__range"
                 type="range"
@@ -184,15 +180,11 @@ export function HardwareScreen() {
         {/* ------------------------------------------------------------------ calibration */}
         <section className="panel" aria-labelledby="cal-heading">
           <h2 id="cal-heading" className="panel__title">
-            Calibration
+            {t('hw.calibration')}
           </h2>
-          <p className="panel__lede">
-            The handoff flags one thing as unconfirmed: whether dot 1 really drives cam track 0.
-            Raise one dot below and look at the cell. If a different dot pops up, correct the
-            mapping here — it is a setting, not a code change.
-          </p>
+          <p className="panel__lede">{t('hw.calLede')}</p>
 
-          <div className="dottest" role="group" aria-label="Raise a single dot">
+          <div className="dottest" role="group" aria-label={t('hw.raiseDot')}>
             {DOTS.map((dot) => (
               <button
                 key={dot}
@@ -202,27 +194,27 @@ export function HardwareScreen() {
                 onClick={() => void testDot(testingDot === dot ? null : dot)}
               >
                 <span className="dottest__num num">{dot}</span>
-                <span className="dottest__cam num">cam {toCam(profile, dotsToMask([dot]))}</span>
+                <span className="dottest__cam num">{t('hw.cam', { position: toCam(profile, dotsToMask([dot])) })}</span>
               </button>
             ))}
             <button type="button" className="btn" onClick={() => void testDot(null)} data-testid="test-clear">
-              Clear
+              {t('hw.clear')}
             </button>
           </div>
 
           <table className="bitmap">
-            <caption className="visually-hidden">Which cam track each dot drives</caption>
+            <caption className="visually-hidden">{t('hw.whichTrack')}</caption>
             <thead>
               <tr>
-                <th scope="col">Dot</th>
-                <th scope="col">Cam track bit</th>
+                <th scope="col">{t('hw.dot')}</th>
+                <th scope="col">{t('hw.camBit')}</th>
               </tr>
             </thead>
             <tbody>
               {profile.bitOrder.map((bit, dotIndex) => (
                 <tr key={dotIndex}>
                   <th scope="row" className="num">
-                    dot {dotIndex + 1}
+                    {t('hw.dotN', { dot: dotIndex + 1 })}
                   </th>
                   <td>
                     <select
@@ -234,7 +226,7 @@ export function HardwareScreen() {
                     >
                       {Array.from({ length: DOT_COUNT }, (_, b) => (
                         <option key={b} value={b}>
-                          bit {b}
+                          {t('hw.bitN', { bit: b })}
                         </option>
                       ))}
                     </select>
@@ -251,35 +243,30 @@ export function HardwareScreen() {
               data-testid="reversed"
               onChange={(event) => setReversed(event.target.checked)}
             />
-            <span>Cell 1 is on the right (dock assembled the other way round)</span>
+            <span>{t('hw.reversed')}</span>
           </label>
 
           <div className="hw__actions">
             <button type="button" className="btn" onClick={() => void homeDisplay()} data-testid="home">
-              Home every cell
+              {t('hw.home')}
             </button>
             <button type="button" className="btn" onClick={() => void copyCalibration()} data-testid="copy-calibration">
-              {copied ? 'Copied' : 'Copy config for the hardware team'}
+              {copied ? t('hw.copied') : t('hw.copyConfig')}
             </button>
           </div>
 
           <p className="hw__note">
-            Sanity check: with this mapping, <code>{maskToUnicode(dotsToMask([1, 2, 5]))}</code> (dots
-            1-2-5) is cam position <strong className="num">{toCam(profile, dotsToMask([1, 2, 5]))}</strong>.
-            The handoff’s worked example says 19 — if these disagree, the mapping above is not the
-            one the cam was cut for.
+            <code>{maskToUnicode(dotsToMask([1, 2, 5]))}</code>{' '}
+            {t('hw.sanity', { position: toCam(profile, dotsToMask([1, 2, 5])) })}
           </p>
         </section>
       </div>
 
       <section className="panel" aria-labelledby="proto-heading">
         <h2 id="proto-heading" className="panel__title">
-          What goes over the wire
+          {t('hw.wire')}
         </h2>
-        <p className="panel__lede">
-          The pod never sees braille, a language, or a maths code — only cam numbers 0–63. That is
-          what lets the translation change without anyone reflashing a board.
-        </p>
+        <p className="panel__lede">{t('hw.wireLede')}</p>
         <pre className="wirecode">
 {`GET  /chain   → {"cells":[32,33,34,35],"count":4,"firmware":"braillix-pod/1.0"}
 POST /show    ← {"positions":[19,5,12,60]}        full frame
@@ -287,10 +274,7 @@ POST /show    ← {"updates":[{"cell":2,"position":19}]}   only what changed
 POST /home    ← {}
 GET  /buttons → {"prev":0,"select":1,"next":0,"seq":42}`}
         </pre>
-        <p className="hw__note">
-          Full specification in <code>docs/PROTOCOL.md</code>. The same verbs work over USB serial as
-          newline-delimited JSON at 115200 baud, so one firmware serves both links.
-        </p>
+        <p className="hw__note">{t('hw.protoNote')}</p>
       </section>
     </div>
   );

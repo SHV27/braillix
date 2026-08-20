@@ -170,16 +170,26 @@ describe('the lessons', () => {
   it('has unique ids and can look them up', () => {
     const ids = LESSONS.map((lesson) => lesson.id);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(lessonById('digits')?.title).toBe('The dropped numbers');
+    expect(lessonById('digits')?.title[0]).toBe('The dropped numbers');
     expect(lessonById('nope')).toBeUndefined();
   });
 
-  it('gives every lesson a rule and every item a specific hint', () => {
+  it('gives every lesson a rule and every item a specific hint, in both languages', () => {
+    // Both halves are checked, because a lesson that is only half translated is a lesson that
+    // stops speaking to a Hindi-medium student exactly when it starts explaining their mistake.
     for (const lesson of LESSONS) {
-      expect(lesson.rule.length, lesson.id).toBeGreaterThan(40);
-      expect(lesson.teaches.length, lesson.id).toBeGreaterThan(10);
+      for (const [index, language] of (['English', 'Hindi'] as const).entries()) {
+        expect(lesson.rule[index].length, `${lesson.id} rule (${language})`).toBeGreaterThan(40);
+        expect(lesson.teaches[index].length, `${lesson.id} teaches (${language})`).toBeGreaterThan(10);
+        expect(lesson.title[index].length, `${lesson.id} title (${language})`).toBeGreaterThan(3);
+        for (const item of lesson.items) {
+          expect(item.hint[index].length, `${lesson.id}: ${item.latex} (${language})`).toBeGreaterThan(15);
+        }
+      }
+      expect(lesson.title[0], `${lesson.id} title is untranslated`).not.toBe(lesson.title[1]);
+      expect(lesson.rule[0], `${lesson.id} rule is untranslated`).not.toBe(lesson.rule[1]);
       for (const item of lesson.items) {
-        expect(item.hint.length, `${lesson.id}: ${item.latex}`).toBeGreaterThan(15);
+        expect(item.hint[0], `${lesson.id}: ${item.latex} hint is untranslated`).not.toBe(item.hint[1]);
       }
     }
   });

@@ -11,25 +11,28 @@ import { useBraillix } from '../store';
 import { SIMULATOR_MAX_CELLS, SIMULATOR_MIN_CELLS } from '../config';
 import { FULL_CELL } from '../core/braille';
 import { BrailleCell } from './BrailleCell';
+import { useT, type StringKey } from './i18n';
+import { describeWindow } from './window-label';
 import './DisplayDock.css';
 
 export interface DisplayDockProps {
-  /** Heading text. Defaults to "The display". */
-  title?: string;
+  /** Heading. Defaults to "The display". */
+  title?: StringKey;
   /** Show the simulated cell-count control. Off where the surrounding screen owns it. */
   showCellCount?: boolean;
   /** Show the paging controls. */
   showPaging?: boolean;
-  /** Extra line under the heading. */
-  hint?: string;
+  /** Extra line under the heading, replacing the default explanation of the cell count. */
+  hint?: StringKey;
 }
 
 export function DisplayDock({
-  title = 'The display',
+  title = 'display.title',
   showCellCount = true,
   showPaging = true,
   hint,
 }: DisplayDockProps) {
+  const t = useT();
   const profile = useBraillix((s) => s.profile);
   const setCellCount = useBraillix((s) => s.setCellCount);
   const frame = useBraillix((s) => s.frame);
@@ -48,11 +51,11 @@ export function DisplayDock({
     <section className="dock" aria-labelledby="dock-heading">
       <div className="dock__head">
         <h2 id="dock-heading" className="read__h2">
-          {title}
+          {t(title)}
         </h2>
         {showCellCount && simulated && (
           <label className="cellcount">
-            <span className="cellcount__label">Cells</span>
+            <span className="cellcount__label">{t('display.cells')}</span>
             <input
               className="cellcount__range"
               type="range"
@@ -68,10 +71,11 @@ export function DisplayDock({
       </div>
 
       <p className="read__hint">
-        {hint ??
-          (profile.cellCount === 1
-            ? 'One cell — the hardware that exists today. A whole equation still has to fit through it.'
-            : `${profile.cellCount} cells — stack more and the same expression simply spreads out.`)}
+        {hint
+          ? t(hint)
+          : profile.cellCount === 1
+            ? t('display.oneCell')
+            : t('display.manyCells', { count: profile.cellCount })}
       </p>
 
       <div className="cellrow" data-testid="cell-row">
@@ -89,7 +93,7 @@ export function DisplayDock({
               />
               {isFold && (
                 <span className="cellwrap__tag" aria-hidden="true">
-                  step in
+                  {t('display.stepIn')}
                 </span>
               )}
             </span>
@@ -105,10 +109,10 @@ export function DisplayDock({
             disabled={!canScroll || windowStart === 0}
             onClick={() => setWindowStart(Math.max(0, windowStart - profile.cellCount))}
           >
-            ← Previous
+            ← {t('display.previous')}
           </button>
           <span className="scroller__label num" data-testid="window-label">
-            {frame.label}
+            {describeWindow(t, frame)}
           </span>
           <button
             type="button"
@@ -116,7 +120,7 @@ export function DisplayDock({
             disabled={!canScroll || windowStart + profile.cellCount >= total}
             onClick={() => setWindowStart(windowStart + profile.cellCount)}
           >
-            Next →
+            {t('display.next')} →
           </button>
         </div>
       )}

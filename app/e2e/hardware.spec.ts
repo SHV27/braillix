@@ -41,7 +41,7 @@ test.afterAll(() => {
 async function openHardware(page: Page) {
   await page.goto('/');
   await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
-  await page.getByRole('button', { name: 'Hardware' }).click();
+  await page.getByTestId('nav-device').click();
   await expect(page.getByRole('heading', { name: 'Hardware', level: 1 })).toBeVisible();
 }
 
@@ -103,7 +103,8 @@ test.describe('the hardware seam', () => {
     await expect(page.getByText('is cam position')).not.toContainText('is cam position 19');
 
     // …and the braille itself is untouched: the atlas still shows the same dot patterns.
-    await page.getByRole('button', { name: 'Cell atlas' }).click();
+    await page.getByTestId('nav-device').click();
+    await page.getByTestId('device-atlas').click();
     await expect(page.locator('.atlas__item')).toHaveCount(64);
   });
 
