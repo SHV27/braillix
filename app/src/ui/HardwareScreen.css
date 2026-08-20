@@ -173,7 +173,7 @@
 }
 
 .dottest__btn.is-current {
-  background: linear-gradient(180deg, var(--signal), var(--signal-dim));
+  background: linear-gradient(180deg, var(--signal), var(--signal-deep));
   color: #1a1204;
 }
 

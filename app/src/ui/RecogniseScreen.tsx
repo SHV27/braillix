@@ -181,7 +181,7 @@ export function RecogniseScreen() {
                   accept="image/*"
                   capture="environment"
                   className="visually-hidden"
-                  data-testid="file-input"
+                  name="image" data-testid="file-input"
                   onChange={(event) => onFile(event.target.files?.[0])}
                 />
                 <button type="button" className="btn" onClick={() => fileInput.current?.click()}>
@@ -268,7 +268,7 @@ export function RecogniseScreen() {
                   rows={3}
                   value={draft}
                   spellCheck={false}
-                  data-testid="rec-latex"
+                  name="recognised" data-testid="rec-latex"
                   onChange={(event) => setDraft(event.target.value)}
                 />
               </label>

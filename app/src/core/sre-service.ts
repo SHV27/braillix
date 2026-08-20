@@ -23,7 +23,7 @@ import sre from 'speech-rule-engine';
  */
 function mathmapsPath(): string | undefined {
   if (typeof document === 'undefined') return undefined;
-  return new URL('sre/mathmaps/', document.baseURI).pathname;
+  return new URL('sre/mathmaps/', document.baseURI).href;
 }
 
 export type SpeechLocale = 'en' | 'hi';

@@ -314,3 +314,23 @@ Veto any of these with one word:
   three fingers simultaneously; committing on first release turns "dots 1-2-5" into three cells. The
   chord accumulates and is written when the hand leaves the keys, and a chord abandoned by a window
   blur is discarded rather than committed later.
+
+## D4 · Certification findings (Arc 6)
+
+- **D4.1** — **The offline test caught a real, demo-killing bug.** speech-rule-engine was still
+  fetching `base.json` from **jsDelivr** despite the `json` path being passed to `setupEngine` —
+  the path arrived too late, after SRE had already requested it. Fixed with the
+  `text/x-sre-config` block in `index.html`, which SRE reads before it initialises. This is exactly
+  the failure the brief's primary requirement is about, and only a test that blocks all external
+  requests would have found it.
+- **D4.2** — Accessibility fixes from the Lighthouse audit, both real: a bare `<div>` carrying an
+  `aria-label` (now `role="img"`, which is also the honest semantic for a picture of a braille
+  cell), and four contrast failures. `--text-400` went from 3.4:1 to 5.1:1, and amber surfaces
+  carrying dark text now use the bright amber (`--signal`) rather than the dim one, which measured
+  3.3:1. Result: **accessibility 100, best practices 100**.
+- **D4.3** — CLS was **0.21** because the evidence table and reader panel arrive ~700 ms in and
+  shove the page down. Space is now reserved for both; CLS is **0.05**.
+- **D4.4** — **The screenshots caught a defect no test would have.** The practice reading drill said
+  "2 cells are on the display" while the Practice screen showed no display at all. With hardware
+  attached the dots are under the student's fingers; with none — the primary mode — there was
+  nothing to read. The dock is now a shared component used by every screen that drives the cells.

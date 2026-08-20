@@ -20,11 +20,16 @@
   --text-100: #f2f4f5; /* headings */
   --text-200: #c3cace; /* body */
   --text-300: #8b959b; /* secondary */
-  --text-400: #5f696f; /* disabled / faint */
+  /* Raised from #5f696f, which measured 3.4:1 and failed WCAG AA. This is 5.1:1 on the panel
+     background and still reads as the quietest step in the scale. */
+  --text-400: #838d94; /* disabled / faint */
 
   /* ---- the one signal colour ---- */
   --signal: #f0a202;
   --signal-dim: #8a5f06;
+  /* Dark text on amber needs the amber to stay bright: #8a5f06 with our ink text is 3.3:1.
+     This is the darkest amber that still clears AA, and is where amber gradients end. */
+  --signal-deep: #c07f02;
   --signal-glow: rgba(240, 162, 2, 0.22);
 
   /* ---- status (used sparingly, never decoratively) ---- */

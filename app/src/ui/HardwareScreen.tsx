@@ -139,7 +139,7 @@ export function HardwareScreen() {
                 className="field__input num"
                 value={podAddresses}
                 spellCheck={false}
-                data-testid="pod-hosts"
+                name="pod-hosts" data-testid="pod-hosts"
                 onChange={(event) => setPodAddresses(event.target.value)}
               />
               <button
@@ -173,7 +173,7 @@ export function HardwareScreen() {
                 min={SIMULATOR_MIN_CELLS}
                 max={SIMULATOR_MAX_CELLS}
                 value={profile.cellCount}
-                data-testid="hw-cell-count"
+                name="hw-cell-count" data-testid="hw-cell-count"
                 onChange={(event) => setCellCount(Number(event.target.value))}
               />
               <output className="cellcount__value num">{profile.cellCount}</output>
@@ -228,6 +228,7 @@ export function HardwareScreen() {
                     <select
                       className="select num"
                       value={bit}
+                      name={`bit-for-dot-${dotIndex + 1}`}
                       data-testid={`bit-for-dot-${dotIndex + 1}`}
                       onChange={(event) => changeBit(dotIndex, Number(event.target.value))}
                     >

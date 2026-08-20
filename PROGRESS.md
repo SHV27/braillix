@@ -2,58 +2,69 @@
 
 **Resume line: “read PROGRESS.md and continue.”**
 
+Repo: **github.com/SHV27/braillix** (private — going public is Shaurya's call, Charter escalation 3)
+
 ---
 
 ## Where we are
 
-**Arc 1 — Walking Skeleton + verification chassis.** In progress.
+**All six arcs are built. Arc 6 (Certification) is closing.**
 
-Pipeline stages 0–5 are complete and written down:
-`RESEARCH.md` → `DECISIONS.md` (boardroom minutes) → `ARCHITECTURE.md` (stack locked) →
-`CLAUDE.md` (project constitution) → `ARC_PLAN.md` (6 arcs, frozen acceptance lists).
+| Arc | State |
+|---|---|
+| 1 · Walking skeleton + verification chassis | ✅ closed |
+| 2 · The Reader (semantic navigation) | ✅ closed |
+| 3 · The Seam (transports, firmware, calibration) | ✅ closed |
+| 4 · The Eye (on-device recognition) | ✅ closed |
+| 5 · The Practice Loop (braille-first drills) | ✅ closed |
+| 6 · Certification | in progress — see next action |
 
 ## The one next action
 
-Finish Arc 1: get `npm run verify` green end-to-end (lint + typecheck + unit + Playwright e2e),
-then create the private GitHub repo and make the first real commit.
-
-## Done so far
-
-- **Recon** — proved on this laptop, before promising anything:
-  - LaTeX → Nemeth braille works offline in pure JS (`temml` + `speech-rule-engine`).
-  - Handwritten-maths OCR works offline in pure JS (`@huggingface/transformers` + FormulaNet ONNX,
-    0.7 s per formula).
-  - Therefore **no backend, no Python** — the whole product is a static web app.
-  - Bonus: SRE also speaks maths in **Hindi**, offline, at no extra cost.
-- **Core engine** (`app/src/core/`) — all pure, all tested:
-  - `braille.ts` dot masks ↔ Unicode ↔ dot lists
-  - `profile.ts` the single authority for cell count and cam bit order
-  - `sre-service.ts` serialised owner of SRE's global engine state, pinned to local locale files
-  - `translate.ts` LaTeX → MathML → Nemeth cells, never throws
-  - `frame.ts` windowing/paging for any cell count
-  - `scheduler.ts` motion-minimising refresh (frame diff + shortest-arc cam rotation)
-  - `nemeth-meanings.ts` the 64-pattern meaning table, cross-checked against the engine
-- **UI** — Read screen (type → dots, live), Cell Atlas (all 64 cam positions), status strip with
-  honest capability badges, "machined instrument" art direction with physically-modelled dots.
-- **Tests** — 149 unit tests passing, including 10 golden Nemeth expressions, all 26 letters and
-  10 digits verified against the engine, and structural invariants that fail the build if anyone
-  hardcodes a cell count or does hardware bit arithmetic outside `profile.ts`.
+Run `npm run verify` end to end, commit, and do the fresh-clone check
+(`git clone` into a clean folder → `npm ci` → `npm run dev`) to prove a teammate can run it cold.
 
 ## Gate status
 
-| Gate | State |
+| Gate | Result |
 |---|---|
-| `typecheck` | green |
-| `test` (Vitest) | green — 149 passing |
-| `lint` | fixing one dead assignment → re-running |
-| `e2e` (Playwright) | written, browser installing |
-| build | running |
+| Unit tests | **278+ passing** (golden Nemeth, all 26 letters + 10 digits cross-checked against the engine, XML reader, protocol conformance, six-key entry, feedback) |
+| Journey tests | **60+ passing** across read / reader / hardware / recognition / practice / offline / screens |
+| Lighthouse accessibility | **100** |
+| Lighthouse best practices | **100** |
+| LCP | **650 ms** (target < 2.5 s) |
+| CLS | **0.05** (was 0.21; fixed by reserving space for late content) |
+| Console errors/warnings | **zero**, asserted in the journey tests |
+| Offline | **passes with every external request blocked** |
+| Horizontal overflow | none, asserted at 390 / 834 / 1440 on every screen |
 
-## Notes for whoever picks this up cold
+## What exists
 
-- Read `CLAUDE.md` first, then `ARC_PLAN.md`. Acceptance lists are frozen; new ideas go to
-  `NOTES.md` unbuilt.
-- The Bash tool's heredoc eats backslashes — write any file containing LaTeX with the Write tool.
-- `npm install` at the repo root installs the workspace and copies SRE locale data + ONNX Runtime
-  wasm into `app/public/`. Without that copy the app would reach for a CDN, which breaks the
-  offline promise.
+- **Five screens**: Read · Practice · Read handwriting · Hardware · Cell atlas.
+- **The core engine** (`app/src/core/`): LaTeX → MathML → Nemeth → dots → cam → frame, plus the
+  semantic tree, the folding mechanism, and the motion-minimising scheduler. Pure, no React, no I/O.
+- **The transports** (`app/src/transport/`): simulator, USB (Web Serial), Wi-Fi pod — one interface,
+  one protocol, tested against a real emulator.
+- **Firmware** (`firmware/`): ESP32 pod and muscle cell, written to the same spec.
+- **Recognition** (`app/src/recognise/`): FormulaNet ONNX in a Web Worker, entirely on-device.
+- **Lessons** (`app/src/learn/`): 10 lessons, 34 items, six-key braille entry, specific feedback.
+- **Docs**: `PROTOCOL.md` (the wire contract) and `HARDWARE_HANDOFF.md` (what the hardware team
+  needs to do — three things, all settings, no code).
+
+## Left on the table (in NOTES.md, deliberately unbuilt)
+
+Bharati maths braille table · Grade-2 contractions · whole-page OCR · mDNS discovery ·
+teacher dashboard · public deploy (Shaurya's call).
+
+## For whoever picks this up cold
+
+1. Read `CLAUDE.md`, then `ARC_PLAN.md`. Acceptance lists are frozen; new ideas go to `NOTES.md`.
+2. `npm install` at the repo root does everything, including copying SRE locale data and the ONNX
+   Runtime WASM into `app/public/`. Without that copy the app reaches for a CDN — which is a
+   silent failure in a room with no Wi-Fi, and is why `e2e/offline.spec.ts` exists.
+3. `npm run fetch:model` (76 MB, once) enables handwriting recognition. Everything else works
+   without it, and the app says so.
+4. **Gotcha that has cost time three times:** this environment's Bash heredoc strips backslashes.
+   Any file containing LaTeX must be written with the Write tool, or use `String.raw`.
+5. `npm run pod` starts a protocol-accurate emulator so the hardware path can be exercised with
+   nothing plugged in.

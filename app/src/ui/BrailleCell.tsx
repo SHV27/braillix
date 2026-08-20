@@ -59,6 +59,7 @@ export function BrailleCell({ dots, cam, index, active = false, bare = false, on
       data-testid={`cell-${index}`}
       data-cam={cam}
       data-dots={dots}
+      role={onClick ? undefined : 'img'}
       aria-label={label}
       title={label}
       {...(onClick ? { type: 'button' as const, onClick } : {})}

@@ -9,6 +9,14 @@
       content="Braillix — a refreshable braille display for mathematics. Type or photograph an equation and read it with your hands, on any number of cells."
     />
     <title>Braillix — read mathematics with your hands</title>
+
+    <!--
+      speech-rule-engine reads this BEFORE it initialises. Without it, SRE fetches its locale data
+      from a jsDelivr CDN — which works on a good connection and fails silently in a room with no
+      Wi-Fi, i.e. exactly where this product has to work. Setting the path via setupEngine() alone
+      was too late: base.json had already been requested. Caught by e2e/offline.spec.ts.
+    -->
+    <script type="text/x-sre-config">{ "json": "./sre/mathmaps/" }</script>
   </head>
   <body>
     <div id="root"></div>

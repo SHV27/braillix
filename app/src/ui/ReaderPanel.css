@@ -1,4 +1,6 @@
 .reader {
+  /* Reserved so switching between reading modes does not move everything below it. */
+  min-height: 300px;
   margin-top: var(--s5);
   padding: var(--s5);
   border-radius: var(--radius);
@@ -151,14 +153,14 @@
 .dpad__btn--mid {
   grid-column: 2;
   grid-row: 2;
-  background: linear-gradient(180deg, var(--signal-dim), #6a4905);
+  background: linear-gradient(180deg, var(--signal), var(--signal-deep));
   color: #1a1204;
 }
 .dpad__btn--mid .dpad__label {
   color: rgba(26, 18, 4, 0.7);
 }
 .dpad__btn--mid:hover:not(:disabled) {
-  background: linear-gradient(180deg, var(--signal), var(--signal-dim));
+  background: linear-gradient(180deg, #ffb31a, var(--signal));
 }
 .dpad__btn--right {
   grid-column: 3;

@@ -41,6 +41,7 @@ import {
 import { translateLatex } from '../core/translate';
 import { maskToUnicode, type DotMask } from '../core/braille';
 import { BrailleCell } from './BrailleCell';
+import { DisplayDock } from './DisplayDock';
 import { toCam } from '../core/profile';
 import './PracticeScreen.css';
 
@@ -188,6 +189,15 @@ export function PracticeScreen() {
         </p>
       </header>
 
+      <DisplayDock
+        title="The display"
+        hint={
+          drill === 'read'
+            ? 'Read these dots — with your fingers on a connected display, or here on screen.'
+            : 'What you write appears here, cell by cell.'
+        }
+      />
+
       <div className="prac__grid">
         <nav className="panel prac__lessons" aria-label="Lessons">
           <h2 className="panel__title">Lessons</h2>
@@ -285,7 +295,7 @@ export function PracticeScreen() {
                   className="field__input num"
                   value={typed}
                   spellCheck={false}
-                  data-testid="answer-input"
+                  name="answer" data-testid="answer-input"
                   placeholder="for example  1/2  or  x^2+1"
                   onChange={(event) => setTyped(event.target.value)}
                   onKeyDown={(event) => {

@@ -217,7 +217,7 @@ export function ReaderPanel() {
           <select
             className="select"
             value={settings.speechLocale}
-            data-testid="speech-locale"
+            name="speech-locale" data-testid="speech-locale"
             onChange={(event) => updateSettings({ speechLocale: event.target.value as 'en' | 'hi' })}
           >
             <option value="en">English</option>
