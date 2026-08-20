@@ -571,3 +571,13 @@ Run before calling this shipped. Result: **nothing to rotate, nothing to hide, n
   sign`). Bharati is a six-dot code carrying a script with more distinctions than sixty-four, so
   the ambiguity is real; picking one reading and printing it as fact would teach something false
   half the time.
+- **D13.1** — A new version announces itself and waits to be asked. The offline copy is what makes
+  Braillix survive a school's Wi-Fi, and it is also what can stop a fix from arriving: a service
+  worker serves the page it already has, so the visit after a release still shows the old build.
+  Found by deploying and looking — the live site served the previous day's app to a returning
+  browser, silently. A strip at the top of the screen and one button; never an automatic reload,
+  because somebody may be half way through typing a question in front of a class.
+- **D13.2** — The notice watches `navigator.serviceWorker.ready`, not `getRegistration()`. On a
+  first visit the component mounts before registration finishes, `getRegistration()` resolves with
+  nothing, and the watcher is never attached — so the first update of that session goes unannounced.
+  Caught in the browser, not by a test; the test came after.

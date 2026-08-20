@@ -195,3 +195,15 @@ What it found, on the first run, in code that had passed every previous gate:
   ordinary words
 - `Ravi के पास 5 सेब` — a Hinglish question — lost every Latin letter, because the Latin word and the
   Hindi one shared a segment and the whole segment went to the Bharati translator
+
+
+## Arc 12 — DELIVERY
+*A fix that never reaches the teacher is not a fix.*
+
+Acceptance (frozen):
+- [x] A new version, once cached, announces itself on screen and reloads when asked — never on its
+      own, because a page that reloads under a teacher's hands in front of a class is worse than a
+      stale one
+- [x] Nothing is said on a first visit: an install is not an update
+- [x] Proved end to end by changing the deployed worker on disk exactly as a deploy would, and
+      watching the browser notice

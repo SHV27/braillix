@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useBraillix, type ViewId } from '../store';
 import { APP_NAME } from '../config';
 import { StatusStrip } from './StatusStrip';
+import { UpdateNotice } from './UpdateNotice';
 import { BoardScreen } from './BoardScreen';
 import { DeviceScreen } from './DeviceScreen';
 import { PracticeScreen } from './PracticeScreen';
@@ -41,6 +42,10 @@ export function App() {
       <a className="skip-link" href="#main">
         {t('app.skip')}
       </a>
+
+      {/* Above everything, because a stale app is a wrong app and the teacher has to be able to
+          see that before they trust anything below it. */}
+      <UpdateNotice />
 
       <header className="masthead">
         <div className="masthead__brand">

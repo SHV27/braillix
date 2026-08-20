@@ -39,6 +39,11 @@ const STORAGE_KEY = 'braillix.lang';
  */
 const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   /* ---- shell ---- */
+  'update.ready': [
+    'A newer Braillix is ready on this machine.',
+    'इस मशीन पर ब्रेलिक्स का नया संस्करण तैयार है।',
+  ],
+  'update.reload': ['Use it now', 'अभी इस्तेमाल करें'],
   'app.tagline': ['refreshable braille for mathematics', 'गणित के लिए रिफ्रेशेबल ब्रेल'],
   'app.skip': ['Skip to the display', 'सीधे डिस्प्ले पर जाएँ'],
   'app.sections': ['Sections', 'भाग'],
