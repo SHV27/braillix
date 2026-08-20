@@ -3,19 +3,24 @@
 Project-local constitution. Overrides any inherited `CLAUDE.md` from a parent folder (that one
 belongs to a different project — see `DECISIONS.md` D0.3).
 
-## THE PRODUCT
+## THE PRODUCT (v2 — the blackboard pivot, 21 Aug 2026)
 
-A refreshable braille display for **mathematics**, for students at Indian schools for the blind.
-This repo is the **software half**: everything from "here is a maths expression" through to "the
-right dots are raised on the right cells" — plus the app around it.
+**The teacher's blackboard, on a blind child's fingers.** A maths teacher who only knows
+WhatsApp writes, types, or scans whatever she is teaching *right now* — full questions, worded
+problems, worked steps — and it lands on the student's braille cells, live and correct. The
+lesson (a stack of lines), not the lone expression, is the unit of the product.
 
-**THE DESIGN LAW (binding):**
-> The software must be complete and genuinely working with **nothing plugged in**. Hardware is an
-> output it can drive, never a dependency it needs. Any commit that makes the app require hardware,
-> a server, a network, or an API key to do its core job is a defect.
+**THE DESIGN LAWS (binding):**
+> 1. The software must be complete and genuinely working with **nothing plugged in**. Hardware is
+> an output it can drive, never a dependency. Requiring hardware/server/network/key = defect.
+> 2. **A silent wrong answer is the one unforgivable failure.** Recognised content cannot reach
+> the lesson without teacher confirmation (structural, typed); uncertainty is said out loud.
 
-**Taste bar:** an instrument, not a student project. Nothing on screen should invite the criticism
-"this looks like a college demo".
+**CUT (founder order — do not build):** worksheets, lesson libraries, practice drills, courses,
+student records, languages beyond English+Hindi.
+
+**Taste bar:** an instrument, not a student project — and **obvious to a non-technical teacher**.
+Beautiful is welcome; intimidating is a defect.
 
 ## THE SEVEN LAWS
 

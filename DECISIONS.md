@@ -691,3 +691,57 @@ Run before calling this shipped. Result: **nothing to rotate, nothing to hide, n
   MASK, and a mask of 56 is 0x2838, not 0x28c8 — and both times the rule looked right, matched
   nothing, and the symbol went on being reported as a gap. A table that cannot be typed wrongly is
   worth more than one that is merely correct today.
+
+---
+
+## V2 BOARDROOM MINUTES (21 Aug 2026 — full pipeline re-run from VISION-BRIEF-Braillix-v2.md)
+
+### PILLARS (5)
+- P1 **The Blackboard.** One screen. The lesson is a living stack of lines (words, maths, worked
+  steps); the teacher writes or scans a line and it lands on the cells. Beat "expression editor
+  with tabs" because the founder's dream is the lesson, not the expression. Cost: board state
+  model + line navigation. Survived the Skeptic by making the line the unit of sync.
+- P2 **Effortless input, three ways.** Type like WhatsApp (natural shorthand + palette), scan like
+  Google Lens (full question: Hindi/English words + maths), or draw it. Everything passes one
+  confirm gate. Beat "modes per input type" via one shared review path.
+- P3 **Every dot provably right.** Nemeth 2022 golden vectors + SRE differential + readback
+  round-trip; uncertainty is said out loud, never guessed. This is the founder's #1 law.
+- P4 **Cells follow the chalk.** Live follow/explore sync; lines→panes→cells paging on the pod's
+  own Prev/Select/Next buttons; any cell count discovered at runtime; mirror mode for many pods.
+- P5 **Stands alone, teaches itself.** Zero hardware/network/key dependency; 60-second first-run
+  taste of success; English + Hindi throughout.
+
+### THE CUT LIST (died in the room)
+- Lessons library, practice drills, worksheets, student records, class management (founder order).
+- The 5-screen IA — replaced by Board + a device drawer + inline help.
+- Grade-2 contractions, languages beyond en/hi, auto full-page layout analysis (v1 scans a
+  cropped question), multi-line braille output (hardware is a line), any server/pairing/auth.
+
+### THE INNOVATION (cross-domain ancestry named)
+- **Follow-the-chalk:** the teacher's cursor IS the display state — collaborative-editor live
+  cursors + karaoke bouncing-ball, applied to braille cells. Student mode flips to explore
+  (pager/scrollback ancestry) and back with one button.
+- **Lines→panes→cells pager:** terminal `less` applied to a 1-cell display reading a blackboard.
+
+### PRE-MORTEM OBITUARY (top causes of death + the design that prevents each)
+1. "Teacher never got past the first screen" → one screen, 60s scripted first-run, WhatsApp-bar.
+2. "A wrong dot reached a child's finger in front of the panel" → triple proof + confirm gate +
+   observable uncertainty.
+3. "Recognition was dead at the demo (again)" → model ships with the build; proven in the real
+   browser as a gate; fallback ladder (edit box, palette) always present.
+4. "Clock ran out mid-rebuild" → reuse the verified core/transport/virtual-pod (evidence: 750/750
+   tests, tsc clean, protocol-complete); rebuild only the product layer.
+
+### CALLS MADE ON THE OWNER'S BEHALF (veto with one word)
+- D-V2.1: Salvage core engine, transport, virtual-pod, recognise worker (all verified by own
+  audit + live browser test); scrap learn/class and the old screens. Basis: clock + evidence.
+- D-V2.2: Math code = pure Nemeth (India's NIEPVD code is Nemeth-derived; UEB math not used in
+  India). Bharati Braille for Hindi words; explicit literary/math context switch.
+- D-V2.3: Scan stack = existing verified formula model + Tesseract.js eng+hin for words; Texo
+  evaluated as an upgrade only if clock allows. ₹ sign: transcriber-defined symbol, logged.
+- D-V2.4: Art direction stays "machined instrument" but tuned for a non-technical teacher:
+  bigger type, fewer controls visible, everything nameable in one word.
+- D-V2.5: No Claude-Code hooks added tonight — single-builder session under a hard clock; a
+  misfiring hook blocks all shell work. Enforcement layer = npm run verify + type constraints.
+- D-V2.6: CLAUDE.md updated surgically (blackboard product, confirm-gate law, founder cut list);
+  seven laws + gates + structure unchanged. Line count stays ~60.
