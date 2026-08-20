@@ -65,7 +65,7 @@ const INITIAL_CAPABILITIES: CapabilityMap = {
 
 /* ------------------------------------------------------------------ view + settings */
 
-export type ViewId = 'read' | 'recognise' | 'hardware' | 'atlas';
+export type ViewId = 'read' | 'practice' | 'recognise' | 'hardware' | 'atlas';
 
 /**
  * How the display is being driven.
@@ -102,6 +102,8 @@ interface BraillixState {
   connectPods: (hosts: string[]) => Promise<void>;
   switchToSimulator: () => Promise<void>;
   homeDisplay: () => Promise<void>;
+  /** Put an arbitrary run of cells on the display — used by calibration and by practice drills. */
+  showCells: (cells: readonly DotMask[], announcement: string) => void;
   /** Raise exactly one dot on every cell — the calibration test for cam bit order. */
   testDot: (dot: DotNumber | null) => Promise<void>;
   testingDot: DotNumber | null;
@@ -401,6 +403,14 @@ export const useBraillix = create<BraillixState>((set, get) => {
      * whether dot 1 really drives cam track 0. Press "dot 1"; if the physical cell raises a
      * different dot, fix the mapping here rather than re-flashing anything.
      */
+    showCells: (cells, announcement) => {
+      set({
+        testingDot: null,
+        announcement,
+        ...project({ activeCells: [...cells], windowStart: 0, cursor: null }),
+      });
+    },
+
     testDot: async (dot) => {
       const { profile } = get();
       const mask = dot === null ? BLANK : dotsToMask([dot]);

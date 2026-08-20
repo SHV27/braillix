@@ -94,8 +94,12 @@
   text-transform: uppercase;
 }
 
+/* Five sections do not fit on a 390px phone in one row, so the nav wraps rather than pushing
+   the page sideways. Caught by the no-horizontal-overflow assertion, not by eye. */
 .masthead__nav {
   display: flex;
+  flex-wrap: wrap;
+  max-width: 100%;
   gap: var(--s1);
   padding: var(--s1);
   border-radius: var(--radius);
@@ -222,6 +226,10 @@
 @media (max-width: 640px) {
   .masthead {
     padding: var(--s3) var(--s4);
+  }
+  .tab {
+    padding: var(--s2) var(--s3);
+    font-size: var(--t-tiny);
   }
   .main {
     padding: var(--s5) var(--s4) var(--s6);

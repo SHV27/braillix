@@ -305,3 +305,12 @@ Veto any of these with one word:
 - **D3.16 (Arc 4)** — Recogniser output is tidied (`\frac { 2 2 } { 7 }` → `\frac{22}{7}`) because
   token-spaced LaTeX reads as broken to a human. The tidy pass is proven meaning-preserving by
   tests that compare the BRAILLE before and after, not the text.
+- **D3.17 (Arc 5)** — **Practice answers are marked on the BRAILLE, not on the text.** A student who
+  correctly reads ⠹⠁⠌⠃⠼ will write `a/b`; marking that wrong because we wanted `\frac{a}{b}` would
+  be marking their LaTeX, not their reading. The typed answer is expanded into several ordinary
+  written forms (`a/b`, `sqrt(x)`, `x**2`) and any form producing the expected braille counts.
+  Tested by comparing braille, not strings, so a rewrite can never quietly change the meaning.
+- **D3.18 (Arc 5)** — **A six-key chord commits on the LAST finger up, not the first.** Nobody lifts
+  three fingers simultaneously; committing on first release turns "dots 1-2-5" into three cells. The
+  chord accumulates and is written when the hand leaves the keys, and a chord abandoned by a window
+  blur is discarded rather than committed later.
