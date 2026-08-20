@@ -276,6 +276,24 @@ export const SYLLABUS: readonly SyllabusTopic[] = [
     ],
   },
   {
+    topic: 'The symbols a senior class needs',
+    classes: '9–12',
+    entries: [
+      { source: 'A subset B', says: 'a subset' },
+      { source: 'A subseteq B', says: 'a subset, or equal' },
+      { source: 'x notin A', says: 'not a member' },
+      { source: 'sqrt(2) approx 1.414', says: 'approximately equal to' },
+      { source: 'a equiv b', says: 'equivalent to' },
+      { source: 'y propto x', says: 'proportional to' },
+      { source: 'AB perp CD', says: 'perpendicular lines' },
+      { source: 'therefore x = 5', says: 'therefore' },
+      { source: 'bar(x) = 45.5', says: 'the mean of a set of readings' },
+      { source: '5!', says: 'a factorial' },
+      { source: 'Delta ABC', says: 'a capital Greek letter' },
+      { source: 'Omega', says: 'another capital Greek letter' },
+    ],
+  },
+  {
     topic: 'Questions with words in them',
     classes: 'all',
     entries: [
@@ -288,6 +306,9 @@ export const SYLLABUS: readonly SyllabusTopic[] = [
       { source: 'ஒரு கோணம் 45 degrees', says: 'a Tamil word problem', words: true },
       { source: 'ਦੋ ਸੰਖਿਆਵਾਂ ਦਾ ਜੋੜ 12', says: 'a Gurmukhi word problem', words: true },
       { source: 'రెండు సంఖ్యల మొత్తం 12', says: 'a Telugu word problem', words: true },
+      { source: 'Solve for x: 3x - 7 = 8', says: 'an instruction with a colon in it', words: true },
+      { source: 'Ravi के पास 5 सेब हैं', says: 'two scripts and a number on one line', words: true },
+      { source: 'ਇੱਕ ਕੋਣ 60 degrees', says: 'Gurmukhi with an addak in it', words: true },
     ],
   },
 ];

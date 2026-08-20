@@ -65,6 +65,8 @@ const WRAPPING: Readonly<Record<string, (argument: string) => string>> = {
   root: (argument) => `\\sqrt{${argument}}`,
   cbrt: (argument) => `\\sqrt[3]{${argument}}`,
   abs: (argument) => `\\left|${argument}\\right|`,
+  bar: (argument) => `\\overline{${argument}}`,
+  mean: (argument) => `\\overline{${argument}}`,
 };
 
 /** Greek letters, written by name. Capitalised name gives the capital letter where one exists. */
@@ -112,9 +114,14 @@ const WORD_SYMBOLS: Readonly<Record<string, string>> = {
   parallel: '\\parallel',
   perp: '\\perp',
   approx: '\\approx',
+  equiv: '\\equiv',
+  propto: '\\propto',
+  subseteq: '\\subseteq',
+  supset: '\\supset',
   cup: '\\cup',
   cap: '\\cap',
   in: '\\in',
+  notin: '\\notin',
   subset: '\\subset',
   to: '\\to',
   sum: '\\sum',

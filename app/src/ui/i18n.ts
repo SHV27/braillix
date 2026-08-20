@@ -382,9 +382,14 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   'class.items': ['{count} items', '{count} सवाल'],
   'class.itemsOne': ['1 item', '1 सवाल'],
   'class.addItem': ['Add a question', 'सवाल जोड़िए'],
+  'class.pasted': [
+    '{count} questions added from what you pasted.',
+    'आपने जो चिपकाया उससे {count} प्रश्न जोड़े गए।',
+  ],
+  'class.pastedOne': ['1 question added.', '1 प्रश्न जोड़ा गया।'],
   'class.addItemHint': [
-    'Type it as you would on the Board — 1/2, sqrt(9), or a whole question with words in it.',
-    'जैसे बोर्ड पर लिखते हैं वैसे लिखिए — 1/2, sqrt(9), या शब्दों वाला पूरा सवाल।',
+    'Type it as you would on the Board — 1/2, sqrt(9), or a whole question with words in it. Paste a whole numbered exercise and each line becomes a question.',
+    'जैसे बोर्ड पर लिखते हैं वैसे लिखिए — 1/2, sqrt(9), या शब्दों वाला पूरा सवाल। पूरा नंबर वाला अभ्यास चिपकाइए, हर पंक्ति एक प्रश्न बन जाएगी।',
   ],
   'class.add': ['Add', 'जोड़िए'],
   'class.noItems': [

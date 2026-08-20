@@ -25,7 +25,7 @@ export interface Canonical {
 /** Commands that stand for exactly one character. */
 const SIGNS: Readonly<Record<string, string>> = {
   times: '×',
-  cdot: '×',
+  cdot: '·', // Nemeth writes a raised dot and a cross differently, so this one does too
   div: '÷',
   pm: '±',
   mp: '∓',
@@ -44,11 +44,16 @@ const SIGNS: Readonly<Record<string, string>> = {
   '%': '%',
   '{': '{',
   '}': '}',
-  '|': '|',
+  '|': '||', // the norm bars, which Nemeth writes as two cells
   ' ': '',
   ',': '',
   ';': '',
   '!': '',
+  subseteq: '⊆',
+  supset: '⊃',
+  propto: '∝',
+  therefore: '∴',
+  because: '∵',
   cup: '∪',
   cap: '∩',
   in: '∈',
@@ -208,6 +213,14 @@ class Printer {
     }
     if (name === 'text' || name === 'textrm' || name === 'mbox') {
       return this.group();
+    }
+    // A bar goes over what it covers, and comes after it in the braille — so it comes after it here.
+    if (name === 'overline' || name === 'bar') return `${this.group()}‾`;
+    // A binomial is a bracketed pair with the lower term written below the upper one.
+    if (name === 'binom' || name === 'choose') {
+      const upper = this.group();
+      const lower = this.group();
+      return `(${upper}_(${lower}))`;
     }
     if (TRANSPARENT.has(name)) return '';
     if (FUNCTIONS.has(name)) return name;

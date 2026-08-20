@@ -96,11 +96,17 @@ describe('the school syllabus reaches the display', () => {
           //     A subsequence, not an equality: the reading is allowed to say MORE than was typed.
           //     `cbrt(27)` becomes √[3](27), and that 3 is not a digit that appeared from nowhere —
           //     it is the index of the root, which the word "cbrt" was standing in for.
+          //
+          //     Measured against the LATEX, not against what was typed. "Delta ABC" is Δ ABC: the D
+          //     of "Delta" was never meant to survive as a letter, and demanding that it did made the
+          //     guard reject a perfectly good line. Commands are stripped for the same reason —
+          //     `\circ` is a degree sign, not the letter C.
           if (!entry.words) {
             const kept = (text: string): string[] => text.match(/[0-9A-Z]/g) ?? [];
+            const written = trips.map((trip) => trip.expected.replace(/\\[a-zA-Z]+/g, '')).join('');
             const reading = kept(trips.map((trip) => trip.reading).join(''));
             let at = 0;
-            for (const char of kept(entry.source)) {
+            for (const char of kept(written)) {
               const found = reading.indexOf(char, at);
               expect(found, `“${char}” never reached the cells (read back as “${reading.join('')}”)`).toBeGreaterThan(-1);
               at = found + 1;

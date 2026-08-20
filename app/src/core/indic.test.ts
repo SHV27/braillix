@@ -93,14 +93,21 @@ describe('reading real words', () => {
 
 describe('what it will not guess at', () => {
   it('reports a letter that has no equivalent instead of rendering a neighbour', () => {
-    // Gurmukhi's addak doubles the consonant after it and is a construction no other script here
-    // shares. The arithmetic lands it on a Devanagari code point that is not a letter — and that
-    // must be a gap, not a guess. Inventing a plausible cell for it would be the worst outcome
-    // available: a child reading a word that was never written.
-    for (const orphan of ['ੱ', 'ୱ']) {
+    // Oriya's wa sits at an offset no other script here uses, and the arithmetic lands it on a
+    // Devanagari code point that is not a letter. That must be a gap, not a guess: inventing a
+    // plausible cell would be the worst outcome available, a child reading a word never written.
+    for (const orphan of ['ୱ', 'ੲ']) {
       const result = indicToBraille(orphan);
       expect(result.unsupported.length, `${orphan} should be reported`).toBeGreaterThan(0);
     }
+  });
+
+  it('doubles the consonant after a Gurmukhi addak, because that is what an addak is', () => {
+    // ਪੱਕਾ is पक्का — the addak is not a letter, it is an instruction to write the next
+    // consonant twice, and Devanagari writes that by stripping the first one's vowel with a halant.
+    expect(toDevanagari('ਪੱਕਾ')).toBe('पक्का');
+    expect(braille('ਪੱਕਾ')).toBe(braille('पक्का'));
+    expect(indicToBraille('ਇੱਕ').unsupported).toEqual([]);
   });
 
   it('knows the letters where the parallel breaks but the meaning does not', () => {
@@ -116,8 +123,8 @@ describe('what it will not guess at', () => {
   });
 
   it('still renders the rest of the line when one character is unknown', () => {
-    const result = indicToBraille('গণিত ੱ গণিত');
-    expect(result.unsupported).toContain('ੱ');
+    const result = indicToBraille('গণিত ୱ গণিত');
+    expect(result.unsupported).toContain('ୱ');
     expect(result.cells.length).toBeGreaterThan(8);
   });
 

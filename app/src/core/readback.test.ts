@@ -86,6 +86,63 @@ describe('reading Nemeth back as ordinary maths', () => {
   });
 });
 
+describe('the symbols a senior class needs', () => {
+  /*
+   * Every cell here was taken from what speech-rule-engine actually emits, not from a table
+   * somebody remembered — a sweep printed the braille for every symbol the printer knows, and each
+   * one it could not read back came here as a rule. Two of them are the reason this block exists:
+   *
+   *   ⠰⠆ is "is proportional to" AND the subscript indicator followed by a 2. A subscript never
+   *   follows a space, so the space is what tells them apart — exactly as it does for a reader.
+   *
+   *   ⠈⠱⠈⠱ is "approximately equal to". It used to read as two bars and say nothing, because a
+   *   lone ⠈ was being silently swallowed. Silence was the bug; the wrong reading was the symptom.
+   */
+  it('reads the set and comparison signs', () => {
+    expect(read('⠁⠀⠸⠐⠅⠀⠠⠃')).toBe('a⊂B');
+    expect(read('⠸⠐⠅⠱')).toBe('⊆');
+    expect(read('⠌⠈⠑')).toBe('∉');
+    expect(read('⠭⠀⠈⠱⠈⠱⠀⠼⠂⠨⠲')).toBe('x≈1.4');
+    expect(read('⠁⠀⠸⠇⠀⠃')).toBe('a≡b');
+  });
+
+  it('reads "proportional to" without mistaking it for a subscript', () => {
+    expect(read('⠭⠀⠰⠆⠀⠽')).toBe('x∝y');
+    // The same two cells, attached to a letter instead of standing alone: a subscript.
+    expect(read('⠭⠰⠆')).toBe('x_(2)');
+  });
+
+  it('reads the reasoning signs and the shapes', () => {
+    expect(read('⠠⠡')).toBe('∴');
+    expect(read('⠈⠌')).toBe('∵');
+    expect(read('⠫⠏')).toBe('⊥');
+  });
+
+  it('reads a bar over a letter, and over a whole run', () => {
+    expect(read('⠭⠱')).toBe('x‾');
+    expect(read('⠐⠠⠁⠠⠃⠣⠱⠻')).toBe('AB‾');
+  });
+
+  it('reads a factorial, a raised dot, and the punctuation colon', () => {
+    expect(read('⠭⠯')).toBe('x!');
+    expect(read('⠡')).toBe('·');
+    expect(read('⠭⠸⠒⠽')).toBe('x:y');
+    // ...which is a different cell from the ratio colon, and must stay different.
+    expect(read('⠼⠆⠀⠐⠂⠀⠼⠒')).toBe('2:3');
+  });
+
+  it('reads a capital Greek letter from the same cells as the small one', () => {
+    expect(read('⠨⠠⠙')).toBe('Δ');
+    expect(read('⠨⠙')).toBe('δ');
+    expect(read('⠨⠠⠺')).toBe('Ω');
+    expect(read('⠨⠠⠏')).toBe('Π');
+  });
+
+  it('reads a binomial coefficient, whose lower term has no terminator of its own', () => {
+    expect(read('⠷⠝⠩⠅⠾')).toBe('(n_(k))');
+  });
+});
+
 describe('the check has teeth — every one of these must read differently', () => {
   const good = '⠭⠘⠆⠐⠬⠒⠭⠬⠆⠀⠨⠅⠀⠼⠴'; // x^2 + 3x + 2 = 0
 

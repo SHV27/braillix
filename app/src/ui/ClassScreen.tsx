@@ -12,7 +12,7 @@
  * a way to lose a lesson.
  */
 
-import { useRef, useState } from 'react';
+import { useRef, useState, type ClipboardEvent } from 'react';
 import { useBraillix } from '../store';
 import { progressByStudent, recordsToCsv, useClass } from '../class/store';
 import { deserialiseClassData, serialiseClassData, FILE_EXTENSION } from '../class/storage';
@@ -139,6 +139,7 @@ function WorksheetEditor({ worksheet, onTeach }: { worksheet: Worksheet; onTeach
   const t = useT();
   const rename = useClass((s) => s.renameWorksheet);
   const addItem = useClass((s) => s.addItem);
+  const [pasted, setPasted] = useState<number | null>(null);
   const removeItem = useClass((s) => s.removeItem);
   const moveItem = useClass((s) => s.moveItem);
   const deleteWorksheet = useClass((s) => s.deleteWorksheet);
@@ -166,6 +167,38 @@ function WorksheetEditor({ worksheet, onTeach }: { worksheet: Worksheet; onTeach
     if (!text) return;
     addItem(worksheet.id, text, Date.now());
     setDraft('');
+  }
+
+  /**
+   * A whole exercise, pasted.
+   *
+   * An exercise in a textbook is a numbered list, and a teacher preparing a lesson had to add it one
+   * question at a time — twelve fields, twelve clicks, for one evening's worth of homework. Pasting
+   * several lines now makes several questions, which is what anybody would expect it to do and what
+   * it quietly did not.
+   *
+   * The numbering is stripped, because Braillix numbers the items itself and a braille reader would
+   * otherwise meet "1. 1." at the top of every question. `\d+[.)]` only counts when a space
+   * follows, so 1.5 keeps its decimal point.
+   */
+  function paste(event: ClipboardEvent<HTMLInputElement>) {
+    const text = event.clipboardData.getData('text');
+    if (!/\r|\n/.test(text)) return; // one line: let the field do what fields do
+
+    const lines = text
+      .split(/\r\n|\r|\n/)
+      .map((line) => line.replace(/^\s*(?:Q\s*)?\d+\s*[.)]\s+/i, '').trim())
+      .filter(Boolean);
+    if (lines.length === 0) return;
+
+    event.preventDefault();
+    let at = Date.now();
+    for (const line of lines) {
+      addItem(worksheet.id, line, at);
+      at += 1; // distinct ids, and the order they were written in
+    }
+    setDraft('');
+    setPasted(lines.length);
   }
 
   return (
@@ -283,6 +316,7 @@ function WorksheetEditor({ worksheet, onTeach }: { worksheet: Worksheet; onTeach
             name="new-item"
             data-testid="new-item"
             onChange={(event) => setDraft(event.target.value)}
+            onPaste={paste}
             onKeyDown={(event) => {
               if (event.key === 'Enter') add();
             }}
@@ -293,6 +327,11 @@ function WorksheetEditor({ worksheet, onTeach }: { worksheet: Worksheet; onTeach
         </div>
       </label>
       <p className="field__help">{t('class.addItemHint')}</p>
+      {pasted !== null && (
+        <p className="notice cls__pasted" role="status" data-testid="pasted-count">
+          {pasted === 1 ? t('class.pastedOne') : t('class.pasted', { count: pasted })}
+        </p>
+      )}
       {draft.trim() && <SourcePreview source={draft} />}
 
       {/* Present in the page, invisible until somebody prints — so the sheet can never drift

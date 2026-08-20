@@ -599,3 +599,32 @@ Run before calling this shipped. Result: **nothing to rotate, nothing to hide, n
 - **D13.7** — Both screens ask `useReadback()`; neither computes the verdict itself. Two copies of
   a rule are a fork of its future bugs, and a lesson disagreeing with the Board about whether a
   question is safe would be the worst possible version of that.
+- **D13.8** — Pasting several lines into the worksheet field makes several questions. An exercise in
+  a textbook is a numbered list, and adding it a question at a time was twelve fields and twelve
+  clicks for one evening's homework — while pasting the list made one long question out of the lot
+  of it. The numbering is stripped, because Braillix numbers items itself and a braille reader would
+  otherwise meet "1. 1." at the top of every question; the pattern requires a space after the
+  number, so 1.5 keeps its decimal point.
+- **D14.1** — The reader's rules come from a sweep, not from memory. A scratch harness printed the
+  Nemeth for every symbol the printer knows and every one it could not read back became a rule:
+  ⊂ ⊆ ⊃ ∉ ≈ ≡ ∝ ∴ ∵ ⊥, the punctuation colon, the factorial, the raised dot, a bar over a letter
+  or a run, a binomial coefficient, and every capital Greek letter. Guessing a cell would have been
+  faster and would have been guessing.
+- **D14.2** — `⠰⠆` is "is proportional to" and also the subscript indicator followed by a 2. A subscript
+  never follows a space — it attaches to the thing before it — so a space is what tells them apart,
+  exactly as it does for a reader.
+- **D14.3** — A lone prefix cell is reported, not swallowed. `SINGLES` had `⠈: ''`, which turned
+  "approximately equal to" into two bars and said nothing about it. Silence was the bug; the wrong
+  reading was only the symptom. Nothing in the reader may map to the empty string.
+- **D14.4** — Gurmukhi's addak is translated after all. It is not a letter: it doubles the consonant
+  that follows it, which Devanagari writes by actually doubling — ਪੱਕਾ is पक्का. That needs a look
+  at the next character, so it lives in `transliterate` rather than in the exceptions table. What
+  stays a reported gap is Oriya's ୱ and Gurmukhi's ੲ, which have no equivalent at all.
+- **D14.5** — A raised dot and a cross are different symbols and Nemeth writes them differently, so
+  the canonical printer stopped calling both of them ×.
+- **D14.6** — The "nothing vanished" invariant measures against the LaTeX, not against what was
+  typed. `Delta ABC` is Δ ABC — the D of "Delta" was never meant to survive as a letter, and
+  demanding that it did made the guard reject a perfectly good line. Two-sided honesty: a guard that
+  rejects the true is as broken as one that accepts the false.
+- **D14.7** — `bar(x)` and `mean(x)` are input words, because that is how a statistics teacher writes
+  the mean, and the braille for it is now something the checker can vouch for.

@@ -210,3 +210,20 @@ Acceptance (frozen):
 - [x] The Device screen shows the cells it drives, and stops pretending a pod address is already
       set up
 - [x] Teach mode carries the verdict — silent when the braille is right, loud when it is not
+- [x] A whole numbered exercise can be pasted into a worksheet in one go
+
+
+## Arc 13 — THE SWEEP
+*Every symbol a senior class needs, verified rather than assumed.*
+
+Arc 11 built the checker. This arc asked it what it could not do, by printing the Nemeth for every
+symbol the printer knows and reading each one back.
+
+Acceptance (frozen):
+- [x] A sweep of every symbol, with each unreadable one becoming a rule taken from real output
+- [x] Set signs, ≈, ≡, ∝, ∴, ∵, ⊥, the punctuation colon, the factorial, the raised dot, bars,
+      binomial coefficients and every capital Greek letter — all read back
+- [x] A probe of sixty-five realistic classroom expressions: **65 agree, 0 differ, 0 unchecked**
+- [x] Gurmukhi's addak translated properly, so Punjabi words with a doubled consonant are right
+- [x] Nothing in the reader maps to the empty string — a cell is read or reported, never swallowed
+- [x] The corpus grown to 148 lines across 21 topics, all round-tripping

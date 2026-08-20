@@ -75,6 +75,7 @@ describe('the whole question, in every script', () => {
       'দুটি সংখ্যার যোগফল', // Bengali
       'ਗਣਿਤ', // Gurmukhi
       'ਪੰਜਾਬੀ', // Gurmukhi, with the tippi
+      'ਇੱਕ ਕੋਣ', // Gurmukhi, with the addak
       'ગણિત', // Gujarati
       'ଗଣିତ', // Oriya
       'கணிதம்', // Tamil

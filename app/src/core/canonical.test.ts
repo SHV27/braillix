@@ -59,9 +59,34 @@ describe('printing LaTeX in the canonical form', () => {
     expect(comparable(print('3\\times 4 = 12'))).toBe('3×4=12');
   });
 
+  it('prints the symbols a senior class needs', () => {
+    expect(print('a\\subset B')).toBe('a⊂B');
+    expect(print('A\\subseteq B')).toBe('A⊆B');
+    expect(print('x\\notin A')).toBe('x∉A');
+    expect(print('x\\approx 1.4')).toBe('x≈1.4');
+    expect(print('a\\equiv b')).toBe('a≡b');
+    expect(print('y\\propto x')).toBe('y∝x');
+    expect(print('\\therefore x=5')).toBe('∴x=5');
+    expect(print('AB\\perp CD')).toBe('AB⊥CD');
+    // A raised dot and a cross are different symbols, and Nemeth writes them differently, so this
+    // printer keeps them apart too rather than calling both of them ×.
+    expect(print('a\\cdot b')).toBe('a·b');
+    expect(print('a\\times b')).toBe('a×b');
+  });
+
+  it('prints a bar after what it covers, because that is where the braille puts it', () => {
+    expect(print('\\overline{x}')).toBe('x‾');
+    expect(print('\\bar{x}')).toBe('x‾');
+    expect(print('\\overline{AB}')).toBe('AB‾');
+  });
+
+  it('prints a binomial coefficient as the bracketed pair the braille writes', () => {
+    expect(print('\\binom{n}{k}')).toBe('(n_(k))');
+  });
+
   it('reports a command it does not know instead of pretending', () => {
-    const result = canonicalise('\\binom{n}{k}');
-    expect(result.unknown).toContain('\\binom');
+    const result = canonicalise('\\begin{matrix}a&b\\end{matrix}');
+    expect(result.unknown).toContain('\\begin');
   });
 });
 
@@ -87,7 +112,7 @@ describe('the verdict', () => {
   });
 
   it('says "unchecked" rather than "agrees" when it met something it does not know', () => {
-    const result = checkRoundTrip('\\binom{n}{k}', cells('⠝⠅'));
+    const result = checkRoundTrip('\\begin{matrix}a', cells('⠝⠅'));
     expect(result.verdict).toBe('unchecked');
     expect(result.gaps.length).toBeGreaterThan(0);
   });

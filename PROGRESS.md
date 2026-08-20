@@ -8,9 +8,9 @@ Repo: **github.com/SHV27/braillix** · Live: **https://braillix.vercel.app**
 
 ## Where we are
 
-**Twelve arcs built and closed.** Arcs 1–6 built the instrument; arcs 7–10 built the classroom
+**Thirteen arcs built and closed.** Arcs 1–6 built the instrument; arcs 7–10 built the classroom
 around it and shipped it; arc 11 made it prove its own work; arc 12 made sure the proof reaches the
-teacher rather than sitting in a cache.
+teacher rather than sitting in a cache; arc 13 swept every symbol a senior class needs into it.
 
 | Arc | State |
 |---|---|
@@ -26,6 +26,7 @@ teacher rather than sitting in a cache.
 | 10 · Ship (installable offline app, deployed and verified) | ✅ closed |
 | 11 · The Proof (the pipeline reads its own braille back) | ✅ closed |
 | 12 · Delivery (a new version announces itself; the Device screen shows its cells) | ✅ closed |
+| 13 · The Sweep (every symbol a senior class needs, verified) | ✅ closed |
 
 ## The one next action
 
@@ -39,9 +40,9 @@ from `NOTES.md` into a new arc rather than starting anything ad hoc.
 
 | Gate | Result |
 |---|---|
-| Unit tests | **647 passing** |
-| Journey tests | **132 passing** across board / read-back / reader / hardware / recognition / practice / class / offline / screens / a11y |
-| Syllabus accuracy | **133 of 133** lines translate cleanly **and read back correctly** — `npm run accuracy`, evidence in `docs/ACCURACY.md` |
+| Unit tests | **673 passing** |
+| Journey tests | **133 passing** across board / read-back / reader / hardware / recognition / practice / class / offline / screens / a11y |
+| Syllabus accuracy | **148 of 148** lines translate cleanly **and read back correctly** — `npm run accuracy`, evidence in `docs/ACCURACY.md` |
 | Round trip | every segment of every syllabus line, in all three braille codes, read back by an engine that never saw the input |
 | Lighthouse (deployed) | **accessibility 100 · best practices 100 · SEO 100**, zero failed audits |
 | Deployed LCP / CLS | **349 ms / 0.00** |

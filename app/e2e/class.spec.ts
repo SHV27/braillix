@@ -68,6 +68,41 @@ test.describe('a teacher prepares a lesson', () => {
     await expect(page.getByTestId('worksheet-items').locator('li')).toHaveCount(1);
   });
 
+  test('a whole exercise can be pasted in one go', async ({ page }) => {
+    await openClass(page);
+    await page.getByTestId('new-worksheet').click();
+
+    // A textbook exercise is a numbered list. Adding it a question at a time was twelve fields and
+    // twelve clicks for one evening's homework, and pasting the list quietly made ONE question out
+    // of the lot of it.
+    const exercise = ['1. 2x + 5 = 15', '2. x^2 - 9 = 0', 'Q3) sqrt(144)', '', '4.  1/2 + 1/3'].join('\n');
+    await page.getByTestId('new-item').focus();
+    await page.evaluate(async (text) => {
+      const field = document.querySelector('[data-testid="new-item"]') as HTMLInputElement;
+      const data = new DataTransfer();
+      data.setData('text', text);
+      field.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }));
+    }, exercise);
+
+    // Four questions, not five: a blank line is not a question.
+    await expect(page.getByTestId('worksheet-items').locator('li')).toHaveCount(4);
+    await expect(page.getByTestId('pasted-count')).toContainText('4');
+
+    // The numbering is gone — Braillix numbers the items itself, and a braille reader would
+    // otherwise meet "1. 1." at the top of every question.
+    const items = page.getByTestId('worksheet-items').locator('li');
+    await expect(items.first()).toContainText('2x + 5 = 15');
+    await expect(items.first()).not.toContainText('1.');
+    await expect(items.nth(2)).toContainText('sqrt(144)');
+    // ...but a decimal point keeps its digits: 1/2 + 1/3 is intact, and nothing swallowed a "1.".
+    await expect(items.nth(3)).toContainText('1/2 + 1/3');
+
+    // One line still behaves like one line.
+    await page.getByTestId('new-item').fill('pi r^2');
+    await page.getByTestId('add-item').click();
+    await expect(page.getByTestId('worksheet-items').locator('li')).toHaveCount(5);
+  });
+
   test('a question written on the Board can be kept without retyping it', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
@@ -208,4 +243,5 @@ test.describe('paper', () => {
     await expect(sheet.locator('.printsheet__braille')).toContainText('⠹', { timeout: 10_000 });
     await expect(sheet.locator('math')).toHaveCount(1);
   });
+
 });

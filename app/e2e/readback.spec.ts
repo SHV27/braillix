@@ -58,9 +58,9 @@ test.describe('reading the dots back', () => {
     await page.goto('/');
     await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
 
-    // A binomial coefficient. The braille engine handles it; the checker does not know it yet, and
-    // the only honest thing to say about it is so.
-    await type(page, '\\binom{n}{k}');
+    // A vector. The braille engine handles it; the checker does not know an arrow over a letter
+    // yet, and the only honest thing to say about that is so.
+    await type(page, '\\vec{v}');
     await expect(page.getByTestId('readback-verdict')).toHaveAttribute('data-verdict', 'unchecked');
     await expect(page.getByText('Cannot be checked')).toBeVisible();
     // The braille is still there. An unverified translation is not a blanked display (Law 4).
@@ -128,7 +128,7 @@ test.describe('reading the dots back', () => {
     await page.getByTestId('nav-class').click();
     await page.getByTestId('new-worksheet').click();
 
-    for (const source of ['1/2 + 1/3', '\\binom{n}{k}']) {
+    for (const source of ['1/2 + 1/3', '\\vec{v}']) {
       await page.getByTestId('new-item').fill(source);
       await page.getByTestId('add-item').click();
     }

@@ -102,6 +102,17 @@ const LETTERS: Readonly<Record<string, string>> = {
  * a fraction and every ≥ as a > followed by a stray cell.
  */
 const SYMBOLS: ReadonlyArray<readonly [string, string]> = ([
+  ['⠸⠐⠅⠱', '⊆'],
+  ['⠈⠱⠈⠱', '≈'],
+  ['⠸⠐⠅', '⊂'],
+  ['⠸⠨⠂', '⊃'],
+  ['⠌⠈⠑', '∉'],
+  ['⠸⠇', '≡'],
+  ['⠸⠒', ':'],
+  ['⠠⠡', '∴'],
+  ['⠈⠌', '∵'],
+  ['⠫⠏', '⊥'],
+  ['⠣⠱⠻', '‾'],
   ['⠌⠨⠅', '≠'],
   ['⠐⠅⠱', '≤'],
   ['⠨⠂⠱', '≥'],
@@ -145,13 +156,15 @@ const SYMBOLS: ReadonlyArray<readonly [string, string]> = ([
 
 /** Single cells that stand for themselves. */
 const SINGLES: Readonly<Record<string, string>> = {
+  '⠡': '·', // a raised dot: multiplication written the other way
+  '⠯': '!', // factorial
+  '⠱': '‾', // a bar over the letter before it
   '⠬': '+',
   '⠤': '-',
   '⠷': '(',
   '⠾': ')',
   '⠳': '|',
   '⠮': '∫',
-  '⠈': '', // a lone prefix cell that reached here has already lost its partner
 };
 
 /**
@@ -223,6 +236,17 @@ class Reader {
       this.last = 'other';
       return 1;
     }
+
+    // ⠰⠆ is "is proportional to", and it is also the subscript indicator followed by the digit 2.
+    // A subscript never follows a space — it attaches to the thing before it — so a space (or the
+    // start of the line) is what tells them apart, exactly as it does for a reader.
+    if (this.cells.startsWith('⠰⠆', i) && (i === 0 || this.cells[i - 1] === '⠀')) {
+      this.out.push('∝');
+      this.last = 'other';
+      return 2;
+    }
+
+    if (this.cells.startsWith('⠨⠠', i)) return this.greekCapital(i);
 
     for (const [sequence, meaning] of SYMBOLS) {
       if (this.cells.startsWith(sequence, i)) {
@@ -313,6 +337,9 @@ class Reader {
     }
 
     if (cell in SINGLES) {
+      // A binomial coefficient is written ( n ⠩ k ) — the "directly below" group has no terminator
+      // of its own, and the bracket that closes the whole thing closes it too.
+      if (cell === '⠾') this.closeLimit();
       this.out.push(SINGLES[cell]);
       this.last = 'other';
       return 1;
@@ -326,6 +353,23 @@ class Reader {
    * ⠠ is three different things: the prefix of a complex fraction, a capital letter, and the comma
    * inside a number written the Indian way. The cell after it decides which.
    */
+  /**
+   * ⠨⠠ then a letter is a capital Greek letter — the same two cells as the lowercase one with
+   * the capital sign wedged in the middle. Only Σ was tabled, because only Σ had turned up; the
+   * rest are the same rule and were waiting to be met as gaps.
+   */
+  private greekCapital(i: number): number {
+    const letter = this.cells[i + 2] ?? '';
+    const lower = SYMBOLS.find(([sequence]) => sequence === `⠨${letter}`)?.[1];
+    if (!lower) {
+      this.unknown.push('⠨⠠');
+      return 2;
+    }
+    this.out.push(lower.toUpperCase());
+    this.last = 'other';
+    return 3;
+  }
+
   private capitalOrComma(next: string): number {
     if (next === '⠹') {
       this.fractions.push('complex');

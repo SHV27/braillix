@@ -190,3 +190,8 @@
   flex-wrap: wrap;
   gap: var(--s2);
 }
+
+/* Said once, after a paste, and never in the way of the next thing. */
+.cls__pasted {
+  margin-top: var(--s2);
+}

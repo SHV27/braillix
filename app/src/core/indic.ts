@@ -13,11 +13,11 @@
  *
  *     ক  U+0995  =  0x0980 + 0x15   →   0x0900 + 0x15  =  क  →  ⠅
  *
- * WHAT THIS DELIBERATELY DOES NOT DO. Where a script has a letter the others do not — Bengali's
- * khanda ta, Gurmukhi's addak, Malayalam's chillu letters — the same arithmetic lands on a
- * Devanagari code point that the braille table does not know, and the character is **reported as
- * unsupported** rather than rendered as whatever happened to be there. That is the whole safety
- * argument for doing it this way: a gap is visible, a wrong letter is not.
+ * WHERE THE PARALLEL BREAKS. A few characters exist in one script and not the others, and the
+ * arithmetic lands them on a Devanagari code point that is not a letter at all. Each one is either
+ * given its true equivalent below — a chillu is a consonant plus a halant, and it says so — or
+ * **reported as unsupported** rather than rendered as whatever happened to be there. That is the
+ * whole safety argument for doing it this way: a gap is visible, a wrong letter is not.
  *
  * The interface says which script it read, so nobody has to infer it from the dots.
  */
@@ -68,9 +68,10 @@ const BLOCK_SIZE = 0x80;
  *   ৎ  Bengali khanda ta  — a ত with its vowel removed: त plus halant, exactly.
  *   ൺൻർൽൾൿ Malayalam chillus — ണ ന ര ല ള क with their vowels removed. Same construction.
  *
- * What is deliberately NOT here: Gurmukhi's addak ੱ, which doubles the consonant after it and has
- * no single Devanagari equivalent. It stays a reported gap, because inventing a cell for it would
- * be a guess wearing the clothes of a translation.
+ * Gurmukhi's addak ੱ is not in this table because it is not a letter at all: it doubles the
+ * consonant that FOLLOWS it, which Devanagari writes by actually doubling — ਪੱਕਾ is पक्का, with the
+ * first क stripped of its vowel by a halant. That needs a look at the next character, so it lives
+ * in `transliterate` below rather than in a character-for-character map.
  */
 const EXCEPTIONS: Readonly<Record<string, string>> = {
   'ੰ': 'ं', // tippi → anusvara
@@ -154,23 +155,61 @@ export interface Transliteration {
   readonly origin: ReadonlyMap<string, string>;
 }
 
+const ADDAK = '\u0a71';
+const HALANT = '\u094d';
+
+/** Devanagari consonants: क–ह, the precomposed nukta letters, and ऩ ऱ ऴ. */
+function isDevanagariConsonant(char: string): boolean {
+  const code = char.codePointAt(0) ?? 0;
+  return (
+    (code >= 0x0915 && code <= 0x0939) ||
+    (code >= 0x0958 && code <= 0x095f) ||
+    code === 0x0929 ||
+    code === 0x0931 ||
+    code === 0x0934
+  );
+}
+
 export function transliterate(text: string): Transliteration {
   let out = '';
   const origin = new Map<string, string>();
-  for (const char of text.normalize('NFC')) {
+  const chars = [...text.normalize('NFC')];
+
+  const toDevanagariChar = (char: string): string | null => {
     const code = char.codePointAt(0)!;
     const block = BLOCKS.find((entry) => code >= entry.base && code < entry.base + BLOCK_SIZE);
-    if (!block) {
-      out += char;
-      continue;
-    }
-    const mapped = EXCEPTIONS[char] ?? String.fromCodePoint(0x0900 + (code - block.base));
-    out += mapped;
+    if (!block) return null;
+    return EXCEPTIONS[char] ?? String.fromCodePoint(0x0900 + (code - block.base));
+  };
+
+  const remember = (mapped: string, source: string) => {
     // One source character can become two Devanagari ones — a chillu is a consonant plus a halant.
     // Both remember where they came from, so a gap in either names what the teacher typed.
     for (const part of mapped) {
-      if (!origin.has(part)) origin.set(part, char);
+      if (!origin.has(part)) origin.set(part, source);
     }
+  };
+
+  for (const [index, char] of chars.entries()) {
+    // The addak doubles the consonant AFTER it: ਪੱਕਾ is पक्का. So it writes that consonant once with
+    // a halant, and the ordinary pass writes it again a moment later.
+    if (char === ADDAK) {
+      const next = chars[index + 1] ? toDevanagariChar(chars[index + 1]) : null;
+      if (next && isDevanagariConsonant(next)) {
+        out += next + HALANT;
+        remember(next + HALANT, char);
+        continue;
+      }
+    }
+
+    const mapped = toDevanagariChar(char);
+    if (mapped === null) {
+      out += char;
+      continue;
+    }
+    out += mapped;
+    remember(mapped, char);
   }
+
   return { text: out, origin };
 }
