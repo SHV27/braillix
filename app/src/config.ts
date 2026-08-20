@@ -23,4 +23,3 @@ export const LOCAL_MODEL_PATH = 'models/';
 export const ORT_WASM_PATH = 'ort/';
 
 export const APP_NAME = 'Braillix';
-export const APP_TAGLINE = 'Read mathematics with your hands.';

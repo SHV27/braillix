@@ -54,7 +54,6 @@ const api = sre as unknown as SreApi;
 
 let queue: Promise<unknown> = Promise.resolve();
 let currentMode: string | null = null;
-let ready = false;
 let failure: string | null = null;
 
 /** Serialise every SRE interaction. Returns the task's value; never lets the chain break. */
@@ -91,23 +90,13 @@ export function initSre(): Promise<{ ok: boolean; reason?: string; version?: str
   return enqueue(async () => {
     try {
       await applyMode({ kind: 'braille' });
-      ready = true;
       failure = null;
       return { ok: true, version: api.version };
     } catch (err) {
-      ready = false;
       failure = err instanceof Error ? err.message : String(err);
       return { ok: false, reason: failure };
     }
   });
-}
-
-export function isSreReady(): boolean {
-  return ready;
-}
-
-export function sreFailureReason(): string | null {
-  return failure;
 }
 
 /** MathML -> a Unicode-braille string in Nemeth. */

@@ -9,9 +9,9 @@
  */
 
 import temml from 'temml';
-import { BLANK, unicodeStringToMasks, type DotMask } from './braille';
+import { unicodeStringToMasks, type DotMask } from './braille';
 import { latexToPlainText, textToLiteralBraille } from './literal';
-import { toEnrichedMathml, toNemeth, toSpeechText, type SpeechLocale } from './sre-service';
+import { toEnrichedMathml, toNemeth } from './sre-service';
 
 export interface TranslationIssue {
   readonly kind: 'parse' | 'unknown-character' | 'engine';
@@ -158,25 +158,8 @@ export async function translateLatex(latex: string): Promise<Translation> {
   return { latex, mathml, enriched, cells, unicode, issues };
 }
 
-/** Spoken form of an expression, for the ear that reads along with the fingers. */
-export async function speakLatex(latex: string, locale: SpeechLocale): Promise<string> {
-  const { mathml, issue } = latexToMathml(latex);
-  if (issue) return '';
-  try {
-    return await toSpeechText(mathml, locale);
-  } catch {
-    return '';
-  }
-}
-
 /** Convenience for tests and the cell atlas: cells as a Unicode braille string. */
 export function cellsToUnicode(cells: readonly DotMask[]): string {
   return cells.map((mask) => String.fromCodePoint(0x2800 + mask)).join('');
 }
 
-/** A blank run, used when an expression is shorter than the display. */
-export function padCells(cells: readonly DotMask[], width: number): DotMask[] {
-  const out = [...cells];
-  while (out.length < width) out.push(BLANK);
-  return out.slice(0, width);
-}

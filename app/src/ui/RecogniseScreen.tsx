@@ -9,7 +9,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useBraillix } from '../store';
-import { imageWarning, prepareImage, type PreparedImage } from '../recognise/preprocess';
+import { NORM_MEAN, NORM_STD, imageWarning, prepareImage, type PreparedImage } from '../recognise/preprocess';
 import { OnDeviceRecogniser } from '../recognise/ondevice';
 import type { ProviderStatus, RecognitionResult } from '../recognise/types';
 import { DrawPad } from './DrawPad';
@@ -67,7 +67,7 @@ export function RecogniseScreen() {
     const image = ctx.createImageData(size, size);
     for (let i = 0; i < prepared.pixels.length; i += 1) {
       // Undo the normalisation for display purposes only.
-      const value = Math.max(0, Math.min(255, Math.round((prepared.pixels[i] * 0.1738 + 0.7931) * 255)));
+      const value = Math.max(0, Math.min(255, Math.round((prepared.pixels[i] * NORM_STD + NORM_MEAN) * 255)));
       image.data[i * 4] = value;
       image.data[i * 4 + 1] = value;
       image.data[i * 4 + 2] = value;

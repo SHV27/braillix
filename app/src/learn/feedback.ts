@@ -124,18 +124,3 @@ export function mark(expected: readonly DotMask[], given: readonly DotMask[]): V
   };
 }
 
-/**
- * Mark a *typed* answer for a reading drill.
- *
- * The comparison is done on braille, not on text, so `1/2`, `\frac12` and `\frac{1}{2}` are all
- * accepted: what is being tested is whether the student read the dots, not whether they can type
- * LaTeX the way we happened to write it.
- */
-export function markReading(expectedCells: readonly DotMask[], answerCells: readonly DotMask[]): Verdict {
-  const verdict = mark(expectedCells, answerCells);
-  if (verdict.correct) return verdict;
-  return {
-    ...verdict,
-    details: [...verdict.details, 'Anything that means the same maths is accepted — spacing and style are not marked.'],
-  };
-}

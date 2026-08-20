@@ -19,6 +19,7 @@ import { mark, type Verdict } from '../learn/feedback';
 import { interpretAnswer } from '../learn/answer';
 import {
   EMPTY,
+  KEY_TO_DOT,
   backspace,
   clear,
   describeChord,
@@ -321,7 +322,7 @@ export function PracticeScreen() {
                       onPointerLeave={() => setEntry((state) => keyUp(state, key))}
                     >
                       <strong>{key.toUpperCase()}</strong>
-                      <small>dot {key === 's' ? 3 : key === 'd' ? 2 : key === 'f' ? 1 : key === 'j' ? 4 : key === 'k' ? 5 : 6}</small>
+                      <small>dot {KEY_TO_DOT[key]}</small>
                     </span>
                   ))}
                 </div>

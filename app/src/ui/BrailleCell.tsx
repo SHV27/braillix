@@ -12,7 +12,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { DOT_COUNT, describeMask, hasDot, type DotMask, type DotNumber } from '../core/braille';
+import { describeMask, hasDot, type DotMask, type DotNumber } from '../core/braille';
 import './BrailleCell.css';
 
 const DOT_LAYOUT: readonly { dot: DotNumber; col: 0 | 1; row: 0 | 1 | 2 }[] = [
@@ -85,5 +85,3 @@ export function BrailleCell({ dots, cam, index, active = false, bare = false, on
   );
 }
 
-/** Dot count is exported so tests can assert the layout never drifts from the standard. */
-export const CELL_DOT_COUNT = DOT_COUNT;

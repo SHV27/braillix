@@ -11,11 +11,7 @@ import { PATTERN_COUNT } from '../core/braille';
 import type { RefreshPlan } from '../core/scheduler';
 import { TransportError, type ButtonEvent, type PodButton } from './types';
 
-export const PROTOCOL_VERSION = 1;
 export const SERIAL_BAUD_RATE = 115_200;
-
-/** A press held at least this long means "step back out". */
-export const LONG_PRESS_MS = 600;
 
 export type Command =
   | { cmd: 'chain' }

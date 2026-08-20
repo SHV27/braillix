@@ -12,11 +12,11 @@
  */
 
 import { PATTERN_COUNT } from '../core/braille';
-import { HALF_STEPS_PER_POSITION, type RefreshPlan } from '../core/scheduler';
+import type { RefreshPlan } from '../core/scheduler';
 import { TransportBase, TransportError, podFromReport, type ChainInfo, type ShowResult, type Transport } from './types';
 
 /** A 28BYJ-48 driven by AccelStepper runs comfortably around this rate. Used for timing estimates only. */
-export const SIM_HALF_STEPS_PER_SECOND = 900;
+const SIM_HALF_STEPS_PER_SECOND = 900;
 
 export class SimTransport extends TransportBase implements Transport {
   readonly kind = 'sim' as const;
@@ -99,8 +99,3 @@ export function estimateMoveMs(plan: RefreshPlan): number {
   return Math.round((slowest / SIM_HALF_STEPS_PER_SECOND) * 1000);
 }
 
-/** The same figure for a naive "resend everything, always forward" strategy, for comparison. */
-export function estimateNaiveMs(plan: RefreshPlan): number {
-  const worst = HALF_STEPS_PER_POSITION * (PATTERN_COUNT - 1);
-  return plan.target.length === 0 ? 0 : Math.round((worst / SIM_HALF_STEPS_PER_SECOND) * 1000);
-}
