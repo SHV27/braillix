@@ -17,6 +17,7 @@ import { useBraillix } from '../store';
 import { SIMULATOR_MAX_CELLS, SIMULATOR_MIN_CELLS } from '../config';
 import { DOT_COUNT, maskToUnicode, type DotNumber } from '../core/braille';
 import { exportCalibration, toCam, type BitOrder } from '../core/profile';
+import type { PodMode } from '../transport/httppod';
 import { dotsToMask } from '../core/braille';
 import { useT } from './i18n';
 import './HardwareScreen.css';
@@ -43,6 +44,7 @@ export function HardwareScreen() {
   const usbCap = useBraillix((s) => s.capabilities.usb);
 
   const [podAddresses, setPodAddresses] = useState('192.168.1.42');
+  const [podMode, setPodMode] = useState<PodMode>('chain');
   const [copied, setCopied] = useState(false);
 
   const simulated = profile.source === 'simulated';
@@ -145,12 +147,36 @@ export function HardwareScreen() {
                 type="button"
                 className="btn"
                 data-testid="connect-pods"
-                onClick={() => void connectPods(podAddresses.split(','))}
+                onClick={() => void connectPods(podAddresses.split(','), podMode)}
               >
                 {t('hw.connect')}
               </button>
             </div>
           </label>
+          {/* Only worth asking once there is more than one address: with one pod the two modes
+              are the same thing, and a control that changes nothing is a control that confuses. */}
+          {podAddresses.split(',').filter((host) => host.trim()).length > 1 && (
+            <fieldset className="hw__modes">
+              <legend className="field__label">{t('hw.podMode')}</legend>
+              {(['chain', 'mirror'] as const).map((mode) => (
+                <label key={mode} className="hw__mode">
+                  <input
+                    type="radio"
+                    name="pod-mode"
+                    value={mode}
+                    checked={podMode === mode}
+                    data-testid={`pod-mode-${mode}`}
+                    onChange={() => setPodMode(mode)}
+                  />
+                  <span>
+                    <strong>{t(mode === 'chain' ? 'hw.chain' : 'hw.mirror')}</strong>
+                    <small>{t(mode === 'chain' ? 'hw.chainHint' : 'hw.mirrorHint')}</small>
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+          )}
+
           <p className="hw__note">{t('hw.noPod')}</p>
 
           {linkError && (

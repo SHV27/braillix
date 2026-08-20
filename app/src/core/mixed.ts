@@ -65,19 +65,28 @@ export const NEMETH_CLOSE: readonly DotMask[] = [dotsToMask([4, 5, 6]), dotsToMa
 /** Characters that make a token mathematics whatever else it contains. */
 const MATHS_CHARS = /[0-9+\-*/^=<>()[\]{}|%°₹\\÷×±≤≥≠≈∞√]/;
 
+/** A token made only of operators — `+`, `=`, `<=`. What binds two things into one expression. */
+const OPERATOR_ONLY = /^[+\-*/^_=<>:|×÷±≤≥≠≈]+$/;
+
 /**
- * Is this whitespace-delimited token part of the mathematics?
+ * How confidently a token belongs to the mathematics.
  *
- * Single letters are variables (`x`), runs of letters are words unless the maths vocabulary claims
- * them (`sin`, `theta`, `Rs`). Devanagari is never maths: Nemeth has no cells for it.
+ * Three states rather than two, because two is not enough. "ab" in `ab + bc` is algebra; "of" in
+ * "the value of 2x" is English; both are two letters and neither can be judged alone. So they are
+ * `weak`, and the pass below decides them by what is next to them.
  */
-function tokenIsMaths(token: string): boolean {
+type Strength = 'maths' | 'text' | 'weak';
+
+function strengthOf(token: string): Strength {
   const bare = token.replace(/[.,;:!?।]+$/, '');
-  if (!bare) return false;
-  if (hasDevanagari(bare)) return false;
-  if (MATHS_CHARS.test(bare)) return true;
-  if (/^[A-Za-z]$/.test(bare)) return true;
-  return isMathWord(bare);
+  if (!bare) return 'weak'; // a lone punctuation mark: the colon in "2 : 3", a stray dash
+  if (hasDevanagari(bare)) return 'text'; // Nemeth has no cells for it, so it is never maths
+  if (MATHS_CHARS.test(bare)) return 'maths';
+  if (/^[A-Za-z]$/.test(bare)) return 'maths'; // a single letter is a variable
+  if (/^[A-Z]{2,}$/.test(bare)) return 'maths'; // ABC — a geometry label, not a word
+  if (isMathWord(bare)) return 'maths'; // sin, theta, Rs
+  if (/^[A-Za-z]{2}$/.test(bare)) return 'weak'; // ab, or of
+  return 'text';
 }
 
 /**
@@ -91,15 +100,32 @@ export function splitLine(line: string, overrides: Readonly<Record<string, Segme
   const tokens = line.split(/\s+/).filter(Boolean);
   if (tokens.length === 0) return [];
 
-  const kinds = tokens.map((token) => (tokenIsMaths(token) ? 'maths' : 'text') as SegmentKind);
+  const strength = tokens.map(strengthOf);
+  const isOperator = tokens.map((token) => OPERATOR_ONLY.test(token));
 
-  // A lone maths token between two words is almost always a word: "sum", "in", "to" and "by" are
-  // all in the maths vocabulary and all ordinary English. Anything containing a digit or an
-  // operator keeps its claim — "of 12 is" must not swallow the 12.
-  for (let i = 1; i < kinds.length - 1; i += 1) {
-    if (kinds[i] === 'maths' && kinds[i - 1] === 'text' && kinds[i + 1] === 'text' && !MATHS_CHARS.test(tokens[i])) {
-      kinds[i] = 'text';
+  // PASS 1 — decide the undecided by their neighbours. An operator on either side makes a token
+  // part of an expression ("ab + bc"); otherwise it is a word ("the value of 2x"). A lone
+  // punctuation mark between two pieces of maths belongs to the maths ("2 : 3").
+  const kinds: SegmentKind[] = strength.map((value, i) => {
+    if (value !== 'weak') return value;
+    if (isOperator[i - 1] || isOperator[i + 1]) return 'maths';
+    if (strength[i - 1] === 'maths' && strength[i + 1] === 'maths') return 'maths';
+    return 'text';
+  });
+
+  // PASS 2 — a run of maths that contains no digit and no operator, with words on BOTH sides, is
+  // a phrase: "The sum of the two numbers" is English, even though "sum" is an operator's name.
+  // Words on only one side is not enough — "Find the value of x" ends in maths, and should.
+  for (let start = 0; start < kinds.length; start += 1) {
+    if (kinds[start] !== 'maths') continue;
+    let end = start;
+    while (end + 1 < kinds.length && kinds[end + 1] === 'maths') end += 1;
+    const symbolic = tokens.slice(start, end + 1).some((token) => MATHS_CHARS.test(token));
+    const between = start > 0 && end < kinds.length - 1 && kinds[start - 1] === 'text' && kinds[end + 1] === 'text';
+    if (!symbolic && between) {
+      for (let i = start; i <= end; i += 1) kinds[i] = 'text';
     }
+    start = end;
   }
 
   const segments: Segment[] = [];

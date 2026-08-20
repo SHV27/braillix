@@ -141,6 +141,104 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   'device.connect': ['Connect and calibrate', 'जोड़ें और कैलिब्रेट करें'],
   'device.atlas': ['Cell atlas', 'सेल एटलस'],
 
+  /* ---- the class ---- */
+  'nav.class': ['Class', 'कक्षा'],
+  'nav.class.hint': ['Worksheets, students and what they have done', 'वर्कशीट, विद्यार्थी और उनका किया हुआ काम'],
+  'class.title': ['Your class', 'आपकी कक्षा'],
+  'class.lede': [
+    'Worksheets you prepare, the children who read them, and what they have done. All of it stays on this laptop, and moves to another one as a file.',
+    'आपकी बनाई वर्कशीट, उन्हें पढ़ने वाले बच्चे, और उनका किया हुआ काम। सब कुछ इसी लैपटॉप पर रहता है, और दूसरे लैपटॉप पर फ़ाइल के रूप में जाता है।',
+  ],
+  'class.tabs': ['What to look at', 'क्या देखना है'],
+  'class.worksheets': ['Worksheets', 'वर्कशीट'],
+  'class.students': ['Students', 'विद्यार्थी'],
+  'class.records': ['Records', 'रिकॉर्ड'],
+
+  'class.newWorksheet': ['New worksheet', 'नई वर्कशीट'],
+  'class.worksheetName': ['Worksheet name', 'वर्कशीट का नाम'],
+  'class.untitled': ['Tuesday, fractions', 'मंगलवार, भिन्न'],
+  'class.noWorksheets': [
+    'No worksheets yet. A worksheet is just a list of things you want on the display, in the order you want them — make one and add today’s sums to it.',
+    'अभी कोई वर्कशीट नहीं है। वर्कशीट बस उन चीज़ों की सूची है जिन्हें आप डिस्प्ले पर चाहते हैं, आपके क्रम में — एक बनाइए और आज के सवाल उसमें जोड़िए।',
+  ],
+  'class.items': ['{count} items', '{count} सवाल'],
+  'class.itemsOne': ['1 item', '1 सवाल'],
+  'class.addItem': ['Add a question', 'सवाल जोड़िए'],
+  'class.addItemHint': [
+    'Type it as you would on the Board — 1/2, sqrt(9), or a whole question with words in it.',
+    'जैसे बोर्ड पर लिखते हैं वैसे लिखिए — 1/2, sqrt(9), या शब्दों वाला पूरा सवाल।',
+  ],
+  'class.add': ['Add', 'जोड़िए'],
+  'class.noItems': [
+    'Nothing in this worksheet yet. Add the first question below, or add one from the Board while you are writing it.',
+    'इस वर्कशीट में अभी कुछ नहीं है। नीचे पहला सवाल जोड़िए, या बोर्ड पर लिखते समय वहीं से जोड़ दीजिए।',
+  ],
+  'class.moveUp': ['Move up', 'ऊपर ले जाइए'],
+  'class.moveDown': ['Move down', 'नीचे ले जाइए'],
+  'class.removeItem': ['Remove', 'हटाइए'],
+  'class.putOnBoard': ['Put on the board', 'बोर्ड पर लगाइए'],
+  'class.teach': ['Teach this worksheet', 'यह वर्कशीट पढ़ाइए'],
+  'class.deleteWorksheet': ['Delete this worksheet', 'यह वर्कशीट हटाइए'],
+  'class.confirmDelete': ['Delete “{name}” and everything in it?', '“{name}” और उसमें सब कुछ हटा दें?'],
+
+  'class.studentName': ['Name', 'नाम'],
+  'class.studentGroup': ['Class or group', 'कक्षा या समूह'],
+  'class.addStudent': ['Add student', 'विद्यार्थी जोड़िए'],
+  'class.noStudents': [
+    'No students yet. Add the children who use this display, and their practice will be kept against their name instead of in one pile.',
+    'अभी कोई विद्यार्थी नहीं है। जो बच्चे यह डिस्प्ले इस्तेमाल करते हैं उन्हें जोड़िए, फिर उनका अभ्यास उन्हीं के नाम से रखा जाएगा।',
+  ],
+  'class.atTheDisplay': ['At the display now', 'अभी डिस्प्ले पर'],
+  'class.nobody': ['Nobody — practice is not being recorded', 'कोई नहीं — अभ्यास दर्ज नहीं हो रहा'],
+  'class.remove': ['Remove', 'हटाइए'],
+  'class.confirmRemoveStudent': ['Remove {name} and everything recorded for them?', '{name} और उनका दर्ज सब कुछ हटा दें?'],
+
+  'class.colStudent': ['Student', 'विद्यार्थी'],
+  'class.colGroup': ['Group', 'समूह'],
+  'class.colAttempts': ['Attempts', 'प्रयास'],
+  'class.colCorrect': ['Correct', 'सही'],
+  'class.colLast': ['Last worked', 'आख़िरी बार'],
+  'class.never': ['not yet', 'अभी नहीं'],
+  'class.noRecords': [
+    'Nothing recorded yet. Choose who is at the display on the Students tab, then let them practise — every answer is kept here, on this machine only.',
+    'अभी कुछ दर्ज नहीं है। “विद्यार्थी” में चुनिए कि डिस्प्ले पर कौन है, फिर उन्हें अभ्यास करने दीजिए — हर उत्तर यहीं, सिर्फ़ इसी मशीन पर रखा जाएगा।',
+  ],
+  'class.exportCsv': ['Save the records as a spreadsheet', 'रिकॉर्ड को स्प्रेडशीट में सहेजिए'],
+  'class.exportAll': ['Save everything to a file', 'सब कुछ फ़ाइल में सहेजिए'],
+  'class.import': ['Open a file from another laptop', 'दूसरे लैपटॉप की फ़ाइल खोलिए'],
+  'class.imported': [
+    'Added {worksheets} worksheets, {items} questions, {students} students and {records} records.',
+    '{worksheets} वर्कशीट, {items} सवाल, {students} विद्यार्थी और {records} रिकॉर्ड जोड़े गए।',
+  ],
+  'class.importFailed': [
+    'That file is not a Braillix file, or it is damaged. Nothing was changed.',
+    'यह ब्रेलिक्स की फ़ाइल नहीं है, या ख़राब है। कुछ भी नहीं बदला गया।',
+  ],
+  'class.eraseAll': ['Erase everything on this laptop', 'इस लैपटॉप से सब कुछ मिटाइए'],
+  'class.confirmErase': [
+    'Erase every worksheet, student and record on this laptop? Save a file first if you want to keep them.',
+    'इस लैपटॉप की हर वर्कशीट, विद्यार्थी और रिकॉर्ड मिटा दें? रखना हो तो पहले फ़ाइल सहेज लीजिए।',
+  ],
+  'class.privacy': [
+    'Braillix has no account and no server. Nothing here has ever left this laptop, and nothing here can.',
+    'ब्रेलिक्स में न कोई खाता है न सर्वर। यहाँ का कुछ भी कभी इस लैपटॉप से बाहर नहीं गया, और जा भी नहीं सकता।',
+  ],
+
+  /* ---- teaching ---- */
+  'teach.title': ['Teaching {name}', '{name} पढ़ाया जा रहा है'],
+  'teach.position': ['{index} of {total}', '{total} में से {index}'],
+  'teach.close': ['Close', 'बंद कीजिए'],
+  'teach.previous': ['Previous question', 'पिछला सवाल'],
+  'teach.next': ['Next question', 'अगला सवाल'],
+  'teach.say': ['Say it', 'बोलिए'],
+  'teach.keys': ['arrow keys to move · escape to close', 'तीर बटनों से चलें · एस्केप से बंद करें'],
+  'teach.onDisplay': ['This is on the display now', 'यह अभी डिस्प्ले पर है'],
+  'teach.empty': ['This worksheet has nothing in it yet.', 'इस वर्कशीट में अभी कुछ नहीं है।'],
+
+  /* ---- adding from the board ---- */
+  'board.addTo': ['Add to worksheet', 'वर्कशीट में जोड़िए'],
+  'board.added': ['Added to {name}', '{name} में जोड़ा गया'],
+
   /* ---- practice ---- */
   'prac.title': ['Practice', 'अभ्यास'],
   'prac.lede': [
@@ -153,6 +251,12 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   ],
   'prac.hintWrite': ['What you write appears here, cell by cell.', 'आप जो लिखते हैं वह यहाँ सेल-दर-सेल दिखता है।'],
   'prac.lessons': ['Lessons', 'पाठ'],
+  'prac.yourWorksheets': ['Your worksheets', 'आपकी वर्कशीट'],
+  'prac.recordingFor': ['Recording for {name}', '{name} के लिए दर्ज हो रहा है'],
+  'prac.recordingNobody': [
+    'Nobody is chosen, so nothing is being recorded. Choose a student on the Class screen.',
+    'कोई चुना नहीं गया, इसलिए कुछ दर्ज नहीं हो रहा। कक्षा स्क्रीन पर विद्यार्थी चुनिए।',
+  ],
   'prac.erase': ['Erase my progress', 'मेरी प्रगति मिटाएँ'],
   'prac.privacy': [
     'Progress is stored on this computer only. Nothing is uploaded, and there is no account.',
@@ -247,6 +351,17 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   'hw.usbHint': ['Recommended for demos — no network needed', 'प्रदर्शन के लिए सबसे अच्छा — नेटवर्क की ज़रूरत नहीं'],
   'hw.wifiPods': ['Wi-Fi pods (comma separated)', 'Wi-Fi पॉड (अल्पविराम से अलग)'],
   'hw.connect': ['Connect', 'जोड़िए'],
+  'hw.podMode': ['Several displays', 'कई डिस्प्ले'],
+  'hw.chain': ['Joined into one long line', 'एक लंबी पंक्ति में जुड़े'],
+  'hw.chainHint': [
+    'Pod 1 shows the first cells, pod 2 the next — one wide display built from several small ones.',
+    'पॉड 1 पहली सेल दिखाता है, पॉड 2 अगली — कई छोटे पॉड मिलकर एक चौड़ा डिस्प्ले।',
+  ],
+  'hw.mirror': ['All showing the same', 'सब एक ही दिखा रहे हैं'],
+  'hw.mirrorHint': [
+    'Every child gets the same expression under their own fingers. The display is as wide as the smallest pod, so nobody loses the end of the line.',
+    'हर बच्चे की उँगलियों के नीचे वही व्यंजक। डिस्प्ले सबसे छोटे पॉड जितना चौड़ा रहता है, ताकि किसी की पंक्ति अधूरी न रहे।',
+  ],
   'hw.noPod': [
     'No pod on the bench? Run npm run pod and connect to 127.0.0.1:8080 — it speaks the real protocol.',
     'पॉड मौजूद नहीं? npm run pod चलाइए और 127.0.0.1:8080 से जुड़िए — यह असली प्रोटोकॉल बोलता है।',

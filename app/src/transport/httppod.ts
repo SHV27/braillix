@@ -22,10 +22,24 @@ import {
 const REQUEST_TIMEOUT_MS = 4000;
 const BUTTON_POLL_MS = 120;
 
+/**
+ * What several pods mean together.
+ *
+ *   'chain'  — the pods are one long display, side by side: pod 1 shows cells 1–4, pod 2 shows 5–8.
+ *              This is the handoff's §4B layout, and it is how you build a wide display cheaply.
+ *   'mirror' — every pod shows the SAME cells. This is a classroom: one teacher, one expression,
+ *              a display in front of each child. It is not a variation on chaining; it is the other
+ *              thing a school actually needs, and guessing between them from the pod count would be
+ *              exactly the kind of cleverness that puts the wrong maths under a child's hands.
+ */
+export type PodMode = 'chain' | 'mirror';
+
 export interface HttpPodOptions {
   /** One entry per pod, left to right. "192.168.1.42" or "http://192.168.1.42". */
   readonly hosts: readonly string[];
   readonly pollButtons?: boolean;
+  /** Defaults to 'chain'. Never inferred from the number of pods. */
+  readonly mode?: PodMode;
 }
 
 function normaliseBase(host: string): string {
@@ -38,6 +52,7 @@ export class HttpPodTransport extends TransportBase implements Transport {
   readonly kind = 'http' as const;
 
   #bases: string[];
+  #mode: PodMode;
   #chain: ChainInfo | null = null;
   #pollTimer: ReturnType<typeof setInterval> | null = null;
   #lastSeq = new Map<string, number>();
@@ -50,12 +65,17 @@ export class HttpPodTransport extends TransportBase implements Transport {
     }
     this.#bases = options.hosts.map(normaliseBase);
     this.#pollButtons = options.pollButtons ?? true;
+    this.#mode = options.mode ?? 'chain';
   }
 
   get label(): string {
-    return this.#bases.length === 1
-      ? `pod at ${this.#bases[0].replace(/^https?:\/\//, '')}`
-      : `${this.#bases.length} pods over Wi-Fi`;
+    if (this.#bases.length === 1) return `pod at ${this.#bases[0].replace(/^https?:\/\//, '')}`;
+    const together = this.#mode === 'mirror' ? 'showing the same' : 'joined';
+    return `${this.#bases.length} pods over Wi-Fi, ${together}`;
+  }
+
+  get mode(): PodMode {
+    return this.#mode;
   }
 
   async #request(base: string, path: string, body?: unknown): Promise<unknown> {
@@ -102,7 +122,20 @@ export class HttpPodTransport extends TransportBase implements Transport {
         firmware ??= version;
       }
 
-      const cellCount = pods.reduce((sum, pod) => sum + pod.cellAddrs.length, 0);
+      // Chained, the display is as wide as all the pods together. Mirrored, it is as wide as the
+      // SMALLEST pod — anything more could not be shown on every display, and a child reading the
+      // short one would silently lose the end of the expression.
+      const widths = pods.map((pod) => pod.cellAddrs.length);
+      const cellCount =
+        this.#mode === 'mirror'
+          ? Math.min(...widths.filter((width) => width > 0), Infinity)
+          : widths.reduce((sum, width) => sum + width, 0);
+      if (!Number.isFinite(cellCount) || cellCount <= 0) {
+        throw new TransportError(
+          'no pod reported any cells',
+          'Check that the cells are powered and answering on the I2C bus.',
+        );
+      }
       this.#chain = { pods, cellCount, firmware };
       this.setStatus('connected');
       if (this.#pollButtons) this.#startPolling();
@@ -132,8 +165,25 @@ export class HttpPodTransport extends TransportBase implements Transport {
       return { moved: reply.moved ?? plan.cellsMoved, skipped: reply.skipped ?? 0 };
     }
 
-    // Several pods: the laptop stays the single brain and hands each pod its slice, with the same
-    // overall layout so the pods can never disagree about the message (handoff §4B).
+    // A class reading together: every pod gets the whole frame.
+    if (this.#mode === 'mirror') {
+      let moved = 0;
+      for (const [index, base] of this.#bases.entries()) {
+        // A pod wider than the mirrored frame keeps its extra cells blank. Padding here rather
+        // than letting the pod decide is deliberate: a pod refuses a frame of the wrong length —
+        // correctly — and a display quietly showing yesterday's dots on its last two cells would
+        // be a lie told in braille.
+        const width = chain.pods[index]?.cellAddrs.length ?? plan.target.length;
+        const positions = [...plan.target];
+        while (positions.length < width) positions.push(0);
+        const reply = (await this.#request(base, '/show', { positions })) as { moved?: number };
+        moved += reply.moved ?? 0;
+      }
+      return { moved, skipped: 0 };
+    }
+
+    // Several pods chained: the laptop stays the single brain and hands each pod its slice, with the
+    // same overall layout so the pods can never disagree about the message (handoff §4B).
     let moved = 0;
     let cursor = 0;
     for (const [index, pod] of chain.pods.entries()) {

@@ -46,7 +46,7 @@ const MENTIONED = new Set<string>();
 const CALLED = new Set<string>();
 for (const file of FILES) {
   if (file.path === 'ui/i18n.ts') continue;
-  for (const match of file.text.matchAll(/'([a-z]+\.[A-Za-z0-9.]+)'/g)) MENTIONED.add(match[1]);
+  for (const match of file.text.matchAll(/['"]([a-z]+\.[A-Za-z0-9.]+)['"]/g)) MENTIONED.add(match[1]);
   for (const match of file.text.matchAll(/\b(?:t|translate)\(\s*'([a-z]+\.[A-Za-z0-9.]+)'/g)) CALLED.add(match[1]);
 }
 

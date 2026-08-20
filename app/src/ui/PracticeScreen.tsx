@@ -15,6 +15,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useBraillix } from '../store';
 import { LESSONS, type DrillKind, type Lesson } from '../learn/lessons';
+import { worksheetToLesson } from '../learn/worksheet-lesson';
+import { useClass } from '../class/store';
 import { mark, type Verdict } from '../learn/feedback';
 import { interpretAnswer } from '../learn/answer';
 import {
@@ -34,7 +36,7 @@ import {
   eraseProgress,
   itemKey,
   loadProgress,
-  recordAttempt,
+  recordAttempt as recordProgress,
   saveProgress,
   summariseLesson,
   type ProgressMap,
@@ -44,13 +46,17 @@ import { maskToUnicode, type DotMask } from '../core/braille';
 import { BrailleCell } from './BrailleCell';
 import { DisplayDock } from './DisplayDock';
 import { MathPreview } from './MathPreview';
-import { useT, usePick } from './i18n';
+import { useT, usePick, type Bilingual } from './i18n';
 import { toCam } from '../core/profile';
 import './PracticeScreen.css';
 
 export function PracticeScreen() {
   const t = useT();
   const say = usePick();
+  const worksheets = useClass((s) => s.worksheets);
+  const currentStudentId = useClass((s) => s.currentStudentId);
+  const students = useClass((s) => s.students);
+  const recordAttempt = useClass((s) => s.record);
   const showCells = useBraillix((s) => s.showCells);
   const profile = useBraillix((s) => s.profile);
   const settings = useBraillix((s) => s.settings);
@@ -132,11 +138,24 @@ export function PracticeScreen() {
       result = mark(expected, [...entry.cells]);
     }
     setVerdict(result);
+    const now = Date.now();
     setProgress((current) => {
-      const next = recordAttempt(current, itemKey(lesson.id, index), result.correct, Date.now());
+      const next = recordProgress(current, itemKey(lesson.id, index), result.correct, now);
       saveProgress(next);
       return next;
     });
+    // The class record is separate from the on-device progress: one is "has this machine seen this
+    // question", the other is "did Asha get it right". Only the second needs a name attached.
+    if (currentStudentId) {
+      recordAttempt({
+        studentId: currentStudentId,
+        worksheetId: lesson.id,
+        itemId: itemKey(lesson.id, index),
+        correct: result.correct,
+        at: now,
+        label: item.latex,
+      });
+    }
   }
 
   /* ---- six-key keyboard handling ---- */
@@ -184,6 +203,13 @@ export function PracticeScreen() {
     [progress, lesson],
   );
 
+  /** The teacher's own worksheets, offered as drills next to the built-in curriculum. */
+  const worksheetLessons = useMemo(
+    () => worksheets.filter((sheet) => sheet.items.length > 0).map(worksheetToLesson),
+    [worksheets],
+  );
+  const student = students.find((entry) => entry.id === currentStudentId) ?? null;
+
   return (
     <div className="prac">
       <header className="prac__head">
@@ -197,25 +223,37 @@ export function PracticeScreen() {
         <nav className="panel prac__lessons" aria-label={t('prac.lessons')}>
           <h2 className="panel__title">{t('prac.lessons')}</h2>
           <ol className="lessons">
-            {LESSONS.map((entryLesson) => {
-              const done = summariseLesson(progress, entryLesson.id, entryLesson.items.length);
-              return (
-                <li key={entryLesson.id}>
-                  <button
-                    type="button"
-                    className={`lessons__btn${entryLesson.id === lesson.id ? ' is-current' : ''}`}
-                    data-testid={`lesson-${entryLesson.id}`}
-                    onClick={() => chooseLesson(entryLesson)}
-                  >
-                    <span className="lessons__title">{say(entryLesson.title)}</span>
-                    <span className="lessons__score num">
-                      {done.correct}/{done.total}
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
+            {LESSONS.map((entryLesson) => (
+              <LessonButton
+                key={entryLesson.id}
+                lesson={entryLesson}
+                current={entryLesson.id === lesson.id}
+                progress={progress}
+                onChoose={chooseLesson}
+                say={say}
+              />
+            ))}
           </ol>
+
+          {/* The teacher's own questions, drillable exactly like the built-in curriculum. This is
+              the loop closing: they wrote it this morning, the child practises it this afternoon. */}
+          {worksheetLessons.length > 0 && (
+            <>
+              <h2 className="panel__title prac__ownheading">{t('prac.yourWorksheets')}</h2>
+              <ol className="lessons">
+                {worksheetLessons.map((entryLesson) => (
+                  <LessonButton
+                    key={entryLesson.id}
+                    lesson={entryLesson}
+                    current={entryLesson.id === lesson.id}
+                    progress={progress}
+                    onChoose={chooseLesson}
+                    say={say}
+                  />
+                ))}
+              </ol>
+            </>
+          )}
 
           <button
             type="button"
@@ -264,7 +302,11 @@ export function PracticeScreen() {
             </div>
           </div>
 
-          <p className="prac__rule">{say(lesson.rule)}</p>
+          {say(lesson.rule) && <p className="prac__rule">{say(lesson.rule)}</p>}
+
+          <p className="prac__who" data-testid="recording-for">
+            {student ? t('prac.recordingFor', { name: student.name }) : t('prac.recordingNobody')}
+          </p>
 
           <div className="prac__meta num">
             <span>{t('prac.question', { index: index + 1, total: lesson.items.length })}</span>
@@ -404,5 +446,37 @@ export function PracticeScreen() {
         </section>
       </div>
     </div>
+  );
+}
+
+/** One row of the lesson list. Extracted only so the two lists cannot drift apart. */
+function LessonButton({
+  lesson,
+  current,
+  progress,
+  onChoose,
+  say,
+}: {
+  lesson: Lesson;
+  current: boolean;
+  progress: ProgressMap;
+  onChoose: (lesson: Lesson) => void;
+  say: (text: Bilingual) => string;
+}) {
+  const done = summariseLesson(progress, lesson.id, lesson.items.length);
+  return (
+    <li>
+      <button
+        type="button"
+        className={`lessons__btn${current ? ' is-current' : ''}`}
+        data-testid={`lesson-${lesson.id}`}
+        onClick={() => onChoose(lesson)}
+      >
+        <span className="lessons__title">{say(lesson.title)}</span>
+        <span className="lessons__score num">
+          {done.correct}/{done.total}
+        </span>
+      </button>
+    </li>
   );
 }

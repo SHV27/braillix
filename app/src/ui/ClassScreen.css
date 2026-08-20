@@ -1,0 +1,184 @@
+/* The Class screen: a list on the left, the thing you are working on to the right of it. */
+
+.cls__head {
+  margin-bottom: var(--s5);
+}
+
+.cls__tabs {
+  margin-bottom: var(--s5);
+}
+
+.cls__grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(0, 2.4fr);
+  gap: var(--s5);
+  align-items: start;
+}
+
+.cls__new {
+  width: 100%;
+  margin-bottom: var(--s4);
+}
+
+/* An empty state is a lesson, not an apology: it says what the thing is and what to do next. */
+.cls__empty {
+  margin: 0;
+  padding: var(--s4);
+  border-radius: var(--radius);
+  background: var(--ink-000);
+  box-shadow: inset 0 0 0 1px var(--edge);
+  color: var(--text-300);
+  font-size: var(--t-small);
+  max-width: 60ch;
+}
+
+.cls__editorhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s4);
+  margin-bottom: var(--s5);
+}
+
+.cls__namefield {
+  flex: 1 1 16rem;
+}
+
+.cls__teach {
+  white-space: nowrap;
+}
+
+.cls__items {
+  margin: 0 0 var(--s5);
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.cls__item {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) auto;
+  gap: var(--s3);
+  align-items: center;
+  padding: var(--s3);
+  border-radius: var(--radius);
+  background: var(--ink-000);
+  box-shadow: inset 0 0 0 1px var(--edge);
+}
+
+.cls__itemnum {
+  color: var(--text-400);
+  font-size: var(--t-small);
+  text-align: right;
+}
+
+.cls__itembody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  min-width: 0;
+}
+
+.cls__itemsource {
+  color: var(--text-400);
+  font-family: var(--font-mono);
+  font-size: var(--t-tiny);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cls__itemnote {
+  color: var(--text-300);
+  font-size: var(--t-small);
+}
+
+.cls__itemactions {
+  display: flex;
+  gap: var(--s1);
+}
+
+.cls__itemactions .btn {
+  min-width: 2rem;
+  padding: var(--s1) var(--s2);
+}
+
+.cls__addfield {
+  margin-top: var(--s4);
+}
+
+/* Anything irreversible sits below a rule, away from the controls used every day. */
+.cls__danger {
+  margin-top: var(--s6);
+  padding-top: var(--s4);
+  border-top: 1px solid var(--edge);
+}
+
+.cls__whofield {
+  margin-top: var(--s5);
+  padding-top: var(--s4);
+  border-top: 1px solid var(--edge);
+}
+
+.cls__students {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.cls__student {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s2) var(--s3);
+  border-radius: var(--radius);
+  background: var(--ink-000);
+  box-shadow: inset 0 0 0 1px var(--edge);
+}
+
+.cls__studentname {
+  flex: 1;
+  color: var(--text-100);
+}
+
+.cls__studentgroup {
+  color: var(--text-400);
+  font-size: var(--t-small);
+}
+
+.cls__records {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s5);
+}
+
+.cls__table {
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .cls__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cls__item {
+    grid-template-columns: 1.5rem minmax(0, 1fr);
+  }
+  .cls__itemactions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+}
+
+/* Inside a worksheet row the preview is content, not a plate of its own. */
+.cls__itembody .mathpreview {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}

@@ -243,6 +243,16 @@ const server = createServer(async (request, response) => {
     }
     case '/home':
       return send(response, 200, handleCommand({ cmd: 'home' }));
+    case '/state':
+      // Not part of the pod protocol either: it lets a test ask the POD what it is showing rather
+      // than trusting the laptop's belief about it. A pod that agreed with us by construction would
+      // prove nothing.
+      return send(response, 200, {
+        ok: true,
+        pod: POD_INDEX,
+        positions: cells.map((cell) => cell.position),
+        homed: cells.every((cell) => cell.homed),
+      });
     case '/buttons':
       return send(response, 200, { prev: buttons.prev, select: buttons.select, next: buttons.next, seq: buttons.seq });
     case '/press': {
@@ -263,7 +273,7 @@ const server = createServer(async (request, response) => {
         firmware: FIRMWARE,
         pod: POD_INDEX,
         cells: cells.length,
-        endpoints: ['/chain', '/show', '/layout', '/home', '/buttons', '/press?button=next'],
+        endpoints: ['/chain', '/show', '/layout', '/home', '/buttons', '/state', '/press?button=next'],
       });
     default:
       return send(response, 404, { ok: false, error: `no endpoint ${url.pathname}` });

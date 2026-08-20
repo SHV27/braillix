@@ -34,7 +34,7 @@ import {
   type SemTree,
 } from './core/tree';
 import { DisplayLink } from './transport/link';
-import { HttpPodTransport } from './transport/httppod';
+import { HttpPodTransport, type PodMode } from './transport/httppod';
 import { WebSerialTransport, webSerialSupported } from './transport/webserial';
 import { TransportError, type ButtonEvent, type TransportStatus } from './transport/types';
 import { cancelSpeech, speak, speechAvailable, voiceFor, whenVoicesReady } from './ui/speech';
@@ -66,7 +66,7 @@ const INITIAL_CAPABILITIES: CapabilityMap = {
 
 /* ------------------------------------------------------------------ view + settings */
 
-export type ViewId = 'board' | 'practice' | 'device';
+export type ViewId = 'board' | 'practice' | 'class' | 'device';
 
 /**
  * How the display is being driven.
@@ -99,7 +99,7 @@ interface BraillixState {
   linkError: string | null;
   linkFix: string | null;
   connectUsb: () => Promise<void>;
-  connectPods: (hosts: string[]) => Promise<void>;
+  connectPods: (hosts: string[], mode: PodMode) => Promise<void>;
   switchToSimulator: () => Promise<void>;
   homeDisplay: () => Promise<void>;
   /** Put an arbitrary run of cells on the display — used by calibration and by practice drills. */
@@ -398,18 +398,18 @@ export const useBraillix = create<BraillixState>((set, get) => {
       }
     },
 
-    connectPods: async (hosts) => {
+    connectPods: async (hosts, mode) => {
       const cleaned = hosts.map((h) => h.trim()).filter(Boolean);
       if (cleaned.length === 0) {
         set({ linkError: 'enter at least one pod address', linkFix: 'For example 192.168.1.42' });
         return;
       }
       try {
-        const transport = new HttpPodTransport({ hosts: cleaned });
+        const transport = new HttpPodTransport({ hosts: cleaned, mode });
         const chain = await transport.connect();
         await adopt(new DisplayLink(transport, chain), {
           state: 'ready',
-          reason: `${chain.cellCount} cells over Wi-Fi · ${chain.pods.length} pod${chain.pods.length === 1 ? '' : 's'}`,
+          reason: `${chain.cellCount} cells over Wi-Fi · ${chain.pods.length} pod${chain.pods.length === 1 ? '' : 's'}${mode === 'mirror' ? ' · all showing the same' : ''}`,
         });
       } catch (err) {
         set({

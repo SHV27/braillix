@@ -405,3 +405,26 @@ Run before calling this shipped. Result: **nothing to rotate, nothing to hide, n
 - **D7.7** — Mirror mode is added to the pod transport: several pods, all showing the same cells, for
   a class reading together. The existing chain mode (pods concatenated into one long display) stays.
   The mode is explicit, never inferred.
+
+## Part two, arc 8 — the classroom (20 Aug 2026)
+
+- **D8.1** — Class data (worksheets, students, records) gets its **own store**, next to `src/store.ts`
+  rather than inside it. The main store owns *the display and what is on it now*; this owns *what a
+  teacher has prepared and what their students have done*. Different lifetimes — a moment versus a
+  term — and merging them would put a student's record in the same object as every keystroke.
+- **D8.2** — No save button. Every mutation writes through to `localStorage` immediately, because a
+  save button is a way to lose a lesson.
+- **D8.3** — Sharing is a **file**, and importing **merges** rather than replaces: the common case is
+  a teacher carrying one worksheet to another laptop and not wanting to lose the students already on
+  it. Same id, newer `updatedAt` wins.
+- **D8.4** — An `AttemptRecord` carries a `label` — what was attempted, in words, captured at the
+  time. A record is a historical fact and must stay readable after the worksheet it came from has
+  been renamed or deleted; looking the text up later would make the past depend on the present.
+- **D8.5** — Deleting a student deletes their records. A record naming nobody is a leak, not data.
+- **D8.6** — Several pods mean one of two things and Braillix never guesses which: **chain** (one
+  long display) or **mirror** (a class reading together). Mirrored, the width is the *smallest* pod
+  and wider pods have their spare cells blanked — a frame the small display cannot show would leave
+  one child reading a truncated equation with no way to know.
+- **D8.7** — A teacher's worksheet is playable as a practice drill through one adapter
+  (`learn/worksheet-lesson.ts`). The loop the Class screen exists to close is: written this morning,
+  practised this afternoon, recorded against a name.

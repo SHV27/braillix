@@ -214,6 +214,54 @@ describe('several pods', () => {
     expect(result.moved).toBe(7);
     await transport.disconnect();
   });
+
+  /*
+   * Mirror mode is the classroom: one expression, a display in front of every child.
+   *
+   * The number that matters is the width. Chained, two pods of 4 and 3 make a 7-cell display.
+   * Mirrored they make a THREE-cell one — the smallest pod — because a frame the small display
+   * cannot show would leave one child reading a truncated equation and no way to know.
+   */
+  it('mirrors one frame onto every pod, at the width of the smallest', async () => {
+    const transport = new HttpPodTransport({
+      hosts: [`127.0.0.1:${PORT_A}`, `127.0.0.1:${PORT_B}`],
+      pollButtons: false,
+      mode: 'mirror',
+    });
+    const chain = await transport.connect();
+
+    expect(chain.pods).toHaveLength(2);
+    expect(chain.cellCount, 'the smallest pod decides the width').toBe(3);
+    expect(transport.label).toContain('showing the same');
+
+    const result = await transport.apply(planRefresh(null, [11, 22, 33]));
+    // At least the three mirrored cells on each pod. Not an exact count: the wider pod may also
+    // have had to blank a cell left over from whatever it was showing before.
+    expect(result.moved).toBeGreaterThanOrEqual(6);
+
+    // What the PODS say they are showing — not what we believe we sent. A pod that agreed with us
+    // by construction would prove nothing.
+    for (const port of [PORT_A, PORT_B]) {
+      const state = (await (await fetch(`http://127.0.0.1:${port}/state`)).json()) as { positions: number[] };
+      expect(state.positions.slice(0, 3), `pod on :${port}`).toEqual([11, 22, 33]);
+    }
+    // The wider pod's spare cell is blank, not a leftover from the last frame.
+    const wide = (await (await fetch(`http://127.0.0.1:${PORT_A}/state`)).json()) as { positions: number[] };
+    expect(wide.positions[3], 'a spare cell must be blanked, never left showing yesterday').toBe(0);
+    await transport.disconnect();
+  });
+
+  it('refuses a frame that is the wrong width for a mirrored display', async () => {
+    const transport = new HttpPodTransport({
+      hosts: [`127.0.0.1:${PORT_A}`, `127.0.0.1:${PORT_B}`],
+      pollButtons: false,
+      mode: 'mirror',
+    });
+    await transport.connect();
+    // Seven cells is right for the chain and wrong for the mirror: it must be refused, not truncated.
+    await expect(transport.apply(planRefresh(null, [1, 2, 3, 4, 5, 6, 7]))).rejects.toThrow(TransportError);
+    await transport.disconnect();
+  });
 });
 
 describe('the simulator obeys the same contract', () => {

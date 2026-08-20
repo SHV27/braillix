@@ -26,6 +26,7 @@ const SCREENS = [
   { id: 'board', steps: [], heading: 'Write maths. Read it with your hands.' },
   { id: 'practice', steps: ['nav-practice'], heading: 'Practice' },
   { id: 'recognise', steps: ['source-photo'], heading: 'Write maths. Read it with your hands.' },
+  { id: 'class', steps: ['nav-class'], heading: 'Your class' },
   { id: 'device', steps: ['nav-device'], heading: 'Hardware' },
   { id: 'atlas', steps: ['nav-device', 'device-atlas'], heading: 'Cell atlas' },
 ] as const;

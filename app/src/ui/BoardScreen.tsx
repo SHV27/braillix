@@ -20,6 +20,7 @@ import { DisplayStrip } from './DisplayStrip';
 import { MathKeypad, insertAtCaret } from './MathKeypad';
 import { MathPreview } from './MathPreview';
 import { QuestionStrip } from './QuestionStrip';
+import { AddToWorksheet } from './AddToWorksheet';
 import { ReaderPanel } from './ReaderPanel';
 import { RecognisePanel } from './RecognisePanel';
 import { useT } from './i18n';
@@ -146,6 +147,8 @@ export function BoardScreen() {
             ) : (
               <MathPreview latex={latex} label={spokenText} size="large" placeholder={t('board.print.empty')} />
             )}
+
+            <AddToWorksheet source={source} />
 
             <div className="examples board__examples" role="group" aria-label={t('board.examples')}>
               {EXAMPLES.map((example) => (

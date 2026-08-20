@@ -1,0 +1,30 @@
+/* A line of words and maths, reading left to right as one sentence. */
+
+.sourceview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s2);
+}
+
+.sourceview__words {
+  color: var(--text-100);
+  font-size: 1.0625rem;
+}
+
+.sourceview--large .sourceview__words {
+  font-size: 1.5rem;
+}
+
+.sourceview--huge .sourceview__words {
+  font-size: clamp(1.75rem, 1rem + 2.5vw, 3rem);
+}
+
+/* Inside a sentence the maths is a word, not a panel. */
+.sourceview .mathpreview {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  overflow: visible;
+}
