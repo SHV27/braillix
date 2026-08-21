@@ -115,3 +115,69 @@ test.describe('reading handwriting — with the model installed', () => {
     await expect(page.getByTestId('braille-unicode')).toHaveText('⠼⠆⠬⠒⠀⠨⠅⠀⠼⠢');
   });
 });
+
+test.describe('scanning a full question — words and maths together', () => {
+  test.skip(!MODEL_PRESENT, 'run `npm run fetch:model` to exercise the real recogniser');
+
+  test('a textbook line is cropped part by part, read by two engines, and lands on the board', async ({ page }) => {
+    test.setTimeout(300_000);
+
+    await page.goto('/');
+    await page.getByTestId('source-photo').click();
+    await page.getByTestId('mode-question').click();
+
+    // Synthesize a textbook-style question in the page: words, then maths.
+    const dataUrl = await page.evaluate(() => {
+      const c = document.createElement('canvas');
+      c.width = 900;
+      c.height = 200;
+      const g = c.getContext('2d')!;
+      g.fillStyle = '#fff';
+      g.fillRect(0, 0, 900, 200);
+      g.fillStyle = '#111';
+      g.textBaseline = 'middle';
+      g.font = '42px Georgia';
+      g.fillText('Find the value of x :', 30, 100);
+      g.font = 'italic 46px Georgia';
+      g.fillText('2x + 3 = 11', 480, 100);
+      return c.toDataURL('image/png');
+    });
+    const buffer = Buffer.from(dataUrl.split(',')[1], 'base64');
+    await page.getByTestId('qs-file-input').setInputFiles({
+      name: 'question.png',
+      mimeType: 'image/png',
+      buffer,
+    });
+
+    const stage = page.getByTestId('qs-stage');
+    await expect(stage).toBeVisible();
+    const box = (await stage.boundingBox())!;
+
+    // Part 1: the words. Drag a box over the left half with the real mouse.
+    await page.mouse.move(box.x + 4, box.y + 4);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.52, box.y + box.height - 4, { steps: 5 });
+    await page.mouse.up();
+    await page.getByTestId('qs-read-words').click();
+    // First run downloads nothing — everything is self-hosted — but WASM startup takes a moment.
+    await expect(page.locator('.qs__part')).toHaveCount(1, { timeout: 120_000 });
+    const words = await page.locator('.qs__part .qs__value').first().inputValue();
+    expect(words.toLowerCase()).toContain('value');
+
+    // Part 2: the maths. Right half of the image.
+    await page.mouse.move(box.x + box.width * 0.5, box.y + 4);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.85, box.y + box.height - 4, { steps: 5 });
+    await page.mouse.up();
+    await page.getByTestId('qs-read-maths').click();
+    await expect(page.locator('.qs__part')).toHaveCount(2, { timeout: 150_000 });
+    const maths = await page.locator('.qs__part .qs__value').nth(1).inputValue();
+    expect(maths.replace(/\s/g, '')).toContain('2x+3=11');
+
+    // The confirm gate: the send button IS the approval, and the line lands on the board
+    // as words + maths in their two braille codes.
+    await page.getByTestId('qs-send').click();
+    await expect(page.getByTestId('lesson-rail')).toContainText('2 x + 3 = 11');
+    await expect(page.locator('.evidence__count')).toContainText('Nemeth');
+  });
+});

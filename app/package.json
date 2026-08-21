@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "postinstall": "node scripts/copy-sre-assets.mjs",
+    "postinstall": "node scripts/copy-sre-assets.mjs && node scripts/copy-tesseract-assets.mjs",
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/assert-assets.mjs",
     "preview": "vite preview --port 4173 --host 127.0.0.1 --strictPort",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
@@ -24,6 +24,7 @@
     "react-dom": "19.2.8",
     "speech-rule-engine": "4.1.4",
     "temml": "0.13.4",
+    "tesseract.js": "^7.0.0",
     "zustand": "5.0.15"
   },
   "devDependencies": {

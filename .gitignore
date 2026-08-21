@@ -19,6 +19,11 @@ app/public/models/
 app/public/sre/
 app/public/ort/
 
+# Word-reading engine: worker+core copied from node_modules at install; language files fetched
+# once by tools/fetch-tesseract-langs.mjs. The BUILD asserts all of it exists in dist
+# (app/scripts/assert-assets.mjs) — absence is a build error, never a dead button (the v1 death).
+app/public/tesseract/
+
 # Vercel's local project link. Not a secret, but not ours to commit either.
 .vercel/
 

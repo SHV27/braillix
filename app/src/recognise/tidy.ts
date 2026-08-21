@@ -18,6 +18,11 @@ export function tidyLatex(raw: string): string {
   // The model's own spacing hints add nothing here.
   text = text.replace(/\\[,;!:]/g, ' ');
 
+  // `~` is LaTeX's non-breaking space; the model sprinkles it around fractions and relations.
+  // In maths it is spacing, nothing more — but in the correction box it reads as garbage.
+  // (A `\~` accent would matter; `(?<!\\)` leaves it alone.)
+  text = text.replace(/(?<!\\)~/g, ' ');
+
   text = text.replace(/\s+/g, ' ');
 
   // Rejoin split numbers: "2 2" -> "22". Only between digits, so "2 x" is untouched.

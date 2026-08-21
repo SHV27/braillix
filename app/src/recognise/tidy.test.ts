@@ -43,6 +43,14 @@ describe('tidyLatex', () => {
     expect(tidyLatex('')).toBe('');
     expect(tidyLatex('   \n ')).toBe('');
   });
+
+  it('strips the model’s ~ spacing glyphs, which read as garbage in the correction box', () => {
+    // Exactly what the formula model emitted for a stacked fraction, verified in the browser.
+    expect(tidyLatex(String.raw`{\frac{~ x^{2} + 1 ~}{~ 2 ~}}~ = ~ 5`)).toBe(
+      String.raw`{\frac{x^{2} + 1}{2}} = 5`,
+    );
+    expect(tidyLatex('a ~ + ~ b')).toBe('a + b');
+  });
 });
 
 describe('tidying never changes the braille', () => {

@@ -10,14 +10,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useBraillix } from '../store';
 import { NORM_MEAN, NORM_STD, imageWarning, prepareImage, type PreparedImage } from '../recognise/preprocess';
-import { OnDeviceRecogniser } from '../recognise/ondevice';
+import { recogniser } from '../recognise/shared';
 import type { ProviderStatus, RecognitionResult } from '../recognise/types';
 import { DrawPad } from './DrawPad';
 import { MathPreview } from './MathPreview';
+import { QuestionScan } from './QuestionScan';
 import { useT, type StringKey } from './i18n';
 import './RecogniseScreen.css';
-
-const recogniser = new OnDeviceRecogniser();
 
 type Source = { url: string; label: string } | null;
 
@@ -44,7 +43,7 @@ export function RecognisePanel({ onSent }: RecognisePanelProps) {
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<'photo' | 'draw'>('photo');
+  const [mode, setMode] = useState<'photo' | 'question' | 'draw'>('photo');
 
   const fileInput = useRef<HTMLInputElement>(null);
   const previewCanvas = useRef<HTMLCanvasElement>(null);
@@ -168,10 +167,10 @@ export function RecognisePanel({ onSent }: RecognisePanelProps) {
         </p>
       )}
 
-      <div className="rec__grid">
+      <div className={mode === 'question' ? undefined : 'rec__grid'}>
         <section className="panel" aria-labelledby="rec-input-heading">
           <h2 id="rec-input-heading" className="panel__title">
-            {t('rec.image')}
+            {mode === 'question' ? t('qs.title') : t('rec.image')}
           </h2>
 
           <div className="segmented" role="group" aria-label={t('rec.how')}>
@@ -185,6 +184,15 @@ export function RecognisePanel({ onSent }: RecognisePanelProps) {
             </button>
             <button
               type="button"
+              className={`segmented__btn${mode === 'question' ? ' is-current' : ''}`}
+              aria-pressed={mode === 'question'}
+              data-testid="mode-question"
+              onClick={() => setMode('question')}
+            >
+              {t('rec.fullQuestion')}
+            </button>
+            <button
+              type="button"
               className={`segmented__btn${mode === 'draw' ? ' is-current' : ''}`}
               aria-pressed={mode === 'draw'}
               data-testid="mode-draw"
@@ -194,7 +202,7 @@ export function RecognisePanel({ onSent }: RecognisePanelProps) {
             </button>
           </div>
 
-          {mode === 'photo' ? (
+          {mode === 'photo' && (
             <>
               <div className="rec__actions">
                 <input
@@ -215,11 +223,12 @@ export function RecognisePanel({ onSent }: RecognisePanelProps) {
               <p className="hw__note">{t('rec.cameraNote')}</p>
               <SampleImages onPick={accept} label={t('rec.samples')} />
             </>
-          ) : (
-            <DrawPad onDone={(url) => accept(url, 'drawing')} />
           )}
+          {mode === 'draw' && <DrawPad onDone={(url) => accept(url, 'drawing')} />}
+          {mode === 'question' && <QuestionScan onSent={onSent} />}
         </section>
 
+        {mode !== 'question' && (
         <section className="panel" aria-labelledby="result-heading">
           <h2 id="result-heading" className="panel__title">
             {t('rec.whatItRead')}
@@ -340,6 +349,7 @@ export function RecognisePanel({ onSent }: RecognisePanelProps) {
             </>
           )}
         </section>
+        )}
       </div>
     </div>
   );

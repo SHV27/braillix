@@ -352,6 +352,36 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
 
   /* ---- practice ---- */
 
+  /* ---- scanning a full question ---- */
+  'rec.fullQuestion': ['A full question', 'पूरा सवाल'],
+  'qs.title': ['Scan a question from the book', 'किताब से सवाल स्कैन कीजिए'],
+  'qs.lede': [
+    'Photograph the question, then drag a box around each part in reading order — the sentence first, then the maths. Each part is read on this laptop and shown to you before anything reaches the display.',
+    'सवाल की फ़ोटो लीजिए, फिर पढ़ने के क्रम में हर हिस्से के चारों ओर बॉक्स खींचिए — पहले वाक्य, फिर गणित। हर हिस्सा इसी लैपटॉप पर पढ़ा जाता है और डिस्प्ले तक पहुँचने से पहले आपको दिखाया जाता है।',
+  ],
+  'qs.startOver': ['Start this photo again', 'यह फ़ोटो फिर से शुरू कीजिए'],
+  'qs.dragHint': [
+    'Drag a box around one part of the question.',
+    'सवाल के एक हिस्से के चारों ओर बॉक्स खींचिए।',
+  ],
+  'qs.photoAlt': ['The photographed question', 'सवाल की फ़ोटो'],
+  'qs.whatIsThis': ['What is in this box?', 'इस बॉक्स में क्या है?'],
+  'qs.itsWords': ['Words', 'शब्द'],
+  'qs.itsMaths': ['Maths', 'गणित'],
+  'qs.nothingRead': ['Nothing could be read in that box. Draw it a little larger.', 'इस बॉक्स में कुछ पढ़ा नहीं जा सका। इसे थोड़ा बड़ा खींचिए।'],
+  'qs.wordsUnavailable': ['Word reading is not available.', 'शब्द पढ़ना उपलब्ध नहीं है।'],
+  'qs.wordsNote': ['read as words · {pc}% sure', 'शब्दों के रूप में पढ़ा · {pc}% विश्वास'],
+  'qs.mathsNote': ['read as maths · {ms} ms', 'गणित के रूप में पढ़ा · {ms} ms'],
+  'qs.theLine': ['The question, part by part — correct anything that is wrong', 'सवाल, हिस्सा-दर-हिस्सा — जो ग़लत हो उसे सुधारिए'],
+  'qs.words': ['Words', 'शब्द'],
+  'qs.maths': ['Maths', 'गणित'],
+  'qs.checkThis': ['Not sure — check this', 'पक्का नहीं — इसे जाँचिए'],
+  'qs.removePart': ['Remove this part', 'यह हिस्सा हटाइए'],
+  'qs.doubtWarning': [
+    'A part above is marked “not sure”. Check it against the book — or correct it — before you send it. It will not read itself right.',
+    'ऊपर एक हिस्सा “पक्का नहीं” चिह्नित है। भेजने से पहले किताब से मिलाइए — या सुधारिए। वह अपने आप सही नहीं होगा।',
+  ],
+
   /* ---- reading handwriting ---- */
   'rec.notInstalled': ['Recognition is not installed.', 'पहचान स्थापित नहीं है।'],
   'rec.notInstalledFix': [
