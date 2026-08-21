@@ -61,8 +61,11 @@ async function load(modelBase: string, wasmBase: string): Promise<void> {
     const wasm = env.backends.onnx.wasm;
     if (wasm) {
       wasm.wasmPaths = wasmBase;
-      // One thread. Multi-threaded WASM needs cross-origin isolation headers, which a plain static
-      // server does not send — and a model that silently fails to start is worse than a slower one.
+      // One thread, deliberately. Multi-threaded ORT was tried in the v3 window with full
+      // cross-origin isolation in place, and its session init hung inside this nested worker —
+      // a model that silently fails to start is worse than a slower one (NOTES.md has the
+      // trail). The real latency win is elsewhere: the model is warmed at app start, so the
+      // teacher's press pays only inference, never the load.
       wasm.numThreads = 1;
     }
 

@@ -352,6 +352,10 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
 
   /* ---- practice ---- */
 
+  /* ---- warming the recognisers ---- */
+  'cap.warming': ['getting ready · {pc}%', 'तैयार हो रहा है · {pc}%'],
+  'cap.warm': ['ready — reads in under a second', 'तैयार — एक सेकंड से कम में पढ़ता है'],
+
   /* ---- scanning a full question ---- */
   'rec.fullQuestion': ['A full question', 'पूरा सवाल'],
   'qs.title': ['Scan a question from the book', 'किताब से सवाल स्कैन कीजिए'],

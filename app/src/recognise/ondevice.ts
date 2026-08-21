@@ -94,8 +94,28 @@ export class OnDeviceRecogniser implements RecognitionProvider {
     }
   }
 
+  /**
+   * One load in flight, ever. The background warm-up (store.bootstrap) and the panel's own
+   * load raced here once: each call overwrote the single ready/progress callback slots, so
+   * whichever caller lost the race waited for a 'ready' that had already been delivered to
+   * the other — and timed out after two minutes with the model sitting there loaded.
+   */
+  #loading: Promise<void> | null = null;
+
   async load(onProgress?: (progress: number, message: string) => void): Promise<void> {
     if (this.#loaded) return;
+    if (this.#loading) {
+      // Join the load already under way; the newest progress reporter wins the badge.
+      if (onProgress) this.#onProgress = onProgress;
+      return this.#loading;
+    }
+    this.#loading = this.#doLoad(onProgress).finally(() => {
+      this.#loading = null;
+    });
+    return this.#loading;
+  }
+
+  async #doLoad(onProgress?: (progress: number, message: string) => void): Promise<void> {
     const worker = this.#ensureWorker();
 
     await new Promise<void>((resolve, reject) => {

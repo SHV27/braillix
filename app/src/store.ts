@@ -18,6 +18,8 @@ import { simulatedProfile, type BitOrder, type DisplayProfile } from './core/pro
 import { initSre, toSpeechText } from './core/sre-service';
 import { toLatex, type MathInputIssue } from './core/mathinput';
 import { modelStatus } from './recognise/status';
+import { recogniser } from './recognise/shared';
+import { warmWords } from './recognise/words';
 import { hasWords, translateMixed, type BrailleCode, type MixedLine, type SegmentKind } from './core/mixed';
 import { latexToMathml, translateLatex, type Translation } from './core/translate';
 import { BLANK, dotsToMask, type DotMask, type DotNumber } from './core/braille';
@@ -836,6 +838,37 @@ export const useBraillix = create<BraillixState>((set, get) => {
         reason: model.installed ? 'on this device, offline' : (model.reason ?? 'on-device model not installed'),
         fix: model.installed ? undefined : 'Run `npm run fetch:model` once (76 MB) to enable reading handwriting.',
       });
+
+      /*
+       * Warm the recognisers NOW, in the background, not when the teacher first presses Read.
+       *
+       * Measured cold on the deployed site: 64 seconds from button to result — model download,
+       * WASM compile, worker boot, then inference. Warm: under a second. A teacher mid-lesson
+       * cannot wait a minute, so the minute is spent here, while she is still reading the
+       * greeting, with the badge saying honestly what is happening (Law 3, never silent).
+       */
+      if (model.installed && typeof Worker !== 'undefined') {
+        window.setTimeout(() => {
+          void recogniser
+            .load((progress) => {
+              setCapability('recognition', {
+                state: 'checking',
+                reason: translate('cap.warming', { pc: Math.round(progress * 100) }),
+              });
+            })
+            .then(() => {
+              setCapability('recognition', { state: 'ready', reason: translate('cap.warm') });
+              return warmWords();
+            })
+            .catch((err: unknown) => {
+              setCapability('recognition', {
+                state: 'degraded',
+                reason: err instanceof Error ? err.message : String(err),
+                fix: 'Reload the page. Typing is unaffected.',
+              });
+            });
+        }, 1500);
+      }
     },
   };
 });

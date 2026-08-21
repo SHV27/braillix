@@ -112,6 +112,19 @@ export async function readWords(image: HTMLCanvasElement): Promise<WordsReading>
   };
 }
 
+/**
+ * Warm the engine before it is needed. A teacher mid-lesson must never watch a worker boot;
+ * this runs in the background after app start so the first scan pays nothing.
+ */
+export async function warmWords(): Promise<void> {
+  try {
+    if ((await wordsStatus()).state === 'unavailable') return;
+    await start();
+  } catch {
+    // Warming is a courtesy; a failure here reports itself on first real use instead.
+  }
+}
+
 /** Free the worker (tests and teardown). */
 export async function disposeWords(): Promise<void> {
   const current = worker;
