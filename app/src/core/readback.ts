@@ -164,6 +164,7 @@ const SYMBOLS: ReadonlyArray<readonly [string, string]> = ([
 /** Single cells that stand for themselves. */
 const SINGLES: Readonly<Record<string, string>> = {
   '⠡': '·', // a raised dot: multiplication written the other way
+  '⠄': "'", // the prime: f'(x), a minute of arc, a first derivative (v5 audit gap G5)
   '⠯': '!', // factorial
   '⠱': '‾', // a bar over the letter before it
   '⠬': '+',

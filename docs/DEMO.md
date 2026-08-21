@@ -19,17 +19,20 @@ Sanity check: **Help → Is everything working?** — all lamps green.
    on it, the braille cell showing it, the chalk tray below. Say: *"There is nothing to learn
    here. If you have used WhatsApp, you can teach on this."*
 
-2. **Type a line, like a message.** *(1 min)* Type `1/2 + 1/3` — the print preview and the dots
-   move with every keystroke. Point at the green line: *"a second engine reads the dots back and
-   confirms they say what I typed — a blind child cannot see a wrong dot, so the app checks
-   every line before it reaches them."* Press **Enter**. The line lands on the board and is
-   spoken aloud.
+2. **Teach a class-11 concept by TYPING** *(1.5 min)* — the mentor's test, half one. Type
+   `nCr = n!/(r!(n-r)!)` exactly like that — the way it is said in class. The preview shows the
+   real formula; the green line says the dots read back as what you wrote. **Enter** — it lands
+   and is spoken. Then `(a+b)^n = sum_{r=0}^{n} nCr a^(n-r) b^r` — the binomial theorem, the
+   whole of it, on the cells. Say: *"union, intersection, inverse trig, derivatives, matrices,
+   Bayes — the full class 11–12 syllabus types like this; 232 curriculum lines are re-proven
+   live in Help."*
 
-3. **Write by hand — the blackboard moment.** *(2 min)* Press the **pencil**. Write `x^2` (or
-   anything) with the mouse/finger, large. Pause — the reading appears in the box below with
-   its preview and verdict. Fix it if it misread (say: *"the teacher is always the last word —
-   nothing recognised reaches a child unconfirmed"*). Press **Put on the board**: the line lands
-   with the teacher's own handwriting kept faintly behind it.
+3. **The SAME kind of concept by WRITING** *(2 min)* — half two. Press the **pencil**. Write
+   `sin^2 x + cos^2 x = 1` large, the way you would on the board. Pause — the reading lands in
+   the box with its preview and braille verdict. If a symbol misread, fix it in the box (say:
+   *"the teacher is always the last word — nothing recognised reaches a child unconfirmed"*).
+   **Put on the board**: the line lands with the teacher's own handwriting kept faintly behind
+   it.
 
 4. **A question in Hindi.** *(1 min)* Type `दो संख्याओं का योग 12 है`. The words become Bharati
    Braille, the number stays Nemeth, the line is spoken in Hindi. Press **हिन्दी** in the corner:

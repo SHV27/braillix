@@ -63,6 +63,19 @@ export function chalkKeys(t: ReturnType<typeof useT>): readonly ChalkKey[] {
     { face: '∠', insert: 'angle ', name: t('keypad.angle'), math: true },
     { face: '{ }', insert: '{}', back: 1, name: t('keypad.set') },
     { face: '[ ]', insert: '[]', back: 1, name: t('keypad.squareBrackets') },
+    /* The class 11-12 vocabulary (D-V5.1): every senior chapter reachable from the rail. */
+    { face: '∪', insert: ' union ', name: t('keypad.union'), math: true },
+    { face: '∩', insert: ' intersect ', name: t('keypad.intersect'), math: true },
+    { face: '∈', insert: ' in ', name: t('keypad.member'), math: true },
+    { face: '→', insert: ' -> ', name: t('keypad.arrow'), math: true },
+    { face: 'f′', insert: "'", name: t('keypad.prime'), math: true },
+    { face: 'sin⁻¹', insert: 'sin^(-1) ', name: t('keypad.inverseSine'), math: true },
+    { face: 'ⁿCᵣ', insert: 'nCr', name: t('keypad.ncr'), math: true },
+    { face: 'd/dx', insert: 'd/dx ', name: t('keypad.ddx'), math: true },
+    { face: 'a⃗', insert: 'vec()', back: 1, name: t('keypad.vector'), math: true },
+    { face: '|A|', insert: '|A|', name: t('keypad.determinant'), math: true },
+    { face: 'Aᵀ', insert: '^T', name: t('keypad.transpose'), math: true },
+    { face: '⎡⎣⎤⎦', insert: '[[a, b], [c, d]]', name: t('keypad.matrix'), math: true },
   ];
 }
 

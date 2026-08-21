@@ -173,9 +173,29 @@
   .chalkline {
     font-size: 1.25rem;
   }
+}
 
-  /* No hover on touch: the tools are always present, quieter. */
+/* No hover, no hidden tools: on ANY touch-first device — a 12.9" iPad included — the line
+   tools are always present, quieter. Width was the wrong test (v5 audit defect T1). */
+@media (hover: none) {
   .boardline__tools {
     opacity: 0.6;
+  }
+}
+
+/* Landscape phone: the chalk shrinks a size so the working still stacks. */
+@media (max-height: 540px) {
+  .board__lines {
+    padding: var(--s2) var(--s3);
+    gap: var(--s1);
+  }
+
+  .boardline__face {
+    min-height: 40px;
+    padding: var(--s1) var(--s3);
+  }
+
+  .chalkline {
+    font-size: 1.15rem;
   }
 }

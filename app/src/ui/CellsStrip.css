@@ -109,3 +109,37 @@
     display: none; /* the pager buttons carry position by feel; space goes to the dots */
   }
 }
+
+/* Landscape phone: the shelf drops to one slim row so the board keeps its height. */
+@media (max-height: 540px) {
+  .cells {
+    padding: var(--s1) var(--s3);
+  }
+
+  .cells__page {
+    min-width: 38px;
+    min-height: 38px;
+  }
+
+  .cells__count {
+    display: none; /* device settings live behind the Device door; not at this height */
+  }
+
+  .cells__ctl {
+    min-height: 28px;
+  }
+
+  .cells__side {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--s2);
+  }
+
+  .cells__label {
+    display: none;
+  }
+
+  .cells__reader {
+    max-height: 32vh;
+  }
+}

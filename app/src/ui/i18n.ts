@@ -72,6 +72,20 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
 
   'board.h1': ['The blackboard', 'गणित का ब्लैकबोर्ड'],
 
+  /* ---- the senior rail (v5) ---- */
+  'keypad.union': ['union', 'सम्मिलन (यूनियन)'],
+  'keypad.intersect': ['intersection', 'सर्वनिष्ठ (इंटरसेक्शन)'],
+  'keypad.member': ['is a member of', 'का सदस्य है'],
+  'keypad.arrow': ['maps to', 'की ओर (→)'],
+  'keypad.prime': ['prime — the first derivative', 'प्राइम — पहला अवकलज'],
+  'keypad.inverseSine': ['inverse sine', 'व्युत्क्रम ज्या'],
+  'keypad.ncr': ['combinations — nCr', 'संयोजन'],
+  'keypad.ddx': ['the derivative operator', 'अवकलज संकारक (d/dx)'],
+  'keypad.vector': ['a vector', 'सदिश'],
+  'keypad.determinant': ['a determinant', 'सारणिक'],
+  'keypad.transpose': ['transpose', 'परिवर्त (ट्रांसपोज़)'],
+  'keypad.matrix': ['a 2×2 matrix, row by row', '2×2 आव्यूह, पंक्ति दर पंक्ति'],
+
   /* ---- the chalk tray (v4) ---- */
   'tray.placeholder': ['Write the next line here', 'अगली पंक्ति यहाँ लिखिए'],
   'tray.scan': ['Photograph a page', 'पन्ने की फ़ोटो लीजिए'],

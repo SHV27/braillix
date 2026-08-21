@@ -26,6 +26,7 @@ export interface Canonical {
 const SIGNS: Readonly<Record<string, string>> = {
   times: '×',
   cdot: '·', // Nemeth writes a raised dot and a cross differently, so this one does too
+  mid: '|', // the conditional-probability bar: P(A|B) (v5 audit gap G7)
   div: '÷',
   pm: '±',
   mp: '∓',
@@ -105,6 +106,12 @@ const FUNCTIONS = new Set([
   'exp',
   'gcd',
   'det',
+  // The inverse trigonometric functions as words — class 12 writes both arcsin x and
+  // sin^(-1) x, and the checker must vouch for both (v5 audit gap G4).
+  'arcsin',
+  'arccos',
+  'arctan',
+  'adj',
 ]);
 
 /** Commands that only affect how something is drawn, and mean nothing here. */

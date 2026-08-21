@@ -73,6 +73,23 @@
 .inkstrip__canvas {
   width: 100%;
   height: clamp(140px, 24vh, 260px);
+}
+
+/* A finger is wider than a mouse: on touch-first devices the writing line is taller, the way
+   a board's line spacing grows for chalk (v5: "tablet pe blackboard bahut ache se kaam kare"). */
+@media (pointer: coarse) and (min-height: 541px) {
+  .inkstrip__canvas {
+    height: clamp(220px, 34vh, 380px);
+  }
+}
+
+@media (max-height: 540px) {
+  .inkstrip__canvas {
+    height: clamp(110px, 34vh, 200px);
+  }
+}
+
+.inkstrip__canvas {
   border-radius: var(--radius);
   background:
     /* a faint writing baseline, the way a fresh board line invites the chalk */

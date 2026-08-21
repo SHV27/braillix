@@ -122,6 +122,14 @@ const WORD_SYMBOLS: Readonly<Record<string, string>> = {
   supset: '\\supset',
   cup: '\\cup',
   cap: '\\cap',
+  // The words a class 11 sets chapter is actually taught in. `cap`/`cup` are what LaTeX calls
+  // them; `union`/`intersection` are what a teacher calls them, and both must be the symbol —
+  // "A union B" split down the middle was v5 audit gap G1.
+  union: '\\cup',
+  intersect: '\\cap',
+  intersection: '\\cap',
+  // The conditional-probability bar, as a word and via the (A|B) rewrite in `toLatex`.
+  mid: '\\mid',
   in: '\\in',
   notin: '\\notin',
   subset: '\\subset',
@@ -140,7 +148,21 @@ const WORD_SYMBOLS: Readonly<Record<string, string>> = {
  * its own copy of this rule for the start of a line, because it decides before this parser is ever
  * called; the two lists are short and each is checked by its own test.
  */
-const NEEDS_A_LEFT_OPERAND = new Set(['in', 'by', 'to', 'cup', 'cap', 'subset', 'subseteq', 'supset', 'notin']);
+const NEEDS_A_LEFT_OPERAND = new Set([
+  'in',
+  'by',
+  'to',
+  'cup',
+  'cap',
+  'union',
+  'intersect',
+  'intersection',
+  'mid',
+  'subset',
+  'subseteq',
+  'supset',
+  'notin',
+]);
 
 /** Two- and three-character sequences that mean one thing. Longest first — order matters. */
 const MULTI: readonly (readonly [string, string])[] = [
@@ -768,12 +790,33 @@ function unwrapBrackets(latex: string): string {
  * saying what is wrong beats one that blanks (CLAUDE.md Law 4).
  */
 export function toLatex(input: string): MathInputResult {
-  const trimmed = input.trim();
+  let trimmed = input.trim();
   if (!trimmed) return { latex: '', issues: [], wasLatex: false };
+
+  /*
+   * Two spellings a senior class uses that the tokeniser cannot see locally (v5 audit):
+   *
+   * · A SPACED dot between two things is the multiplication dot — `vec(a) . vec(b)` is a dot
+   *   product. A decimal point is never written with air around it, so the space is the whole
+   *   signal, exactly as it is for the spaced x (D12.4).
+   * · A bar inside a bracket with something on both sides is the conditional-probability bar —
+   *   `P(A|B)`. Absolute-value bars come in pairs; this one is alone between two operands, and
+   *   reading it as an opening |...| left the bracket "never closed".
+   */
+  trimmed = trimmed.replace(/(?<=\s)\.(?=\s)/g, '·');
+  trimmed = trimmed.replace(/\(([^()|]+)\|([^()|]+)\)/g, '($1 mid $2)');
 
   const issues: MathInputIssue[] = [];
   const tokens = tokenise(trimmed, issues);
-  const latex = new Parser(tokens, issues).parse();
+  let latex = new Parser(tokens, issues).parse();
+
+  /*
+   * `f: A -> B` — the colon that names a function's domain and codomain. As a bare relation
+   * SRE writes the RATIO colon ⠐⠂, which unspaced after a letter is indistinguishable from
+   * "f1" (D15.15), so the round-trip could never vouch for it. Braced, SRE writes the
+   * punctuated colon ⠸⠒, which reads back as exactly what it is.
+   */
+  latex = latex.replace(/^([A-Za-z]):(?![=:])/, '$1{:}\\ ');
 
   const wasLatex = tokens.every((token) => token.kind === 'latex') && tokens.length > 0;
   return { latex, issues, wasLatex };
@@ -797,6 +840,16 @@ export function looksLikeLatex(input: string): boolean {
  * about what counts as maths.
  */
 export function isMathWord(word: string): boolean {
+  // nCr, nPr, 5C2 — the combinatorics tokens, written exactly as a class 11 teacher writes
+  // them. The capital C or P in the middle is the operator; the parser reads the run as the
+  // juxtaposed letters Nemeth wants. Classified here so `mixed.ts` cannot take them for words.
+  // Lowercase or digit either side, deliberately: nCr and 5C2 qualify, the acronyms OCR and
+  // NCC do not — an all-caps word in a sentence is a word.
+  if (/^[a-z0-9][CP][a-z0-9]$/.test(word)) return true;
+  // The differentials: dx, dy, du, dv, dt — integration by parts is written in them, and a
+  // "dv" taken for a word cut `int u dv = uv - int v du` in half. `do` is English and is
+  // decided by the never-maths list before this is consulted.
+  if (/^d[a-z]$/.test(word) && word !== 'do') return true;
   const lower = word.toLowerCase();
   return (
     lower in FUNCTIONS ||

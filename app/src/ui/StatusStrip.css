@@ -144,20 +144,32 @@
   transform: translateY(-2.4em);
 }
 
-@media (max-width: 640px) {
-  /* On a phone the strip is one sliding row — the board keeps its height. Worst news is
-     ranked first (rankedCapabilities), so what matters is never off-screen at rest. */
+/* On a phone — and at any landscape-phone height — the strip is one sliding row so the board
+   keeps its height. Worst news is ranked first (rankedCapabilities), so what matters is never
+   off-screen at rest. */
+@media (max-width: 640px), (max-height: 540px) {
   .strip {
     padding: var(--s2) var(--s3);
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: none;
   }
+  .strip__caps {
+    flex-wrap: nowrap;
+  }
   .cap {
     flex: 0 0 auto;
   }
   .cap__reason,
   .cap__fix {
+    display: none;
+  }
+}
+
+/* Landscape phone: the display/motion readouts live behind the Device door; the badges —
+   the news — keep the one slim row. */
+@media (max-height: 540px) {
+  .strip__group {
     display: none;
   }
 }

@@ -98,6 +98,18 @@
   }
 }
 
+/* A phone held sideways is a real classroom posture and gets its own geometry: the dots and
+   the rhythm shrink so the board, the cells AND the chalk hand all stay on one screen at
+   390px of height (v5 audit defect L1 — the input was invisible in landscape). */
+@media (max-height: 540px) {
+  :root {
+    --dot-size: 12px;
+    --dot-gap-x: 8px;
+    --dot-gap-y: 6px;
+    --cell-pad: 10px;
+  }
+}
+
 /* A light theme is not part of the art direction — this is an instrument, and instruments are
    read in the dark. But we still declare the ground explicitly so the page never borrows a
    host background. */

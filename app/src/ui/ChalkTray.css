@@ -40,7 +40,7 @@
   margin: 0;
 }
 
-/* ---- the symbol rail: every key, one row, scrolls sideways, never the page ---- */
+/* ---- the symbol rail: every key visible, never the page scrolling ---- */
 .tray__rail {
   display: flex;
   gap: var(--s1);
@@ -48,6 +48,16 @@
   scrollbar-width: thin;
   padding-bottom: var(--s1);
   -webkit-overflow-scrolling: touch;
+}
+
+/* Where there is room, the whole senior vocabulary stands in two rows with nothing hidden —
+   coverage IS the product (D-V5.1). The single sliding row is for phones, and for any screen
+   too short to give the board its height back. */
+@media (min-width: 834px) and (min-height: 541px) {
+  .tray__rail {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
 }
 
 .tray__key {
@@ -248,5 +258,44 @@
 
   .tray__help {
     display: none; /* the placeholder carries the hint on a phone */
+  }
+}
+
+/* Landscape phone: every control a size down, the hint gone, the hand always on screen. */
+@media (max-height: 540px) {
+  .tray {
+    padding: var(--s1) var(--s3);
+    gap: var(--s1);
+  }
+
+  .tray__help {
+    display: none;
+  }
+
+  .tray__key {
+    min-width: 38px;
+    min-height: 38px;
+    font-size: 0.95rem;
+  }
+
+  .tray__field {
+    min-height: 40px;
+    font-size: 1rem;
+    padding: var(--s2) var(--s3);
+  }
+
+  .tray__grip,
+  .tray__cancel {
+    width: 40px;
+    height: 40px;
+  }
+
+  .tray__put {
+    min-width: 40px;
+    height: 40px;
+  }
+
+  .tray__preview {
+    max-height: 26vh;
   }
 }
