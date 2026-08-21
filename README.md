@@ -19,6 +19,16 @@ Braillix is a capstone project built by:
 - **Atishay** — hardware
 - **Mridul** — hardware
 
+## What it looks like
+
+<p align="center">
+  <img src="docs/shots/board-hero.jpeg" alt="The Braillix board: a lesson stack of three lines, the current line's cells lit up as physically-modelled raised dots, and reading controls beside it" width="900">
+</p>
+
+<p align="center">
+  <img src="docs/shots/question-scan-hero.jpeg" alt="Scanning a full textbook question: the sentence and the equation each cropped and read separately, shown back in print for the teacher to check before sending" width="900">
+</p>
+
 ## What a lesson looks like
 
 1. **The board.** The teacher types a line the way she would say it — `2x + 3 = 11`, or
