@@ -24,6 +24,11 @@ describe('natural maths — the shape of what comes out', () => {
     ['2x/3', String.raw`\frac{2x}{3}`],
     ['x^2/2', String.raw`\frac{x^2}{2}`],
     ['a/b/c', String.raw`\frac{\frac{a}{b}}{c}`],
+    // A name straight onto a bracket is one thing, on BOTH sides of a slash. Found by looking
+    // at the printed Bayes line: (B) was standing outside the fraction, and the round-trip
+    // could not object because both engines were faithful to the same mis-grouped LaTeX.
+    ['P(A)/P(B)', String.raw`\frac{P(A)}{P(B)}`],
+    ['1/x(x+1)', String.raw`\frac{1}{x(x+1)}`],
 
     // Powers and indices.
     ['x^2', 'x^2'],

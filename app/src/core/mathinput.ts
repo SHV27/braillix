@@ -566,6 +566,21 @@ class Parser {
   #power(): string {
     let latex = this.#atom();
     for (;;) {
+      /*
+       * A name straight onto a bracket is ONE thing — an application or a tight product:
+       * P(B), f(x), x(x+1). Binding it here (rather than as loose juxtaposition upstream)
+       * is what makes `P(A)/P(B)` a fraction over ALL of P(B), and `1/x(x+1)` the partial-
+       * fractions denominator a class 11 teacher means — not (1/x)·(x+1). Found by LOOKING
+       * at the printed Bayes line, which showed (B) standing outside the fraction; the
+       * round-trip could not catch it, because both engines were faithful to the same
+       * mis-grouped LaTeX. Cells for products are unchanged: Nemeth writes tight and loose
+       * juxtaposition identically.
+       */
+      const next = this.#peek();
+      if (next?.kind === 'open' && next.text === '(' && /^[A-Za-z][A-Za-z]*$/.test(latex)) {
+        latex = `${latex}${this.#atom()}`;
+        continue;
+      }
       if (this.#atOp('^')) {
         this.#take();
         latex = `${latex}^${braced(this.#script(true))}`;

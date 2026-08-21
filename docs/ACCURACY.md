@@ -309,11 +309,11 @@ rather than ½ — because it exists to be compared, not admired.
 | Typed | Means | Braille | Cells | Reads back as |
 |---|---|---|---|---|
 | `lim_{x -> infinity} 1/x = 0` | a limit at infinity | ⠐⠇⠊⠍⠩⠭⠀⠫⠕⠀⠠⠿⠻⠀⠹⠂⠌⠭⠼⠀⠨⠅⠀⠼⠴ | 25 | `lim_(x→∞)(1)/(x)=0` |
-| `d/dx (x^n) = n x^(n-1)` | the derivative operator | ⠹⠙⠌⠙⠭⠼⠷⠭⠘⠝⠐⠾⠀⠨⠅⠀⠝⠭⠘⠷⠝⠤⠂⠾ | 24 | `(d)/(dx)(x^(n))=nx^((n-1))` |
+| `d/dx (x^n) = n x^(n-1)` | the derivative operator | ⠹⠙⠌⠙⠭⠷⠭⠘⠝⠐⠾⠼⠀⠨⠅⠀⠝⠭⠘⠷⠝⠤⠂⠾ | 24 | `(d)/(dx(x^(n)))=nx^((n-1))` |
 | `f'(x)` | prime notation | ⠋⠄⠷⠭⠾ | 5 | `f'(x)` |
 | `d^2y/dx^2` | a second derivative | ⠹⠙⠘⠆⠐⠽⠌⠙⠭⠘⠆⠐⠼ | 13 | `(d^(2)y)/(dx^(2))` |
 | `dy/dx = dy/du x du/dx` | the chain rule | ⠹⠙⠽⠌⠙⠭⠼⠀⠨⠅⠀⠹⠙⠽⠌⠙⠥⠼⠈⠡⠹⠙⠥⠌⠙⠭⠼ | 27 | `(dy)/(dx)=(dy)/(du)×(du)/(dx)` |
-| `d/dx (uv) = u dv/dx + v du/dx` | the product rule | ⠹⠙⠌⠙⠭⠼⠷⠥⠧⠾⠀⠨⠅⠀⠹⠥⠙⠧⠌⠙⠭⠼⠬⠹⠧⠙⠥⠌⠙⠭⠼ | 31 | `(d)/(dx)(uv)=(udv)/(dx)+(vdu)/(dx)` |
+| `d/dx (uv) = u dv/dx + v du/dx` | the product rule | ⠹⠙⠌⠙⠭⠷⠥⠧⠾⠼⠀⠨⠅⠀⠹⠥⠙⠧⠌⠙⠭⠼⠬⠹⠧⠙⠥⠌⠙⠭⠼ | 31 | `(d)/(dx(uv))=(udv)/(dx)+(vdu)/(dx)` |
 | `int x^2 dx = x^3/3 + C` | an indefinite integral, dx and all | ⠮⠭⠘⠆⠐⠙⠭⠀⠨⠅⠀⠹⠭⠘⠒⠐⠌⠒⠼⠬⠠⠉ | 22 | `∫x^(2)dx=(x^(3))/(3)+C` |
 | `int_{0}^{pi} sin x dx = 2` | a definite integral | ⠮⠰⠴⠘⠨⠏⠐⠎⠊⠝⠀⠭⠙⠭⠀⠨⠅⠀⠼⠆ | 20 | `∫_(0)^(π)sinxdx=2` |
 | `int u dv = uv - int v du` | integration by parts | ⠮⠥⠙⠧⠀⠨⠅⠀⠥⠧⠤⠮⠧⠙⠥ | 15 | `∫udv=uv-∫vdu` |
@@ -334,8 +334,8 @@ rather than ½ — because it exists to be compared, not admired.
 | `A^(-1) = adj(A)/|A|` | the inverse of a matrix | ⠠⠁⠘⠷⠤⠂⠾⠀⠨⠅⠀⠹⠁⠙⠚⠷⠠⠁⠾⠌⠳⠠⠁⠳⠼ | 25 | `A^((-1))=(adj(A))/(|A|)` |
 | `A = [[a, b], [c, d]]` | a 2×2 matrix, row by row | ⠠⠁⠀⠨⠅⠀⠈⠷⠈⠷⠁⠠⠀⠃⠈⠾⠠⠀⠈⠷⠉⠠⠀⠙⠈⠾⠈⠾ | 28 | `A=[[a,b],[c,d]]` |
 | `A^T` | a transpose | ⠠⠁⠘⠠⠞ | 5 | `A^(T)` |
-| `P(A|B) = P(A intersect B)/P(B)` | conditional probability | ⠠⠏⠷⠠⠁⠳⠠⠃⠾⠀⠨⠅⠀⠹⠠⠏⠷⠠⠁⠨⠩⠠⠃⠾⠌⠠⠏⠼⠷⠠⠃⠾ | 32 | `P(A|B)=(P(A∩B))/(P)(B)` |
-| `P(A|B) = P(B|A) P(A)/P(B)` | Bayes’ theorem | ⠠⠏⠷⠠⠁⠳⠠⠃⠾⠀⠨⠅⠀⠹⠠⠏⠷⠠⠃⠳⠠⠁⠾⠠⠏⠷⠠⠁⠾⠌⠠⠏⠼⠷⠠⠃⠾ | 37 | `P(A|B)=(P(B|A)P(A))/(P)(B)` |
+| `P(A|B) = P(A intersect B)/P(B)` | conditional probability | ⠠⠏⠷⠠⠁⠳⠠⠃⠾⠀⠨⠅⠀⠹⠠⠏⠷⠠⠁⠨⠩⠠⠃⠾⠌⠠⠏⠷⠠⠃⠾⠼ | 32 | `P(A|B)=(P(A∩B))/(P(B))` |
+| `P(A|B) = P(B|A) P(A)/P(B)` | Bayes’ theorem | ⠠⠏⠷⠠⠁⠳⠠⠃⠾⠀⠨⠅⠀⠹⠠⠏⠷⠠⠃⠳⠠⠁⠾⠠⠏⠷⠠⠁⠾⠌⠠⠏⠷⠠⠃⠾⠼ | 37 | `P(A|B)=(P(B|A)P(A))/(P(B))` |
 | `P(A union B) = P(A) + P(B) - P(A intersect B)` | the addition rule | ⠠⠏⠷⠠⠁⠨⠬⠠⠃⠾⠀⠨⠅⠀⠠⠏⠷⠠⠁⠾⠬⠠⠏⠷⠠⠃⠾⠤⠠⠏⠷⠠⠁⠨⠩⠠⠃⠾ | 38 | `P(A∪B)=P(A)+P(B)-P(A∩B)` |
 | `sigma^2 = sum (x_i - bar(x))^2 / n` | variance | ⠨⠎⠘⠆⠀⠨⠅⠀⠹⠨⠠⠎⠷⠭⠰⠊⠐⠤⠐⠭⠣⠱⠻⠾⠘⠆⠐⠌⠝⠼ | 30 | `σ^(2)=(Σ(x_(i)-x‾)^(2))/(n)` |
 | `E(X) = sum x_i p_i` | expectation | ⠠⠑⠷⠠⠭⠾⠀⠨⠅⠀⠨⠠⠎⠭⠰⠊⠐⠏⠰⠊ | 20 | `E(X)=Σx_(i)p_(i)` |
