@@ -88,7 +88,7 @@ drills, student records, and any language beyond English and Hindi.
 | Word recognition | tesseract.js 7 (Apache-2.0) with tessdata_fast English + Hindi, fully self-hosted | The words of a textbook question, both scripts, offline |
 | Speech output | Web Speech API, voices from the operating system | Free and offline; absence of a voice is reported, never silent |
 | Hardware link | Custom `Transport` interface with three implementations: simulator, Web Serial (USB), HTTP (Wi-Fi pods) | One interface means the app cannot behave differently on hardware than in the simulator |
-| Testing | Vitest 4 (666 unit tests), Playwright 1.62 (97 end-to-end journeys with screenshots at 390/834/1440 px) | See §7 |
+| Testing | Vitest 4 (666 unit tests), Playwright 1.62 (101 end-to-end journeys with screenshots at 390/834/1440 px) | See §7 |
 | Deployment | Vercel, static, free tier | No server component exists |
 
 Everything is served from the application's own origin — fonts, braille tables, both
@@ -174,8 +174,8 @@ badge, so the teacher's first scan does not pay the load cost.
 |---|---|
 | Unit tests (Vitest) | 666 / 666 passing |
 | TypeScript, ESLint | clean |
-| End-to-end journeys (Playwright, real browser, production build) | 97 / 97 passing, with screenshots at 390 / 834 / 1440 px and a no-horizontal-scroll assertion per screen |
-| Curriculum coverage | 175 / 175 lines across 23 topics (NCERT arc, classes 1–12: arithmetic, fractions, algebra, geometry, trigonometry, logarithms, sequences, sets, vectors, matrices, limits, derivatives, integrals, probability, Hindi worded questions) translate and read back cleanly. Regenerable as `docs/ACCURACY.md`, and re-runnable live by any user from the Help screen ("Prove the syllabus" — measured 2.5 s in-browser) |
+| End-to-end journeys (Playwright, real browser, production build) | 101 / 101 passing, with screenshots at 390 / 834 / 1440 px and a no-horizontal-scroll assertion per screen. Includes two handwriting journeys that draw real mouse strokes on the ink strip, wait for the on-device reading, and follow it through the confirm gate onto the board — and one that proves a hand correction is never overwritten by a later reading |
+| Curriculum coverage | 175 / 175 lines across 23 topics (NCERT arc, classes 1–12: arithmetic, fractions, algebra, geometry, trigonometry, logarithms, sequences, sets, vectors, matrices, limits, derivatives, integrals, probability, Hindi worded questions) translate and read back cleanly. Regenerable as `docs/ACCURACY.md`, and re-runnable live by any user from the Help screen ("Prove the syllabus" — measured 0.8 s on the deployed v4 build, 21 August 2026) |
 | Golden vectors | Nemeth output asserted against dot patterns from the official BANA Nemeth 2022 code book; Bharati output against the NIEPVD/Government of India Bharati Braille standard |
 | Round-trip law | Every expression's cells are read back by engines that share no code with the forward translation; disagreement is displayed, and the cosmetic LaTeX tidier is tested to never change the resulting braille |
 | Recognition speed | Cold press-to-result was 64.2 s (model load dominated); after background warm-up, 1.25 s press-to-result measured even when scanning immediately after page load; steady-state 0.7–2.5 s per scan on a mid-range laptop |
