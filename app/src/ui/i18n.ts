@@ -352,6 +352,20 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
 
   /* ---- practice ---- */
 
+  /* ---- the syllabus, proven live ---- */
+  'cov.title': ['The syllabus, proven here', 'पाठ्यक्रम, यहीं प्रमाणित'],
+  'cov.lede': [
+    'One press walks the whole school curriculum — arithmetic to calculus, classes 1 to 12 — through this laptop: every line translated, and read back by engines that never saw it.',
+    'एक बार दबाइए और पूरा स्कूली पाठ्यक्रम — अंकगणित से कलन तक, कक्षा 1 से 12 — इसी लैपटॉप से गुज़रता है: हर पंक्ति का अनुवाद, और फिर उन इंजनों से वापस पढ़ाई जो उसे कभी देखे ही नहीं।',
+  ],
+  'cov.run': ['Prove the syllabus', 'पाठ्यक्रम प्रमाणित कीजिए'],
+  'cov.running': ['Proving… {done} of {total} lines', 'प्रमाणित हो रहा है… {total} में से {done} पंक्तियाँ'],
+  'cov.summary': [
+    '{clean} of {total} curriculum lines translate and read back cleanly, across {topics} topics, in {s} seconds on this machine.',
+    '{total} में से {clean} पाठ्यक्रम पंक्तियाँ साफ़ अनुवाद होकर वापस पढ़ी गईं, {topics} विषयों में, इसी मशीन पर {s} सेकंड में।',
+  ],
+  'cov.classes': ['classes {classes}', 'कक्षा {classes}'],
+
   /* ---- warming the recognisers ---- */
   'cap.warming': ['getting ready · {pc}%', 'तैयार हो रहा है · {pc}%'],
   'cap.warm': ['ready — reads in under a second', 'तैयार — एक सेकंड से कम में पढ़ता है'],
