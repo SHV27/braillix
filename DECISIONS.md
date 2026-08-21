@@ -754,3 +754,15 @@ Run before calling this shipped. Result: **nothing to rotate, nothing to hide, n
 - D-V2.9: Committed lines are spoken as they land (sayCurrent after translation) — the chalk
   stroke a sighted class hears narrated. Key caps (Enter/PageUp/PageDown) whitelisted as names
   in the Hindi-purity i18n test.
+- D-V2.10: Words OCR = tesseract.js 7 with tessdata_fast eng+hin, fully self-hosted (worker,
+  core, langs in public/tesseract, gitignored, build-asserted). Two known-cosmetic core
+  warnings are filtered inside a runtime-generated quiet worker wrapper — console stays clean.
+- D-V2.11: Full-question scan = teacher rubber-bands parts in reading order, tags Words/Maths;
+  hand-correcting a part clears its doubt flag (the correction IS the verification). A
+  keyboard-only path reads the whole photo without dragging (Law 6).
+- D-V2.12: assert-assets.mjs runs inside npm run build — model/langs/mathmaps absent from dist
+  = build error. vercel.json fetches all assets in buildCommand. The v1 dead-button class is
+  structurally closed.
+- D-V2.13: tessdata_fast chosen over tessdata_best (3 MB vs ~30 MB; clean-print accuracy is
+  comparable and the confirm gate catches the rest). Revisit only if real-textbook scans
+  disappoint. Parked in NOTES.md.

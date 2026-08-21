@@ -66,7 +66,7 @@ export function QuestionScan({ onSent }: { onSent: (source: string) => void }) {
   }
 
   /** Crop the selected box out of the ORIGINAL pixels, not the scaled-down screen ones. */
-  function cropToCanvas(): HTMLCanvasElement | null {
+  function cropToCanvas(box: Box | null): HTMLCanvasElement | null {
     const el = img.current;
     if (!el || !box || box.w < 8 || box.h < 8) return null;
     const scaleX = el.naturalWidth / el.clientWidth;
@@ -92,8 +92,8 @@ export function QuestionScan({ onSent }: { onSent: (source: string) => void }) {
     return canvas;
   }
 
-  async function readAs(kind: 'words' | 'maths') {
-    const canvas = cropToCanvas();
+  async function readAs(kind: 'words' | 'maths', givenBox: Box | null = box) {
+    const canvas = cropToCanvas(givenBox);
     if (!canvas) return;
     setBusy(kind);
     setError(null);
@@ -193,6 +193,36 @@ export function QuestionScan({ onSent }: { onSent: (source: string) => void }) {
       {imageUrl && (
         <>
           <p className="qs__hint">{t('qs.dragHint')}</p>
+          {/* The keyboard road: no dragging required when the photo holds exactly one part.
+              (A mouse is a convenience; operating this app must never require one — Law 6.) */}
+          <div className="rec__actions">
+            <button
+              type="button"
+              className="chip"
+              disabled={busy !== null}
+              data-testid="qs-whole-words"
+              onClick={() => {
+                const el = img.current;
+                if (!el) return;
+                void readAs('words', { x: 0, y: 0, w: el.clientWidth, h: el.clientHeight });
+              }}
+            >
+              {t('qs.wholeWords')}
+            </button>
+            <button
+              type="button"
+              className="chip"
+              disabled={busy !== null}
+              data-testid="qs-whole-maths"
+              onClick={() => {
+                const el = img.current;
+                if (!el) return;
+                void readAs('maths', { x: 0, y: 0, w: el.clientWidth, h: el.clientHeight });
+              }}
+            >
+              {t('qs.wholeMaths')}
+            </button>
+          </div>
           <div
             className="qs__stage"
             data-testid="qs-stage"

@@ -365,6 +365,8 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
     'सवाल के एक हिस्से के चारों ओर बॉक्स खींचिए।',
   ],
   'qs.photoAlt': ['The photographed question', 'सवाल की फ़ोटो'],
+  'qs.wholeWords': ['Read the whole photo as words', 'पूरी फ़ोटो शब्दों के रूप में पढ़िए'],
+  'qs.wholeMaths': ['Read the whole photo as maths', 'पूरी फ़ोटो गणित के रूप में पढ़िए'],
   'qs.whatIsThis': ['What is in this box?', 'इस बॉक्स में क्या है?'],
   'qs.itsWords': ['Words', 'शब्द'],
   'qs.itsMaths': ['Maths', 'गणित'],
