@@ -13,11 +13,11 @@ drives it over the wire protocol in `docs/PROTOCOL.md`, and is complete without 
 
 Braillix is a capstone project built by:
 
-- **Shaurya Verma** — project lead, software
-- **Harshita** — software
-- **Aniket** — software
-- **Atishay** — hardware
-- **Mridul** — hardware
+- **Shaurya Verma** — Software
+- **Harshita** — Software
+- **Aniket** — Software
+- **Atishay** — Hardware
+- **Mridul** — Hardware
 
 ## What it looks like
 
