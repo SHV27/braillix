@@ -23,9 +23,16 @@ export type TransportStatus = 'disconnected' | 'connecting' | 'connected' | 'err
 /** What the pod reported when we asked what it is made of. Never assumed — always discovered. */
 export interface ChainInfo {
   readonly pods: readonly PodInfo[];
-  /** Total cells across every pod. */
+  /** Chained: total cells across every pod. Mirrored: the width of the smallest pod. */
   readonly cellCount: number;
   readonly firmware?: string;
+  /**
+   * True when several pods all show the same cells (a class reading together, D8.6). Stated
+   * explicitly because the profile's pod arithmetic is different in each mode, and deriving
+   * the mode from the numbers would be a guess (v5 Arc D found the chain-shaped check
+   * rejecting a real 4+2-cell mirror).
+   */
+  readonly mirrored?: boolean;
 }
 
 export type PodButton = 'prev' | 'select' | 'next';

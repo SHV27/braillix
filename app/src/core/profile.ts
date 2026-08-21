@@ -41,6 +41,8 @@ export interface DisplayProfile {
   readonly homeIndex: number;
   /** Per-pod breakdown, when the display is made of more than one brain pod. */
   readonly pods: readonly PodInfo[];
+  /** True when every pod shows the same cells (a class reading together); width = smallest pod. */
+  readonly mirrored: boolean;
 }
 
 export interface PodInfo {
@@ -71,6 +73,7 @@ export function makeProfile(input: {
   reversed?: boolean;
   homeIndex?: number;
   pods?: readonly PodInfo[];
+  mirrored?: boolean;
 }): DisplayProfile {
   const { cellCount, source, label } = input;
 
@@ -87,11 +90,25 @@ export function makeProfile(input: {
   }
 
   const pods = input.pods ?? [{ index: 0, label, cellAddrs: [] }];
+  const mirrored = input.mirrored ?? false;
   const podTotal = pods.reduce((sum, pod) => sum + pod.cellAddrs.length, 0);
-  if (podTotal > 0 && podTotal !== cellCount) {
-    throw new ProfileError(
-      `pods declare ${podTotal} cells but cellCount is ${cellCount} — the display would be sliced wrongly`,
-    );
+  if (podTotal > 0) {
+    if (mirrored) {
+      // Mirrored, the display is exactly as wide as the SMALLEST pod (D8.6) — a frame the
+      // small display cannot show would leave one child reading a truncated line. Different
+      // arithmetic, same duty: fail loudly rather than slice wrongly (v5 Arc D: a real
+      // 4+2-cell mirror was being rejected by the chain-shaped check below).
+      const smallest = Math.min(...pods.map((pod) => pod.cellAddrs.length).filter((width) => width > 0));
+      if (cellCount !== smallest) {
+        throw new ProfileError(
+          `mirrored pods must show the width of the smallest (${smallest} cells) but cellCount is ${cellCount}`,
+        );
+      }
+    } else if (podTotal !== cellCount) {
+      throw new ProfileError(
+        `pods declare ${podTotal} cells but cellCount is ${cellCount} — the display would be sliced wrongly`,
+      );
+    }
   }
 
   return {
@@ -102,6 +119,7 @@ export function makeProfile(input: {
     reversed: input.reversed ?? false,
     homeIndex,
     pods,
+    mirrored,
   };
 }
 

@@ -53,6 +53,41 @@ describe('profile construction', () => {
       }),
     ).toThrow(/sliced wrongly/);
   });
+
+  /*
+   * Found live, not by reasoning: a real 4-cell pod and a real 2-cell pod, mirrored for two
+   * students, were rejected by the chain-shaped check above (v5 Arc D). Mirrored pods have
+   * their own arithmetic — the display is exactly as wide as the smallest pod (D8.6).
+   */
+  it('accepts mirrored pods of different widths at the width of the smallest', () => {
+    const profile = makeProfile({
+      cellCount: 2,
+      source: 'http',
+      label: 'two pods, mirrored',
+      mirrored: true,
+      pods: [
+        { index: 0, label: 'pod 0', cellAddrs: [0x20, 0x21, 0x22, 0x23] },
+        { index: 1, label: 'pod 1', cellAddrs: [0x20, 0x21] },
+      ],
+    });
+    expect(profile.cellCount).toBe(2);
+    expect(profile.mirrored).toBe(true);
+  });
+
+  it('rejects a mirrored cellCount that is not the smallest pod', () => {
+    expect(() =>
+      makeProfile({
+        cellCount: 4,
+        source: 'http',
+        label: 'two pods, mirrored wrongly',
+        mirrored: true,
+        pods: [
+          { index: 0, label: 'pod 0', cellAddrs: [0x20, 0x21, 0x22, 0x23] },
+          { index: 1, label: 'pod 1', cellAddrs: [0x20, 0x21] },
+        ],
+      }),
+    ).toThrow(/smallest/);
+  });
 });
 
 describe('cam mapping', () => {

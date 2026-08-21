@@ -136,7 +136,7 @@ export class HttpPodTransport extends TransportBase implements Transport {
           'Check that the cells are powered and answering on the I2C bus.',
         );
       }
-      this.#chain = { pods, cellCount, firmware };
+      this.#chain = { pods, cellCount, firmware, mirrored: this.#mode === 'mirror' };
       this.setStatus('connected');
       if (this.#pollButtons) this.#startPolling();
       return this.#chain;

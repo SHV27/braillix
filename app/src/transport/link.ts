@@ -98,6 +98,7 @@ export class DisplayLink {
       reversed: existing?.reversed,
       homeIndex: existing?.homeIndex,
       pods: this.#chain.pods,
+      mirrored: this.#chain.mirrored,
     });
   }
 
