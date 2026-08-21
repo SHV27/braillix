@@ -43,3 +43,13 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 
+
+# Internal planning documents never ship with the product (v3 brief order). They stay local.
+VISION-BRIEF-*.md
+ARC_PLAN.md
+NOTES.md
+PROGRESS.md
+DECISIONS.md
+RESEARCH.md
+SOFTWARE_TEAM_README*.pdf
+PLAN.md
