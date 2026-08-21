@@ -12,10 +12,11 @@ import { expect, test, type Page } from '@playwright/test';
 async function openReader(page: Page, latex: string) {
   await page.goto('/');
   await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
-  await page.getByRole('checkbox', { name: /speak as i read|पढ़ते समय बोलिए/i }).uncheck();
+  await page.getByTestId('speech-toggle').click();
   await page.getByTestId('latex-input').fill(latex);
   await expect(page.getByTestId('latex-input')).toHaveValue(latex);
   await page.waitForTimeout(500);
+  await page.getByTestId('explore-toggle').click();
   await page.getByTestId('mode-explore').click();
   await expect(page.getByTestId('breadcrumb')).not.toHaveText('—', { timeout: 10_000 });
 }

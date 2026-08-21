@@ -31,7 +31,7 @@ test.describe('recognition quality on the shipped samples', () => {
     test.setTimeout(300_000);
 
     await page.goto('/');
-    await page.getByTestId('source-photo').click();
+    await page.getByTestId('tray-scan').click();
 
     const results: string[] = [];
 

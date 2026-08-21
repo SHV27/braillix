@@ -12,8 +12,8 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const SCREENS = [
-  { tab: 'board', steps: [], heading: 'Write maths. Read it with your hands.' },
-  { tab: 'photo', steps: ['source-photo'], heading: 'Write maths. Read it with your hands.' },
+  { tab: 'board', steps: [], heading: 'The blackboard' },
+  { tab: 'scan', steps: ['tray-scan'], heading: 'The blackboard' },
   { tab: 'device', steps: ['nav-device'], heading: 'Hardware' },
   { tab: 'atlas', steps: ['nav-device', 'device-atlas'], heading: 'Cell atlas' },
 ] as const;
@@ -114,8 +114,9 @@ test.describe('keyboard only', () => {
     test(`${screen.tab}: tabbing reaches controls and never traps`, async ({ page }) => {
       await open(page, screen.tab);
       // Give the document focus first. Headless Chromium starts with focus nowhere, and the first
-      // Tab then lands on nothing — which is a property of the harness, not of the page.
-      await page.locator('h1').click();
+      // Tab then lands on nothing — which is a property of the harness, not of the page. A raw
+      // mouse click at the corner works whatever overlay (the scan sheet) is on top.
+      await page.mouse.click(2, 2);
 
       const seen = new Set<string>();
       let last = '';
@@ -159,11 +160,12 @@ test.describe('keyboard only', () => {
 
   test('the reader is fully operable without a mouse', async ({ page }) => {
     await open(page, 'board');
-    await page.getByLabel('Speak as I read').uncheck();
+    await page.getByTestId('speech-toggle').click(); // speech starts on; one press silences it
     await page.getByTestId('latex-input').fill(String.raw`\frac{1}{2a}`);
     await page.waitForTimeout(400);
+    await page.getByTestId('explore-toggle').click();
     await page.getByTestId('mode-explore').click();
-    await page.locator('h1').click();
+    await page.locator('.rail-top__brand').click();
 
     await page.keyboard.press('ArrowDown');
     await expect(page.getByTestId('breadcrumb')).toHaveText('Fraction ▸ Numerator');

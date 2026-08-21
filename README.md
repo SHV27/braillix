@@ -1,9 +1,12 @@
 # Braillix — the teacher's blackboard, on a blind child's fingers
 
-A maths teacher who only knows WhatsApp writes, types, or scans whatever she is teaching
-*right now* — full questions, worded problems, worked steps — and it lands on her student's
-refreshable braille cells, live and correct. In English and in Hindi. With no account, no
-server, no API key, and no network needed after the first load.
+A maths teacher who only knows WhatsApp opens one screen that **is** a blackboard: she writes
+by hand, types, or photographs whatever she is teaching *right now* — full questions, worded
+problems, worked steps — and it lands on her student's refreshable braille cells, live and
+verified. In English and in Hindi. With no account, no server, no API key, and no network
+needed after the first load.
+
+**Live:** https://braillix.vercel.app
 
 This repository is the **software half** of the Braillix capstone. The hardware half (the
 ESP32 "brain pod" and the motorised "muscle cells") lives with the hardware team; this app
@@ -35,15 +38,21 @@ Braillix is a capstone project built by:
 
 ## What a lesson looks like
 
-1. **The board.** The teacher types a line the way she would say it — `2x + 3 = 11`, or
-   `दो संख्याओं का योग 12 है` — and presses Enter. The line joins the lesson stack, lands on
-   the cells, and is spoken aloud. Line by line, the working builds up exactly as it does on
-   a blackboard, and every line can be shown again with one press.
-2. **The scan.** "Photograph it" reads an equation from a photo or a drawing. "A full
-   question" reads a textbook line part by part — the words by one engine (Tesseract,
-   English + Hindi), the maths by another (a 76 MB on-device formula model). Everything is
-   read **on the laptop**, offline; nothing leaves the room.
-3. **The walk.** The pod's own Prev/Next buttons — or PageUp/PageDown, or the on-screen
+The whole app is one surface: the lesson standing on the board as typeset chalk, the cells
+beneath it, and a chalk tray with every symbol a school line needs always on screen.
+
+1. **Write it — like chalk.** Press the pencil and the board's next line becomes a writing
+   surface. Write a step with a finger, stylus or mouse; the moment the hand pauses, the
+   on-device recogniser reads it into the box below, with a print preview and a braille
+   verdict to check. One press puts it on the board — and the teacher's own handwriting
+   stays faintly behind the typeset line.
+2. **Type it — like a message.** `2x + 3 = 11`, `sqrt(144)`, `1/2`, or a full Hindi question
+   like `दो संख्याओं का योग 12 है` — Enter puts it on the board, on the cells, and in the
+   room aloud. The print preview and the dots track every keystroke.
+3. **Photograph it.** The camera grip reads an equation photo, or a full textbook question
+   part by part — words by Tesseract (English + Hindi), maths by a 76 MB on-device formula
+   model. Everything is read **on the laptop**, offline; nothing leaves the room.
+4. **The walk.** The pod's own Prev/Next buttons — or PageUp/PageDown, or the on-screen
    arrows — walk the whole lesson: through the panes of a long line, then on to the next
    line. On a one-cell display that walk is seamless; on forty cells it is the same walk.
 
@@ -95,7 +104,7 @@ npm install          # also copies SRE + tesseract assets into app/public
 npm run fetch:model  # once: the 76 MB on-device formula model
 node tools/fetch-tesseract-langs.mjs   # once: eng+hin word reading (3 MB)
 npm run dev          # http://localhost:5173
-npm run verify       # typecheck · lint · 666 unit tests · 97 e2e journeys + screenshots
+npm run verify       # typecheck · lint · 666 unit tests · 101 e2e journeys + screenshots
 npm run pod          # a virtual brain pod on :8080 — connect from the Device screen
 ```
 

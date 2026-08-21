@@ -20,14 +20,14 @@ const MODEL_PRESENT = existsSync(join(process.cwd(), 'public', 'models', 'formul
 test.describe('reading handwriting', () => {
   test('offers samples so a demo never depends on the room’s lighting', async ({ page }) => {
     await page.goto('/');
-    await page.getByTestId('source-photo').click();
+    await page.getByTestId('tray-scan').click();
     await expect(page.getByRole('heading', { name: 'What it read' })).toBeVisible();
     await expect(page.locator('.samples__btn')).toHaveCount(6);
   });
 
   test('shows the recogniser exactly what it will see', async ({ page }) => {
     await page.goto('/');
-    await page.getByTestId('source-photo').click();
+    await page.getByTestId('tray-scan').click();
     await page.getByTestId('sample-quadratic.svg').click();
 
     // The preview is the cropped, normalised image — not the original. Being able to see that is
@@ -38,7 +38,7 @@ test.describe('reading handwriting', () => {
 
   test('lets you write an equation with the mouse', async ({ page }) => {
     await page.goto('/');
-    await page.getByTestId('source-photo').click();
+    await page.getByTestId('tray-scan').click();
     await page.getByTestId('mode-draw').click();
 
     const pad = page.getByTestId('draw-pad');
@@ -74,7 +74,7 @@ test.describe('reading handwriting — with the model installed', () => {
     test.setTimeout(180_000);
 
     await page.goto('/');
-    await page.getByTestId('source-photo').click();
+    await page.getByTestId('tray-scan').click();
     await page.getByTestId('sample-fraction.svg').click();
 
     await page.getByTestId('run-recognition').click();
@@ -94,7 +94,13 @@ test.describe('reading handwriting — with the model installed', () => {
     // back in the typing box, which stays empty for the teacher's next line.
     await page.getByTestId('send-to-display').click();
     await expect(page.getByTestId('lesson-rail')).toBeVisible();
-    await expect(page.getByTestId('lesson-rail')).toContainText(latex.trim().slice(0, 12));
+    // The board renders lines as typeset print, not raw LaTeX — so the honest check is the
+    // store: the confirmed line's source is exactly what the recogniser handed over.
+    await expect
+      .poll(async () =>
+        page.evaluate(() => (window as unknown as { __braillix: { getState(): { source: string } } }).__braillix.getState().source),
+      )
+      .toBe(latex.trim());
     // The typing box keeps whatever draft the teacher had; the recognised maths does not
     // hijack it on its way to the board.
     await expect(page.getByTestId('latex-input')).not.toHaveValue(latex);
@@ -104,7 +110,7 @@ test.describe('reading handwriting — with the model installed', () => {
     test.setTimeout(180_000);
 
     await page.goto('/');
-    await page.getByTestId('source-photo').click();
+    await page.getByTestId('tray-scan').click();
     await page.getByTestId('sample-quadratic.svg').click();
     await page.getByTestId('run-recognition').click();
     await expect(page.getByTestId('rec-latex')).toBeVisible({ timeout: 150_000 });
@@ -123,7 +129,7 @@ test.describe('scanning a full question — words and maths together', () => {
     test.setTimeout(300_000);
 
     await page.goto('/');
-    await page.getByTestId('source-photo').click();
+    await page.getByTestId('tray-scan').click();
     await page.getByTestId('mode-question').click();
 
     // Synthesize a textbook-style question in the page: words, then maths.
@@ -177,7 +183,12 @@ test.describe('scanning a full question — words and maths together', () => {
     // The confirm gate: the send button IS the approval, and the line lands on the board
     // as words + maths in their two braille codes.
     await page.getByTestId('qs-send').click();
-    await expect(page.getByTestId('lesson-rail')).toContainText('2 x + 3 = 11');
+    await expect
+      .poll(async () =>
+        page.evaluate(() => (window as unknown as { __braillix: { getState(): { source: string } } }).__braillix.getState().source),
+      )
+      .toContain('2 x + 3 = 11');
+    await page.getByTestId('evidence-toggle').click();
     await expect(page.locator('.evidence__count')).toContainText('Nemeth');
   });
 });

@@ -76,6 +76,21 @@
   --dur-ui: 140ms;
 }
 
+/* ---- THE BOARD (v4): the one surface that is a blackboard ----
+   A real school board: deep slate green-black, chalk-cream writing, the amber signal reserved
+   for "the class is here". The drawer and its instruments keep the graphite above. */
+:root {
+  --board-000: #101613; /* the slate itself */
+  --board-050: #141b17; /* slate, raised (tray) */
+  --board-100: #1a221d; /* slate control */
+  --board-200: #232d27; /* slate control hover */
+  --chalk-100: #f4f2e7; /* chalk, pressed hard — headings, maths */
+  --chalk-200: #d8d6c9; /* chalk, normal hand — body */
+  --chalk-300: #a8a89b; /* chalk, faint — hints */
+  --board-edge: rgba(244, 242, 231, 0.08);
+  --board-vignette: radial-gradient(120% 90% at 50% 0%, rgba(244, 242, 231, 0.03), transparent 60%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --dur-cam: 1ms;

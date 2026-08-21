@@ -106,8 +106,8 @@ test.describe('Braillix — the core journey', () => {
 
     // Walk far enough to reach the input, and prove it can be typed into without a mouse. The
     // count is generous on purpose: what matters is that it is reachable, not that it is the
-    // twelfth stop — a welcome panel or a new control should not fail this test.
-    for (let i = 0; i < 40; i += 1) {
+    // Nth stop — and the always-visible symbol rail alone is 36 legitimate stops on the way.
+    for (let i = 0; i < 90; i += 1) {
       await page.keyboard.press('Tab');
       if (await page.getByTestId('latex-input').evaluate((el) => el === document.activeElement)) break;
     }
@@ -159,40 +159,63 @@ test.describe('appearance', () => {
 });
 
 /**
- * The first sixty seconds.
+ * The blackboard itself — the v4 core.
  *
- * A teacher who has never seen this before opens it and is not asked to read anything: three
- * things to press, each of which does what it says. And once dismissed it is gone — an app that
- * keeps explaining itself to somebody who has used it all term is an app that is not listening.
+ * A board that has never been written on opens with one worked line already standing on it and
+ * already on the cells; the teacher writes lines and they accumulate; tapping any line is the
+ * teacher pointing at the board. This is the product; everything else serves it.
  */
-test.describe('the first sixty seconds', () => {
-  test('offers three things to press, and each of them does it', async ({ page }) => {
+test.describe('the blackboard', () => {
+  test('opens with one worked line already alive on the cells', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
-    await expect(page.getByTestId('first-run')).toBeVisible();
 
-    await page.getByTestId('first-run-read').click();
-    await expect(page.getByTestId('latex-input')).toHaveValue('2/3 + 1/6');
-    await expect(page.getByTestId('braille-unicode')).toContainText('⠹', { timeout: 10_000 });
-
-    await page.getByTestId('first-run-explore').click();
-    // Nineteen cells fold to five: open, something, over, something, close.
-    await expect(page.getByTestId('braille-unicode')).toHaveText('⠹⠿⠌⠿⠼', { timeout: 10_000 });
-
-    await page.getByTestId('first-run-question').click();
-    await expect(page.getByTestId('question-strip')).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByTestId('braille-unicode')).toContainText('⠸⠩', { timeout: 10_000 });
+    // The seeded example stands ON the board, not in the input — the hand starts empty.
+    await expect(page.getByTestId('lesson-rail').locator('li')).toHaveCount(1);
+    await expect(page.getByTestId('latex-input')).toHaveValue('');
   });
 
-  test('goes away when dismissed, and stays away', async ({ page }) => {
+  test('lines accumulate, and tapping one puts it back on the display', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByTestId('first-run')).toBeVisible({ timeout: 20_000 });
-    await page.getByTestId('first-run-close').click();
-    await expect(page.getByTestId('first-run')).toBeHidden();
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
+
+    await page.getByTestId('latex-input').fill('2/3 + 1/6');
+    await page.getByTestId('commit-line').click();
+    await page.getByTestId('latex-input').fill('sqrt(144) = 12');
+    await page.getByTestId('commit-line').click();
+    await expect(page.getByTestId('lesson-rail').locator('li')).toHaveCount(3);
+
+    // The display holds the last line written…
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠜', { timeout: 10_000 });
+    // …until the teacher points at an earlier one.
+    await page.getByTestId('lesson-line-1').click();
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠹', { timeout: 10_000 });
+  });
+
+  test('correcting a line happens in the tray, and the correction lands', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
+
+    await page.getByTestId('latex-input').fill('2+2=5');
+    await page.getByTestId('commit-line').click();
+    await page.getByTestId('lesson-edit-1').click();
+    await expect(page.getByTestId('latex-input')).toHaveValue('2+2=5');
+    await page.getByTestId('latex-input').fill('2+2=4');
+    await page.getByTestId('commit-line').click();
+
+    await expect(page.getByTestId('lesson-line-1')).not.toContainText('2+2=5');
+    await expect(page.getByTestId('latex-input')).toHaveValue('');
+  });
+
+  test('a wiped board stays wiped — the example does not come back', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
+
+    await page.getByTestId('lesson-clear').click();
+    await expect(page.getByTestId('lesson-empty')).toBeVisible();
 
     await page.reload();
-    await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
-    await expect(page.getByTestId('first-run')).toBeHidden();
+    await expect(page.getByTestId('lesson-empty')).toBeVisible({ timeout: 20_000 });
   });
 });
 
@@ -292,28 +315,18 @@ test.describe('a question in any Indian script', () => {
  * unified table. The right behaviour is not to render something near it — it is to say so.
  */
 /**
- * Clear must clear.
+ * The hand empties and stays empty.
  *
- * The Board greets a new user with one worked example, so the first thing anybody sees is a working
- * display rather than an empty box. That greeting used to re-fire every time the field became empty
- * — so pressing Clear put the example straight back, and deleting the last character by hand
- * refilled the field under the teacher's cursor. A greeting is not a rule about what the box may
- * contain.
+ * The v3 greeting used to refill the input whenever it became empty — deleting the last
+ * character put the example back under the teacher's cursor. v4 seeds the example onto the
+ * BOARD instead and never touches the hand, so the box's only writer is the teacher.
  */
-test('the Clear button clears, and the example does not come back', async ({ page }) => {
+test('an emptied input stays empty — nothing races to refill it', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByTestId('latex-input')).toHaveValue('x^2 + 3x + 2 = 0', { timeout: 20_000 });
+  await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
+  await expect(page.getByTestId('latex-input')).toHaveValue('');
 
   await page.getByTestId('latex-input').fill('2x + 5 = 15');
-  await page.getByTestId('clear-board').click();
-  await expect(page.getByTestId('latex-input')).toHaveValue('');
-
-  // Still empty a moment later: nothing is racing to refill it.
-  await page.waitForTimeout(600);
-  await expect(page.getByTestId('latex-input')).toHaveValue('');
-
-  // And typing then deleting by hand leaves it empty too.
-  await page.getByTestId('latex-input').fill('7');
   await page.getByTestId('latex-input').fill('');
   await page.waitForTimeout(600);
   await expect(page.getByTestId('latex-input')).toHaveValue('');

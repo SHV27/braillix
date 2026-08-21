@@ -62,7 +62,7 @@ test.describe('reading the dots back', () => {
     // yet, and the only honest thing to say about that is so.
     await type(page, '\\vec{v}');
     await expect(page.getByTestId('readback-verdict')).toHaveAttribute('data-verdict', 'unchecked');
-    await expect(page.getByText('Cannot be checked')).toBeVisible();
+    await expect(page.getByText(/could not be double-checked/)).toBeVisible();
     // The braille is still there. An unverified translation is not a blanked display (Law 4).
     await expect(page.getByTestId('braille-unicode')).not.toBeEmpty();
   });
@@ -94,9 +94,9 @@ test.describe('reading the dots back', () => {
     await page.goto('/');
     await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
 
+    await type(page, 'x^2 + 1');
     await page.getByRole('button', { name: /हिन्दी/ }).click();
-    await expect(page.getByText('डॉट्स क्या कह रहे हैं')).toBeVisible();
-    await expect(page.getByText('आपने जो लिखा, वही है')).toBeVisible();
+    await expect(page.getByText('डॉट्स वही पढ़ते हैं जो आपने लिखा।')).toBeVisible();
     // The braille itself never changes with the language. Nemeth is Nemeth.
     await expect(page.getByTestId('braille-unicode')).toContainText('⠭');
   });
@@ -106,6 +106,8 @@ test.describe('reading the dots back', () => {
     await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
 
     await type(page, 'दो संख्याओं का योग 12 है');
+    // The evidence lives behind one press now (v4): a lesson is not an inspection.
+    await page.getByTestId('evidence-toggle').click();
 
     // The strip used to say "Nemeth" whatever was on it, and annotate a Bharati ⠙ as "letter d".
     // A teacher reading that table would have been told something false about every cell.

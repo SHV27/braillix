@@ -44,47 +44,18 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
     'इस मशीन पर ब्रेलिक्स का नया संस्करण तैयार है।',
   ],
   'update.reload': ['Use it now', 'अभी इस्तेमाल करें'],
-  'app.tagline': ['refreshable braille for mathematics', 'गणित के लिए रिफ्रेशेबल ब्रेल'],
   'app.skip': ['Skip to the display', 'सीधे डिस्प्ले पर जाएँ'],
   'app.sections': ['Sections', 'भाग'],
   'app.language': ['Language', 'भाषा'],
 
-  'nav.board': ['Board', 'बोर्ड'],
-  'nav.board.hint': ['Write maths and put it on the display', 'गणित लिखें और डिस्प्ले पर भेजें'],
   'nav.device': ['Device', 'डिवाइस'],
-  'nav.device.hint': ['Connect a display and check the wiring', 'डिस्प्ले जोड़ें और वायरिंग जाँचें'],
 
   /* ---- board ---- */
-  'board.title': ['Write maths. Read it with your hands.', 'गणित लिखिए। हाथों से पढ़िए।'],
-  'board.lede': [
-    'Type it the way you would on paper. Braillix turns it into Nemeth — the braille code for mathematics — and drives the dots, on one cell or on forty.',
-    'जैसे कागज़ पर लिखते हैं वैसे ही लिखिए। ब्रेलिक्स इसे नेमेथ में बदलता है — गणित की ब्रेल लिपि — और डॉट्स चलाता है, चाहे एक सेल हो या चालीस।',
-  ],
-  'board.source.type': ['Type it', 'लिखिए'],
-  'board.source.photo': ['Photograph it', 'फ़ोटो लीजिए'],
   'board.field': ['The expression', 'गणितीय व्यंजक'],
   'board.help': [
     'Write it as you would say it: 1/2, sqrt(9), x^2, 2 <= x, 45 degrees. LaTeX works too.',
     'जैसे बोलते हैं वैसे लिखिए: 1/2, sqrt(9), x^2, 2 <= x, 45 degrees. LaTeX भी चलता है।',
   ],
-  /* ---- the read-back check ---- */
-  'readback.title': ['What the dots say', 'डॉट्स क्या कह रहे हैं'],
-  'readback.agrees': ['Matches what you typed', 'आपने जो लिखा, वही है'],
-  'readback.differs': ['Does NOT match what you typed', 'आपने जो लिखा, यह वह नहीं है'],
-  'readback.unchecked.detail': [
-    'This one uses something the checker does not understand yet, so it cannot confirm the dots. The braille is still on the display — have someone who reads braille look at it before a student does.',
-    'इसमें कुछ ऐसा है जिसे जाँचने वाला अभी समझता नहीं, इसलिए वह डॉट्स की पुष्टि नहीं कर सका। ब्रेल डिस्प्ले पर मौजूद है — विद्यार्थी को देने से पहले किसी ब्रेल पढ़ने वाले से देखवा लीजिए।',
-  ],
-  'readback.unchecked': ['Cannot be checked', 'जाँचा नहीं जा सका'],
-  'readback.differs.detail': [
-    'The dots do not say what you wrote. You wrote {expected}. Please do not send this to a student — tell us the expression and it will be fixed.',
-    'डॉट्स वह नहीं कह रहे जो आपने लिखा। आपने {expected} लिखा था। कृपया इसे विद्यार्थी को न भेजें — हमें यह व्यंजक बताइए, इसे ठीक किया जाएगा।',
-  ],
-  'readback.how': [
-    'Read back from the dots themselves by engines that never saw what you typed — one for each braille code on the line. When the two readings agree, the braille is carrying your question.',
-    'यह पढ़ाई डॉट्स से ही की गई है, ऐसे इंजनों द्वारा जिन्होंने आपका लिखा कभी देखा ही नहीं — पंक्ति की हर ब्रेल लिपि के लिए एक। जब दोनों पढ़ाइयाँ मिलती हैं, तब ब्रेल आपका प्रश्न सही ले जा रही है।',
-  ],
-
   /* ---- the blackboard (the lesson rail) ---- */
   'rail.title': ['Today’s lesson, line by line', 'आज का पाठ, पंक्ति दर पंक्ति'],
   'rail.empty': ['The board is empty.', 'बोर्ड अभी खाली है।'],
@@ -98,28 +69,54 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   'rail.clear': ['Wipe the board', 'पूरा बोर्ड साफ़ कीजिए'],
   'rail.translating': ['working…', 'हो रहा है…'],
   'board.put': ['Put on the board', 'बोर्ड पर लिखिए'],
+
+  'board.h1': ['The blackboard', 'गणित का ब्लैकबोर्ड'],
+
+  /* ---- the chalk tray (v4) ---- */
+  'tray.placeholder': ['Write the next line here', 'अगली पंक्ति यहाँ लिखिए'],
+  'tray.scan': ['Photograph a page', 'पन्ने की फ़ोटो लीजिए'],
+  'tray.save': ['Save', 'सहेजें'],
+  'drawer.back': ['Back to the board', 'बोर्ड पर वापस'],
+
+  'tray.write': ['Write by hand', 'हाथ से लिखिए'],
+
+  /* ---- the ink strip (v4) ---- */
+  'ink.maths': ['Maths', 'गणित'],
+  'ink.words': ['Words', 'शब्द'],
+  'ink.modeLabel': ['What are you writing?', 'आप क्या लिख रही हैं?'],
+  'ink.undo': ['Undo', 'पीछे जाइए'],
+  'ink.clear': ['Wipe', 'मिटाइए'],
+  'ink.working': ['Reading your writing…', 'आपकी लिखाई पढ़ी जा रही है…'],
+  'ink.landed': ['It is in the box below — check it, then put it on the board.', 'नीचे बॉक्स में आ गया — जाँचिए, फिर बोर्ड पर भेजिए।'],
+  'ink.check': ['Not sure about this one — please check the box below.', 'इसमें पक्का नहीं — नीचे बॉक्स में ज़रूर जाँचिए।'],
+  'ink.nothing': ['Nothing could be read. Write larger, and one line at a time.', 'कुछ पढ़ा नहीं जा सका। बड़ा लिखिए, और एक बार में एक ही पंक्ति।'],
+  'ink.hint': [
+    'Write one step, large and clear, the way you would on the board. It lands in the box below the moment you pause.',
+    'एक चरण लिखिए — बड़ा और साफ़, जैसे बोर्ड पर लिखतीं। रुकते ही वह नीचे बॉक्स में आ जाएगा।',
+  ],
+  'ink.canvasLabel': ['The writing surface', 'लिखने की जगह'],
+  'ink.unavailable': [
+    'Handwriting reading is not installed on this machine. Typing works as always.',
+    'इस मशीन पर लिखाई पढ़ने वाला मॉडल नहीं है। टाइपिंग हमेशा की तरह चलती है।',
+  ],
+
+  /* ---- the cells strip (v4) ---- */
+  'strip.speak': ['Speak', 'बोलें'],
+  'strip.structure': ['Explore', 'ढाँचा देखें'],
+  'strip.why': ['Why these dots?', 'ये डॉट्स क्यों?'],
+
+  /* ---- the verdict, in one line (v4) ---- */
+  'verdict.agrees': ['The dots read back as what you wrote.', 'डॉट्स वही पढ़ते हैं जो आपने लिखा।'],
+  'verdict.differs': ['Warning: the dots read back differently. Check before teaching.', 'चेतावनी: डॉट्स कुछ और पढ़ते हैं। पढ़ाने से पहले जाँचें।'],
+  'verdict.unchecked': ['Part of this line could not be double-checked.', 'इस पंक्ति का एक हिस्सा दोबारा जाँचा नहीं जा सका।'],
   'board.saveLine': ['Save line {n}', 'पंक्ति {n} सहेजिए'],
   'board.cancelEdit': ['Stop correcting', 'सुधारना छोड़िए'],
 
-  'board.print': ['How it reads in print', 'छपाई में ऐसा दिखता है'],
   'board.print.empty': ['Type something and it appears here', 'कुछ लिखिए, वह यहाँ दिखेगा'],
-  'board.examples': ['Examples', 'उदाहरण'],
-  'board.clear': ['Clear', 'मिटाएँ'],
   'board.parseFailed': ['That expression could not be read.', 'यह व्यंजक पढ़ा नहीं जा सका।'],
 
-  'board.source': ['How to write it', 'कैसे लिखें'],
 
   /* ---- examples ---- */
-  'ex.quadratic': ['Quadratic', 'द्विघात'],
-  'ex.fraction': ['Fraction', 'भिन्न'],
-  'ex.root': ['Square root', 'वर्गमूल'],
-  'ex.formula': ['Quadratic formula', 'द्विघात सूत्र'],
-  'ex.identity': ['Identity', 'सर्वसमिका'],
-  'ex.addFractions': ['Adding fractions', 'भिन्नों का जोड़'],
-  'ex.degrees': ['An angle', 'एक कोण'],
-  'ex.money': ['Money', 'रुपये-पैसे'],
-  'ex.hindiQuestion': ['A question in Hindi', 'हिन्दी में एक प्रश्न'],
-  'ex.wordProblem': ['A word problem', 'शब्द-प्रश्न'],
 
   /* ---- questions: words and maths on one line ---- */
   'mixed.flip': ['Click to switch between words and maths', 'शब्द और गणित के बीच बदलने के लिए दबाइए'],
@@ -130,42 +127,9 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   'code.nemeth': ['Nemeth · maths', 'नेमेथ · गणित'],
   'code.bharati': ['Bharati · Hindi', 'भारती · हिन्दी'],
   'code.literary': ['Grade 1 · words', 'ग्रेड 1 · शब्द'],
-  'board.question': ['The question, part by part', 'प्रश्न, हिस्सा-दर-हिस्सा'],
-
-  /* ---- the first sixty seconds ---- */
-  'first.title': ['New here? Sixty seconds.', 'पहली बार? साठ सेकंड।'],
-  'first.lede': [
-    'Press any of these and watch the display. Nothing is being set up — this is the product working.',
-    'इनमें से कोई भी दबाइए और डिस्प्ले देखिए। कुछ सेट नहीं हो रहा — यह उत्पाद चल रहा है।',
-  ],
-  'first.skip': ['I know it already', 'मुझे पता है'],
-  'first.step1': ['Put a sum on the display', 'डिस्प्ले पर एक सवाल भेजिए'],
-  'first.step1detail': [
-    'Two thirds plus one sixth, written the way you would write it.',
-    'दो तिहाई जोड़ एक छठा — जैसे आप लिखते हैं वैसे ही।',
-  ],
-  'first.step2': ['Make a long formula fit one cell', 'लंबा सूत्र एक सेल में समाइए'],
-  'first.step2detail': [
-    'The quadratic formula folds from nineteen cells to five, and you step into the parts.',
-    'द्विघात सूत्र उन्नीस सेल से पाँच में सिमट जाता है, और आप हिस्सों में जा सकते हैं।',
-  ],
-  'first.step3': ['Write a question in Hindi', 'हिन्दी में सवाल लिखिए'],
-  'first.step3detail': [
-    'Words in Bharati Braille, the number in Nemeth, on one line of cells.',
-    'शब्द भारती ब्रेल में, संख्या नेमेथ में — सेल की एक ही पंक्ति पर।',
-  ],
-  'first.foot': ['Everything else is explained in', 'बाक़ी सब समझाया गया है'],
-  'first.help': ['Help', 'सहायता में'],
 
   /* ---- keypad ---- */
-  'keypad.arithmetic': ['Arithmetic', 'अंकगणित'],
-  'keypad.shapes': ['Powers and roots', 'घात और मूल'],
-  'keypad.comparison': ['Comparison', 'तुलना'],
   'keypad.symbols': ['Symbols', 'चिह्न'],
-  'keypad.functions': ['Functions', 'फलन'],
-  'keypad.senior': ['Senior classes', 'बड़ी कक्षाएँ'],
-  'keypad.more': ['More symbols', 'और चिह्न'],
-  'keypad.fewer': ['Fewer symbols', 'कम चिह्न'],
   'keypad.plus': ['plus', 'जोड़'],
   'keypad.minus': ['minus', 'घटा'],
   'keypad.times': ['times', 'गुणा'],
@@ -207,7 +171,6 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
 
   /* ---- help and the self-check ---- */
   'nav.help': ['Help', 'सहायता'],
-  'nav.help.hint': ['How it works, and what is working right now', 'यह कैसे काम करता है, और अभी क्या चल रहा है'],
   'help.title': ['Help', 'सहायता'],
   'help.lede': [
     'What Braillix does, how to use it in a lesson, and a button that goes and checks whether everything on this laptop is actually working.',

@@ -44,9 +44,10 @@ test.describe('with the network unplugged', () => {
     await page.goto('/');
     await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 25_000 });
 
-    await page.getByLabel('Speak as I read').uncheck();
+    await page.getByTestId('speech-toggle').click();
     await page.getByTestId('latex-input').fill(String.raw`\frac{1}{2a}`);
     await page.waitForTimeout(400);
+    await page.getByTestId('explore-toggle').click();
     await page.getByTestId('mode-explore').click();
     await expect(page.getByTestId('breadcrumb')).toHaveText('Fraction');
     await page.getByTestId('go-in').click();

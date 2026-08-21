@@ -30,10 +30,19 @@ export interface LessonLine {
 
 const STORAGE_KEY = 'braillix.lesson.v1';
 
+/**
+ * A board that has never been written on shows one worked line, already alive on the cells —
+ * the taste of success before anything is asked of the teacher. Only on a machine that has
+ * never seen Braillix: an absent key is a first launch; an empty array is a teacher who
+ * cleared her board, and a cleared board stays cleared.
+ */
+export const OPENING_EXAMPLE = 'x^2 + 3x + 2 = 0';
+
 /** localStorage can be full, disabled, or a private-mode mirage — the lesson works regardless. */
 function load(): LessonLine[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw === null) return [{ id: makeId(), source: OPENING_EXAMPLE, origin: { kind: 'typed' } }];
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];

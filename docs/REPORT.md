@@ -31,16 +31,32 @@ complete software half, which is fully functional with no hardware attached.
 
 ## 2. What the product does
 
-- **The Board.** A single primary screen. The teacher types a line in ordinary notation
-  (`2x + 3 = 11`, `sqrt(144)`, `1/2`, or Hindi text such as `दो संख्याओं का योग 12 है`) and
-  presses Enter. The line joins the lesson — a stack of lines, like a blackboard — is
-  translated to braille, sent to the display, and spoken aloud. Any earlier line returns to
-  the display with one press. Lessons persist across restarts on the same laptop.
-- **Scanning.** Three photograph paths, all processed on the laptop with no network:
-  an equation photo; a hand-drawn expression (mouse/touch pad); and a full textbook question
-  scanned part by part — the teacher drags a box around the sentence, then around the
-  mathematics, tags each, watches each be read, corrects anything doubtful, and only then
-  sends the assembled line to the board. Keyboard-only paths exist for all of it.
+The interface is a single surface designed to read as a blackboard: the lesson stands on it
+as typeset print, the braille cells sit beneath it, and one input tray (with every school
+mathematics symbol permanently visible) is the only place anything is written. Device
+configuration and help are behind two doors in the top rail. This is a deliberate v4
+redesign: usability testing with the project owner showed that capability which must be
+found behaves identically to capability which is absent.
+
+- **The board.** The teacher types a line in ordinary notation (`2x + 3 = 11`, `sqrt(144)`,
+  `1/2`, or Hindi text such as `दो संख्याओं का योग 12 है`) and presses Enter. The line joins
+  the lesson — a stack of lines, like a blackboard — is translated to braille, sent to the
+  display, and spoken aloud. Any earlier line returns to the display with one press. Lessons
+  persist across restarts on the same laptop.
+- **Handwriting, in place.** Pressing the pencil turns the board's next empty line into a
+  writing surface. The teacher writes a step with a finger, stylus or mouse; when the hand
+  pauses (1.2 s), the strokes are rasterised to a clean black-on-white image and read by the
+  same on-device recogniser the camera path uses (the model was trained on handwritten as
+  well as printed formulas — UniMER-1M, handwritten-subset BLEU 0.86). The reading lands in
+  the input box behind the print preview and the braille verdict; the teacher's ordinary
+  "put on the board" press is the confirmation. If she edits the box by hand, the strip
+  never overwrites her text. The committed line keeps her strokes as a faint ghost behind
+  the typeset print.
+- **Scanning.** Photograph paths, all processed on the laptop with no network: an equation
+  photo, and a full textbook question scanned part by part — the teacher drags a box around
+  the sentence, then around the mathematics, tags each, watches each be read, corrects
+  anything doubtful, and only then sends the assembled line to the board. Keyboard-only
+  paths exist for all of it.
 - **The confirm gate.** No recognised content can reach the display without explicit teacher
   approval. This is enforced in the type system (a "recognised" lesson line cannot be
   constructed without a literal `confirmed: true`), not by interface convention.
@@ -82,7 +98,7 @@ application fully functional offline; large model files are cached on first use.
 ## 4. System architecture and data flow
 
 ```
-teacher input (type | photo | drawing | textbook scan)
+teacher input (type | handwriting on the board | photo | textbook scan)
     → [scan paths only] recognition workers (formula ONNX · tesseract eng+hin)
     → [scan paths only] CONFIRM GATE — teacher sees print + hears speech, approves
     → lesson store (lines of segments: English text | Hindi text | mathematics)
@@ -173,8 +189,12 @@ badge, so the teacher's first scan does not pay the load cost.
 - **Recognition is not perfect and is designed around that fact.** Handwriting quality,
   page skew and low light reduce accuracy; the mitigation is the visible quality judgement,
   the second reading, and the mandatory human confirmation — not a claim of perfection.
-- **Word OCR of handwritten text is out of scope** (printed text only); Tesseract is weaker
-  on Hindi than English, which the confidence flag surfaces.
+- **Handwritten words (as opposed to mathematics) are weak.** The ink strip's "Words" mode
+  routes handwriting through Tesseract, which is trained on print — careful, print-style
+  writing works; cursive and handwritten Devanagari genuinely do not, and no free
+  browser-runnable handwritten-Devanagari model existed as of August 2026 (researched, with
+  sources, in the project decision log). Mathematics ink is the strong path; the confirm
+  gate carries the rest.
 - **The braille pipeline is Grade 1 plus Nemeth.** Grade 2 (contracted) literary braille is
   not implemented. The Indian mathematics braille code is treated as Nemeth-compatible; a
   symbol-level diff against the NIEPVD manual (print-only) has not been performed.
@@ -207,8 +227,10 @@ app/            the product (Vite + React + TS)
   src/core/     translation engine: input → LaTeX → MathML → Nemeth/Bharati → cells → cams
   src/recognise/ on-device recognition (formula worker, tesseract words, preprocessing)
   src/transport/ simulator | Web Serial | HTTP pods, one interface + conformance suite
-  src/ui/       the Board, scanning, device and help screens, i18n (en/hi)
-  src/lesson.ts the blackboard: lesson lines, selection, the typed confirm gate
+  src/ui/       the blackboard surface, chalk tray, ink strip, cells strip, drawer, i18n
+  src/lesson.ts the blackboard's memory: lesson lines, selection, the typed confirm gate
+  src/draft.ts  the chalk in the hand: one owner of the line being written
+  src/ink.ts    ghost ink: the teacher's strokes kept behind recognised lines
 firmware/       ESP32 pod + muscle-cell sketches (hardware team's domain)
 tools/          virtual pod emulator · model fetchers · accuracy report · deployed-site check
 docs/           PROTOCOL.md (wire protocol) · ACCURACY.md (generated) · this report

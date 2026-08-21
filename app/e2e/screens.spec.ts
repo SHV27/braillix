@@ -23,8 +23,8 @@ const WIDTHS = [
  * `steps` is the sequence of test ids to click from a cold start; the Board needs none.
  */
 const SCREENS = [
-  { id: 'board', steps: [], heading: 'Write maths. Read it with your hands.' },
-  { id: 'recognise', steps: ['source-photo'], heading: 'Write maths. Read it with your hands.' },
+  { id: 'board', steps: [], heading: 'The blackboard' },
+  { id: 'recognise', steps: ['tray-scan'], heading: 'The blackboard' },
   { id: 'device', steps: ['nav-device'], heading: 'Hardware' },
   { id: 'atlas', steps: ['nav-device', 'device-atlas'], heading: 'Cell atlas' },
 ] as const;
@@ -61,9 +61,10 @@ test.describe('states worth capturing', () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/');
     await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
-    await page.getByLabel('Speak as I read').uncheck();
+    await page.getByTestId('speech-toggle').click();
     await page.getByTestId('latex-input').fill(String.raw`\frac{-b \pm \sqrt{b^2-4ac}}{2a}`);
     await page.waitForTimeout(600);
+    await page.getByTestId('explore-toggle').click();
     await page.getByTestId('mode-explore').click();
     await expect(page.getByTestId('breadcrumb')).toHaveText('Fraction');
     await page.getByTestId('cell-count').fill('5');
@@ -80,7 +81,8 @@ test.describe('states worth capturing', () => {
       await page.getByTestId('latex-input').fill(source);
       await page.getByTestId('commit-line').click();
     }
-    await expect(page.getByTestId('lesson-rail').locator('li')).toHaveCount(3);
+    // Three committed lines plus the seeded example a fresh machine opens with.
+    await expect(page.getByTestId('lesson-rail').locator('li')).toHaveCount(4);
     await page.waitForTimeout(500);
     await noSidewaysScroll(page, 'the board with a lesson on it');
     await page.screenshot({ path: `${SHOTS}/board-lesson.png`, fullPage: true });

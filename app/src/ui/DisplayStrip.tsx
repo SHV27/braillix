@@ -56,7 +56,7 @@ export function DisplayStrip() {
         </p>
       </div>
 
-      <p className="evidence__unicode" lang="en" data-testid="braille-unicode">
+      <p className="evidence__unicode" lang="en">
         {cellsToUnicode(cells)}
       </p>
 

@@ -16,7 +16,7 @@ async function openWith(page: Page, latex: string) {
   await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
 
   // Silence speech so the suite stays fast and quiet.
-  await page.getByLabel('Speak as I read').uncheck();
+  await page.getByTestId('speech-toggle').click();
 
   await page.getByTestId('latex-input').fill(latex);
   // Translation is asynchronous. Wait for the new expression to land before changing mode,
@@ -25,6 +25,7 @@ async function openWith(page: Page, latex: string) {
   await expect(page.getByTestId('braille-unicode')).not.toHaveText('', { timeout: 10_000 });
   await page.waitForTimeout(400);
 
+  await page.getByTestId('explore-toggle').click();
   await page.getByTestId('mode-explore').click();
   await expect(page.getByTestId('breadcrumb')).not.toHaveText('—', { timeout: 10_000 });
 }
@@ -55,7 +56,7 @@ test.describe('exploring an expression', () => {
 
   test('the arrow keys do the same as the buttons', async ({ page }) => {
     await openWith(page, SIMPLE_FRACTION);
-    await page.locator('h1').click(); // move focus out of any field
+    await page.locator('.rail-top__brand').click(); // move focus out of any field
 
     await page.keyboard.press('ArrowDown');
     await expect(page.getByTestId('breadcrumb')).toHaveText('Fraction ▸ Numerator');

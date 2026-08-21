@@ -145,8 +145,16 @@
 }
 
 @media (max-width: 640px) {
+  /* On a phone the strip is one sliding row — the board keeps its height. Worst news is
+     ranked first (rankedCapabilities), so what matters is never off-screen at rest. */
   .strip {
-    padding: var(--s3) var(--s4);
+    padding: var(--s2) var(--s3);
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .cap {
+    flex: 0 0 auto;
   }
   .cap__reason,
   .cap__fix {
