@@ -25,7 +25,7 @@ Braillix is a capstone project built by:
 ## What it looks like
 
 <p align="center">
-  <img src="docs/shots/board-hero.jpeg" alt="The blackboard: a five-line lesson standing as typeset chalk — a quadratic, fractions, a square root, the quadratic formula, and a Hindi question — with the amber marker on the current line, six braille cells showing it below, and the chalk tray with every symbol visible" width="900">
+  <img src="docs/shots/board-hero.jpeg" alt="The blackboard on a laptop: a class 11–12 lesson standing as typeset chalk — the combinations formula, the whole binomial theorem, Bayes' theorem, integration by parts — with the amber marker on the current line, the braille cell below, and the full senior symbol vocabulary visible on the rail" width="900">
 </p>
 
 <p align="center">
@@ -34,6 +34,19 @@ Braillix is a capstone project built by:
 
 <p align="center">
   <img src="docs/shots/coverage-proof.jpeg" alt="The Help drawer proving the syllabus live on production: 232 of 232 curriculum lines translate and read back cleanly, across 27 topics, in about a second" width="900">
+</p>
+
+The same blackboard, studio-grade at every size — a tablet held in class, and a phone held
+sideways:
+
+<p align="center">
+  <img src="docs/shots/tablet-hero.jpeg" alt="The same senior lesson on a tablet: every line with its correct and rub-out tools always visible, all 48 symbol keys in three rows, the cells and the chalk tray" width="440">
+  &nbsp;
+  <img src="docs/shots/phone-landscape-hero.jpeg" alt="A phone held sideways: the board line, the cells, a sliding symbol rail and the writing hand all on one 390-pixel-tall screen" width="440">
+</p>
+
+<p align="center">
+  <img src="docs/shots/mirror-two-pods.jpeg" alt="Two Wi-Fi pods of different sizes mirroring one lesson — the status strip reads 2 cells across 2 pods, showing the same — each child reading the same expression under their own fingers" width="900">
 </p>
 
 ## What a lesson looks like
@@ -111,7 +124,7 @@ npm install          # also copies SRE + tesseract assets into app/public
 npm run fetch:model  # once: the 76 MB on-device formula model
 node tools/fetch-tesseract-langs.mjs   # once: eng+hin word reading (3 MB)
 npm run dev          # http://localhost:5173
-npm run verify       # typecheck · lint · 725 unit tests · 101 e2e journeys + screenshots
+npm run verify       # typecheck · lint · 727 unit tests · 101 e2e journeys + screenshots
 npm run pod          # a virtual brain pod on :8080 — connect from the Device screen
 ```
 

@@ -1,6 +1,6 @@
 # Braillix — Project Report Source Document
 
-Prepared 21 August 2026 from the codebase as deployed at https://braillix.vercel.app
+Prepared 22 August 2026 from the codebase as deployed at https://braillix.vercel.app
 (repository: github.com/SHV27/braillix, branch `main`). All numbers in this document were
 measured on that build, on real hardware or in a real browser, on the dates given. Written
 for the report author; no marketing language.
@@ -88,7 +88,7 @@ drills, student records, and any language beyond English and Hindi.
 | Word recognition | tesseract.js 7 (Apache-2.0) with tessdata_fast English + Hindi, fully self-hosted | The words of a textbook question, both scripts, offline |
 | Speech output | Web Speech API, voices from the operating system | Free and offline; absence of a voice is reported, never silent |
 | Hardware link | Custom `Transport` interface with three implementations: simulator, Web Serial (USB), HTTP (Wi-Fi pods) | One interface means the app cannot behave differently on hardware than in the simulator |
-| Testing | Vitest 4 (666 unit tests), Playwright 1.62 (101 end-to-end journeys with screenshots at 390/834/1440 px) | See §7 |
+| Testing | Vitest 4 (727 unit tests), Playwright 1.62 (101 end-to-end journeys with screenshots at 390/834/1440 px) | See §7 |
 | Deployment | Vercel, static, free tier | No server component exists |
 
 Everything is served from the application's own origin — fonts, braille tables, both
@@ -172,7 +172,7 @@ badge, so the teacher's first scan does not pay the load cost.
 
 | Evidence | Result |
 |---|---|
-| Unit tests (Vitest) | 725 / 725 passing |
+| Unit tests (Vitest) | 727 / 727 passing |
 | TypeScript, ESLint | clean |
 | End-to-end journeys (Playwright, real browser, production build) | 101 / 101 passing, with screenshots at 390 / 834 / 1440 px and a no-horizontal-scroll assertion per screen. Includes two handwriting journeys that draw real mouse strokes on the ink strip, wait for the on-device reading, and follow it through the confirm gate onto the board — and one that proves a hand correction is never overwritten by a later reading |
 | Curriculum coverage | **232 / 232 lines across 27 topics** (NCERT arc, classes 1–12), with the senior classes at full depth after a v5 gap audit: sets/relations/functions, inverse trigonometry, permutations–combinations and the binomial theorem written as `nCr`, sequences, complex numbers, conics, calculus from limits to differential equations (including `int u dv = uv - int v du`), vectors and 3-D, matrices and determinants, conditional probability and Bayes' theorem, and a linear-programming objective. Every line is independently read back from its cells. Regenerable as `docs/ACCURACY.md`; re-runnable live from Help ("Prove the syllabus") |
