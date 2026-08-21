@@ -29,6 +29,10 @@ Braillix is a capstone project built by:
   <img src="docs/shots/question-scan-hero.jpeg" alt="Scanning a full textbook question: the sentence and the equation each cropped and read separately, shown back in print for the teacher to check before sending" width="900">
 </p>
 
+<p align="center">
+  <img src="docs/shots/coverage-proof.jpeg" alt="The Help screen proving the syllabus live: 175 of 175 curriculum lines translate and read back cleanly, across 23 topics, in 1.2 seconds" width="900">
+</p>
+
 ## What a lesson looks like
 
 1. **The board.** The teacher types a line the way she would say it — `2x + 3 = 11`, or
