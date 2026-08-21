@@ -51,8 +51,6 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
 
   'nav.board': ['Board', 'बोर्ड'],
   'nav.board.hint': ['Write maths and put it on the display', 'गणित लिखें और डिस्प्ले पर भेजें'],
-  'nav.practice': ['Practice', 'अभ्यास'],
-  'nav.practice.hint': ['Learn Nemeth by reading and writing braille', 'ब्रेल पढ़कर और लिखकर नेमेथ सीखें'],
   'nav.device': ['Device', 'डिवाइस'],
   'nav.device.hint': ['Connect a display and check the wiring', 'डिस्प्ले जोड़ें और वायरिंग जाँचें'],
 
@@ -86,6 +84,22 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
     'Read back from the dots themselves by engines that never saw what you typed — one for each braille code on the line. When the two readings agree, the braille is carrying your question.',
     'यह पढ़ाई डॉट्स से ही की गई है, ऐसे इंजनों द्वारा जिन्होंने आपका लिखा कभी देखा ही नहीं — पंक्ति की हर ब्रेल लिपि के लिए एक। जब दोनों पढ़ाइयाँ मिलती हैं, तब ब्रेल आपका प्रश्न सही ले जा रही है।',
   ],
+
+  /* ---- the blackboard (the lesson rail) ---- */
+  'rail.title': ['Today’s lesson, line by line', 'आज का पाठ, पंक्ति दर पंक्ति'],
+  'rail.empty': ['The board is empty.', 'बोर्ड अभी खाली है।'],
+  'rail.emptyHint': [
+    'Write the first line below — the question, then the working, one line at a time. Every line stays on the board so the class can go back to it.',
+    'नीचे पहली पंक्ति लिखिए — पहले प्रश्न, फिर हल, एक-एक पंक्ति करके। हर पंक्ति बोर्ड पर बनी रहती है ताकि कक्षा उसे दोबारा पढ़ सके।',
+  ],
+  'rail.show': ['Put line {n} on the display', 'पंक्ति {n} डिस्प्ले पर दिखाइए'],
+  'rail.edit': ['Correct line {n}', 'पंक्ति {n} सुधारिए'],
+  'rail.remove': ['Rub out line {n}', 'पंक्ति {n} मिटाइए'],
+  'rail.clear': ['Wipe the board', 'पूरा बोर्ड साफ़ कीजिए'],
+  'rail.translating': ['working…', 'हो रहा है…'],
+  'board.put': ['Put on the board', 'बोर्ड पर लिखिए'],
+  'board.saveLine': ['Save line {n}', 'पंक्ति {n} सहेजिए'],
+  'board.cancelEdit': ['Stop correcting', 'सुधारना छोड़िए'],
 
   'board.print': ['How it reads in print', 'छपाई में ऐसा दिखता है'],
   'board.print.empty': ['Type something and it appears here', 'कुछ लिखिए, वह यहाँ दिखेगा'],
@@ -190,14 +204,6 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   'device.atlas': ['Cell atlas', 'सेल एटलस'],
 
   /* ---- the printed worksheet ---- */
-  'print.name': ['Name', 'नाम'],
-  'print.date': ['Date', 'दिनांक'],
-  'print.foot': [
-    'Prepared with Braillix. The braille under each question is Nemeth for the mathematics and Bharati for the words.',
-    'ब्रेलिक्स से बनाया गया। हर सवाल के नीचे की ब्रेल में गणित नेमेथ में है और शब्द भारती में।',
-  ],
-  'class.print': ['Print this worksheet', 'यह वर्कशीट छापिए'],
-  'class.brf': ['Save for an embosser (BRF)', 'एम्बॉसर के लिए सहेजिए (BRF)'],
 
   /* ---- help and the self-check ---- */
   'nav.help': ['Help', 'सहायता'],
@@ -335,193 +341,17 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
   ],
 
   /* ---- marking an answer ---- */
-  'fb.nothing': ['Nothing written yet.', 'अभी कुछ नहीं लिखा।'],
-  'fb.correct': ['Correct.', 'सही।'],
-  'fb.correctAll': ['Correct — all {count} cells.', 'सही — पूरी {count} सेल।'],
-  'fb.notFinished': ['Not finished yet.', 'अभी पूरा नहीं हुआ।'],
-  'fb.tooLong': ['One cell too many.', 'एक सेल ज़्यादा है।'],
-  'fb.almost': ['Almost — one cell is wrong.', 'लगभग — एक सेल ग़लत है।'],
-  'fb.manyWrong': ['{count} cells are wrong.', '{count} सेल ग़लत हैं।'],
-  'fb.lengthNext': [
-    'The answer is {expected} cells long; you wrote {given}. The next one is {cell}.',
-    'उत्तर {expected} सेल का है; आपने {given} लिखीं। अगली सेल है {cell}।',
-  ],
-  'fb.lengthOnly': [
-    'The answer is {expected} cells long; you wrote {given}.',
-    'उत्तर {expected} सेल का है; आपने {given} लिखीं।',
-  ],
-  'fb.extraDots': [
-    'Cell {index}: you raised dot {dots}, which should not be there.',
-    'सेल {index}: आपने डॉट {dots} उठाया, जो नहीं होना चाहिए।',
-  ],
-  'fb.missingDots': ['Cell {index}: dot {dots} is missing.', 'सेल {index}: डॉट {dots} छूट गया।'],
-  'fb.youWrote': ['You wrote {given}; it should be {expected}.', 'आपने {given} लिखा; होना चाहिए {expected}।'],
-  'fb.moreDiffer': ['{count} more cells after that also differ.', 'उसके बाद {count} और सेल भी अलग हैं।'],
-  'fb.moreDifferOne': ['1 more cell after that also differs.', 'उसके बाद 1 और सेल भी अलग है।'],
 
   /* ---- the class ---- */
-  'nav.class': ['Class', 'कक्षा'],
-  'nav.class.hint': ['Worksheets, students and what they have done', 'वर्कशीट, विद्यार्थी और उनका किया हुआ काम'],
-  'class.title': ['Your class', 'आपकी कक्षा'],
-  'class.lede': [
-    'Worksheets you prepare, the children who read them, and what they have done. All of it stays on this laptop, and moves to another one as a file.',
-    'आपकी बनाई वर्कशीट, उन्हें पढ़ने वाले बच्चे, और उनका किया हुआ काम। सब कुछ इसी लैपटॉप पर रहता है, और दूसरे लैपटॉप पर फ़ाइल के रूप में जाता है।',
-  ],
-  'class.tabs': ['What to look at', 'क्या देखना है'],
-  'class.worksheets': ['Worksheets', 'वर्कशीट'],
-  'class.students': ['Students', 'विद्यार्थी'],
-  'class.records': ['Records', 'रिकॉर्ड'],
 
-  'class.newWorksheet': ['New worksheet', 'नई वर्कशीट'],
-  'class.worksheetName': ['Worksheet name', 'वर्कशीट का नाम'],
-  'class.untitled': ['Tuesday, fractions', 'मंगलवार, भिन्न'],
-  'class.noWorksheets': [
-    'No worksheets yet. A worksheet is just a list of things you want on the display, in the order you want them — make one and add today’s sums to it.',
-    'अभी कोई वर्कशीट नहीं है। वर्कशीट बस उन चीज़ों की सूची है जिन्हें आप डिस्प्ले पर चाहते हैं, आपके क्रम में — एक बनाइए और आज के सवाल उसमें जोड़िए।',
-  ],
-  'class.items': ['{count} items', '{count} सवाल'],
-  'class.itemsOne': ['1 item', '1 सवाल'],
-  'class.addItem': ['Add a question', 'सवाल जोड़िए'],
-  'class.pasted': [
-    '{count} questions added from what you pasted.',
-    'आपने जो चिपकाया उससे {count} प्रश्न जोड़े गए।',
-  ],
-  'class.pastedOne': ['1 question added.', '1 प्रश्न जोड़ा गया।'],
-  'class.addItemHint': [
-    'Type it as you would on the Board — 1/2, sqrt(9), or a whole question with words in it. Paste a whole numbered exercise and each line becomes a question.',
-    'जैसे बोर्ड पर लिखते हैं वैसे लिखिए — 1/2, sqrt(9), या शब्दों वाला पूरा सवाल। पूरा नंबर वाला अभ्यास चिपकाइए, हर पंक्ति एक प्रश्न बन जाएगी।',
-  ],
-  'class.add': ['Add', 'जोड़िए'],
-  'class.noItems': [
-    'Nothing in this worksheet yet. Add the first question below, or add one from the Board while you are writing it.',
-    'इस वर्कशीट में अभी कुछ नहीं है। नीचे पहला सवाल जोड़िए, या बोर्ड पर लिखते समय वहीं से जोड़ दीजिए।',
-  ],
-  'class.moveUp': ['Move up', 'ऊपर ले जाइए'],
-  'class.moveDown': ['Move down', 'नीचे ले जाइए'],
-  'class.removeItem': ['Remove', 'हटाइए'],
-  'class.putOnBoard': ['Put on the board', 'बोर्ड पर लगाइए'],
-  'class.teach': ['Teach this worksheet', 'यह वर्कशीट पढ़ाइए'],
-  'class.deleteWorksheet': ['Delete this worksheet', 'यह वर्कशीट हटाइए'],
-  'class.confirmDelete': ['Delete “{name}” and everything in it?', '“{name}” और उसमें सब कुछ हटा दें?'],
 
-  'class.studentName': ['Name', 'नाम'],
-  'class.studentGroup': ['Class or group', 'कक्षा या समूह'],
-  'class.addStudent': ['Add student', 'विद्यार्थी जोड़िए'],
-  'class.noStudents': [
-    'No students yet. Add the children who use this display, and their practice will be kept against their name instead of in one pile.',
-    'अभी कोई विद्यार्थी नहीं है। जो बच्चे यह डिस्प्ले इस्तेमाल करते हैं उन्हें जोड़िए, फिर उनका अभ्यास उन्हीं के नाम से रखा जाएगा।',
-  ],
-  'class.atTheDisplay': ['At the display now', 'अभी डिस्प्ले पर'],
-  'class.nobody': ['Nobody — practice is not being recorded', 'कोई नहीं — अभ्यास दर्ज नहीं हो रहा'],
-  'class.remove': ['Remove', 'हटाइए'],
-  'class.confirmRemoveStudent': ['Remove {name} and everything recorded for them?', '{name} और उनका दर्ज सब कुछ हटा दें?'],
 
-  'class.colStudent': ['Student', 'विद्यार्थी'],
-  'class.colGroup': ['Group', 'समूह'],
-  'class.colAttempts': ['Attempts', 'प्रयास'],
-  'class.colCorrect': ['Correct', 'सही'],
-  'class.colLast': ['Last worked', 'आख़िरी बार'],
-  'class.never': ['not yet', 'अभी नहीं'],
-  'class.noRecords': [
-    'Nothing recorded yet. Choose who is at the display on the Students tab, then let them practise — every answer is kept here, on this machine only.',
-    'अभी कुछ दर्ज नहीं है। “विद्यार्थी” में चुनिए कि डिस्प्ले पर कौन है, फिर उन्हें अभ्यास करने दीजिए — हर उत्तर यहीं, सिर्फ़ इसी मशीन पर रखा जाएगा।',
-  ],
-  'class.exportCsv': ['Save the records as a spreadsheet', 'रिकॉर्ड को स्प्रेडशीट में सहेजिए'],
-  'class.exportAll': ['Save everything to a file', 'सब कुछ फ़ाइल में सहेजिए'],
-  'class.import': ['Open a file from another laptop', 'दूसरे लैपटॉप की फ़ाइल खोलिए'],
-  'class.imported': [
-    'Added {worksheets} worksheets, {items} questions, {students} students and {records} records.',
-    '{worksheets} वर्कशीट, {items} सवाल, {students} विद्यार्थी और {records} रिकॉर्ड जोड़े गए।',
-  ],
-  'class.importFailed': [
-    'That file is not a Braillix file, or it is damaged. Nothing was changed.',
-    'यह ब्रेलिक्स की फ़ाइल नहीं है, या ख़राब है। कुछ भी नहीं बदला गया।',
-  ],
-  'class.eraseAll': ['Erase everything on this laptop', 'इस लैपटॉप से सब कुछ मिटाइए'],
-  'class.confirmErase': [
-    'Erase every worksheet, student and record on this laptop? Save a file first if you want to keep them.',
-    'इस लैपटॉप की हर वर्कशीट, विद्यार्थी और रिकॉर्ड मिटा दें? रखना हो तो पहले फ़ाइल सहेज लीजिए।',
-  ],
-  'class.privacy': [
-    'Braillix has no account and no server. Nothing here has ever left this laptop, and nothing here can.',
-    'ब्रेलिक्स में न कोई खाता है न सर्वर। यहाँ का कुछ भी कभी इस लैपटॉप से बाहर नहीं गया, और जा भी नहीं सकता।',
-  ],
 
   /* ---- teaching ---- */
-  'teach.title': ['Teaching {name}', '{name} पढ़ाया जा रहा है'],
-  'teach.position': ['{index} of {total}', '{total} में से {index}'],
-  'teach.wrong': [
-    'The dots do NOT say this question. They say {reading}. Do not use this one — check it on the Board.',
-    'डॉट्स यह प्रश्न नहीं कह रहे। वे {reading} कह रहे हैं। इसे इस्तेमाल न करें — बोर्ड पर जाँचिए।',
-  ],
-  'teach.unchecked': [
-    'This one could not be checked, so nothing here promises the dots are right. The dots read {reading}.',
-    'इसे जाँचा नहीं जा सका, इसलिए डॉट्स सही होने का यहाँ कोई वादा नहीं है। डॉट्स {reading} पढ़े गए।',
-  ],
-  'teach.close': ['Close', 'बंद कीजिए'],
-  'teach.previous': ['Previous question', 'पिछला सवाल'],
-  'teach.next': ['Next question', 'अगला सवाल'],
-  'teach.say': ['Say it', 'बोलिए'],
-  'teach.keys': ['arrow keys to move · escape to close', 'तीर बटनों से चलें · एस्केप से बंद करें'],
-  'teach.onDisplay': ['This is on the display now', 'यह अभी डिस्प्ले पर है'],
-  'teach.empty': ['This worksheet has nothing in it yet.', 'इस वर्कशीट में अभी कुछ नहीं है।'],
 
   /* ---- adding from the board ---- */
-  'board.addTo': ['Add to worksheet', 'वर्कशीट में जोड़िए'],
-  'board.added': ['Added to {name}', '{name} में जोड़ा गया'],
 
   /* ---- practice ---- */
-  'prac.title': ['Practice', 'अभ्यास'],
-  'prac.lede': [
-    'Read the dots, or write them yourself. Answers are marked on the braille, so any correct way of writing the maths counts.',
-    'डॉट्स पढ़िए, या खुद लिखिए। जाँच ब्रेल पर होती है, इसलिए गणित लिखने का हर सही तरीका गिना जाता है।',
-  ],
-  'prac.hintRead': [
-    'Read these dots — with your fingers on a connected display, or here on screen.',
-    'इन डॉट्स को पढ़िए — जुड़े हुए डिस्प्ले पर उँगलियों से, या यहाँ स्क्रीन पर।',
-  ],
-  'prac.hintWrite': ['What you write appears here, cell by cell.', 'आप जो लिखते हैं वह यहाँ सेल-दर-सेल दिखता है।'],
-  'prac.lessons': ['Lessons', 'पाठ'],
-  'prac.yourWorksheets': ['Your worksheets', 'आपकी वर्कशीट'],
-  'prac.recordingFor': ['Recording for {name}', '{name} के लिए दर्ज हो रहा है'],
-  'prac.recordingNobody': [
-    'Nobody is chosen, so nothing is being recorded. Choose a student on the Class screen.',
-    'कोई चुना नहीं गया, इसलिए कुछ दर्ज नहीं हो रहा। कक्षा स्क्रीन पर विद्यार्थी चुनिए।',
-  ],
-  'prac.erase': ['Erase my progress', 'मेरी प्रगति मिटाएँ'],
-  'prac.privacy': [
-    'Progress is stored on this computer only. Nothing is uploaded, and there is no account.',
-    'प्रगति सिर्फ़ इसी कंप्यूटर पर रहती है। कुछ भी अपलोड नहीं होता, और कोई खाता नहीं है।',
-  ],
-  'prac.drillType': ['Drill type', 'अभ्यास का प्रकार'],
-  'prac.drillRead': ['Read the dots', 'डॉट्स पढ़िए'],
-  'prac.drillWrite': ['Write the braille', 'ब्रेल लिखिए'],
-  'prac.question': ['Question {index} of {total}', '{total} में से प्रश्न {index}'],
-  'prac.score': ['{correct} of {total} answered correctly', '{total} में से {correct} सही'],
-  'prac.promptRead': ['{count} cells are on the display. What does it say?', 'डिस्प्ले पर {count} सेल हैं। यह क्या कहता है?'],
-  'prac.promptReadPaged': [
-    '{count} cells are on the display ({width} at a time). What does it say?',
-    'डिस्प्ले पर {count} सेल हैं (एक बार में {width})। यह क्या कहता है?',
-  ],
-  'prac.yourAnswer': ['Your answer', 'आपका उत्तर'],
-  'prac.answerHint': ['for example 1/2 or x^2+1', 'जैसे 1/2 या x^2+1'],
-  'prac.promptWrite': ['Write this in braille', 'इसे ब्रेल में लिखिए'],
-  'prac.dot': ['dot {dot}', 'डॉट {dot}'],
-  'prac.chordHint': ['press the dots together, then let go', 'डॉट्स एक साथ दबाइए, फिर छोड़ दीजिए'],
-  'prac.nothingWritten': ['nothing written yet', 'अभी कुछ नहीं लिखा'],
-  'prac.space': ['Space', 'खाली जगह'],
-  'prac.deleteLast': ['Delete last', 'आख़िरी मिटाएँ'],
-  'prac.startAgain': ['Start again', 'फिर से शुरू'],
-  'prac.check': ['Check my answer', 'मेरा उत्तर जाँचिए'],
-  'prac.reveal': ['Show me', 'दिखाइए'],
-  'prac.theAnswer': ['The answer', 'उत्तर'],
-  'prac.speechOff': [
-    'Speech is switched off — turn it on from the Board to hear each question.',
-    'वाणी बंद है — हर प्रश्न सुनने के लिए बोर्ड से इसे चालू कीजिए।',
-  ],
-  'prac.sayReading': ['Reading drill: {count} cells on the display. Type what they say.', 'पढ़ने का अभ्यास: डिस्प्ले पर {count} सेल। लिखिए कि वे क्या कहते हैं।'],
-  'prac.sayNothing': ['Nothing written yet.', 'अभी कुछ नहीं लिखा।'],
-  'prac.sayWritten': ['{count} cells written.', '{count} सेल लिखी गईं।'],
 
   /* ---- reading handwriting ---- */
   'rec.notInstalled': ['Recognition is not installed.', 'पहचान स्थापित नहीं है।'],

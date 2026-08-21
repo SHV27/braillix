@@ -15,13 +15,14 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useBraillix } from '../store';
+import { useLesson } from '../lesson';
+import { LessonRail } from './LessonRail';
 import { DisplayDock } from './DisplayDock';
 import { DisplayStrip } from './DisplayStrip';
 import { MathKeypad, insertAtCaret } from './MathKeypad';
 import { MathPreview } from './MathPreview';
 import { QuestionStrip } from './QuestionStrip';
 import { ReadbackPanel } from './ReadbackPanel';
-import { AddToWorksheet } from './AddToWorksheet';
 import { FirstRun } from './FirstRun';
 import { ReaderPanel } from './ReaderPanel';
 import { RecognisePanel } from './RecognisePanel';
@@ -53,7 +54,6 @@ type SourceTab = 'type' | 'photo';
 
 export function BoardScreen() {
   const t = useT();
-  const source = useBraillix((s) => s.source);
   const setSource = useBraillix((s) => s.setSource);
   const translation = useBraillix((s) => s.translation);
   const latex = useBraillix((s) => s.latex);
@@ -63,23 +63,80 @@ export function BoardScreen() {
   const spokenText = useBraillix((s) => s.spokenText);
   const mixedLine = useBraillix((s) => s.mixedLine);
 
+  const addLine = useLesson((s) => s.addLine);
+  const editLine = useLesson((s) => s.editLine);
+  const selectLine = useLesson((s) => s.selectLine);
+
   const [tab, setTab] = useState<SourceTab>('type');
+  /** Which lesson line the box is correcting, or null when it is writing the next one. */
+  const [editing, setEditing] = useState<number | null>(null);
+  /**
+   * What is in the box, which is NOT what is on the display. While the teacher types, the two
+   * track each other so the dots are a live preview; the moment a line is committed the box
+   * empties for the next line while the display keeps showing the one just written — the chalk
+   * stays on the board when the teacher's hand leaves it.
+   */
+  const [draft, setDraft] = useState('');
   const field = useRef<HTMLTextAreaElement>(null);
 
   /*
    * Taste of success before any input is demanded — ONCE.
    *
-   * This used to depend on `source`, so every time the box became empty the example came back. Which
-   * meant the Clear button did nothing you could see, and deleting the last character by hand
-   * refilled the field under the teacher's cursor. An opening example is a greeting, not a rule
-   * about what the box may contain.
+   * On a machine that has a lesson from last time, show its last line — the board resumes
+   * where the class left off. On a machine that has never seen Braillix, draft the opening
+   * example into the box so the display is alive before anything is asked of the teacher.
    */
   const greeted = useRef(false);
   useEffect(() => {
     if (greeted.current || sre.state !== 'ready') return;
     greeted.current = true;
-    if (useBraillix.getState().source === '') setSource(OPENING_EXAMPLE);
+    const lesson = useLesson.getState();
+    if (lesson.lines.length > 0) {
+      lesson.selectLine(lesson.lines.length - 1);
+    } else if (useBraillix.getState().source === '') {
+      // Deferred a tick: the greeting is a one-time hand-off into normal typing state, not
+      // something this render depends on — and the lint rule about synchronous setState in
+      // effects is right about everything else.
+      const greet = setTimeout(() => {
+        setDraft(OPENING_EXAMPLE);
+        setSource(OPENING_EXAMPLE);
+      }, 0);
+      return () => clearTimeout(greet);
+    }
   }, [sre.state, setSource]);
+
+  /** The teacher typing: box and display move together, keystroke by keystroke. */
+  function updateDraft(text: string) {
+    setDraft(text);
+    setSource(text);
+  }
+
+  /** The one commit path: Enter, or the button. Adds the next line, or saves a correction. */
+  function commit() {
+    const text = draft.trim();
+    if (!text) return;
+    if (editing !== null) {
+      editLine(editing, text);
+      setEditing(null);
+    } else {
+      addLine(text, { kind: 'typed' });
+    }
+    setDraft(''); // the box empties; the display keeps the line just written
+  }
+
+  function beginEdit(index: number, text: string) {
+    setEditing(index);
+    setTab('type');
+    setDraft(text);
+    setSource(text);
+    selectLine(index);
+    field.current?.focus();
+  }
+
+  function cancelEdit() {
+    setEditing(null);
+    setDraft('');
+  }
 
   const issues = translation?.issues ?? [];
   const parseIssue = issues.find((issue) => issue.kind === 'parse');
@@ -87,10 +144,10 @@ export function BoardScreen() {
   function insert(text: string, back: number) {
     const node = field.current;
     if (!node) {
-      setSource(source + text);
+      updateDraft(draft + text);
       return;
     }
-    setSource(insertAtCaret(node, text, back));
+    updateDraft(insertAtCaret(node, text, back));
   }
 
   return (
@@ -102,7 +159,10 @@ export function BoardScreen() {
         <p className="read__lede">{t('board.lede')}</p>
 
         {/* Shown once, on a machine that has never used Braillix, and never again. */}
-        <FirstRun />
+        <FirstRun onDemo={updateDraft} />
+
+        {/* The blackboard: today's lesson, line by line, in the order it was taught. */}
+        <LessonRail onEdit={beginEdit} />
 
         <div className="segmented board__tabs" role="group" aria-label={t('board.source')}>
           <button
@@ -132,18 +192,49 @@ export function BoardScreen() {
               <textarea
                 ref={field}
                 className="field__input num"
-                value={source}
+                value={draft}
                 spellCheck={false}
                 rows={2}
                 name="expression"
                 data-testid="latex-input"
                 aria-describedby="input-help"
-                onChange={(event) => setSource(event.target.value)}
+                onChange={(event) => updateDraft(event.target.value)}
+                onKeyDown={(event) => {
+                  // Enter puts the line on the board, exactly as it sends a WhatsApp message.
+                  // Shift+Enter keeps its meaning of "new line inside the box".
+                  if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    commit();
+                  }
+                  if (event.key === 'Escape' && editing !== null) cancelEdit();
+                }}
               />
             </label>
             <p id="input-help" className="field__help">
               {t('board.help')}
             </p>
+
+            <div className="board__commit">
+              <button
+                type="button"
+                className="btn btn--primary"
+                data-testid="commit-line"
+                disabled={!draft.trim()}
+                onClick={commit}
+              >
+                {editing !== null ? t('board.saveLine', { n: editing + 1 }) : t('board.put')}
+              </button>
+              {editing !== null && (
+                <button
+                  type="button"
+                  className="chip"
+                  data-testid="cancel-edit"
+                  onClick={cancelEdit}
+                >
+                  {t('board.cancelEdit')}
+                </button>
+              )}
+            </div>
 
             <MathKeypad onInsert={insert} />
 
@@ -151,8 +242,8 @@ export function BoardScreen() {
               <h2 className="field__label board__printlabel">
                 {mixedLine ? t('board.question') : t('board.print')}
               </h2>
-              {source && (
-                <button type="button" className="chip" data-testid="clear-board" onClick={() => setSource('')}>
+              {draft && (
+                <button type="button" className="chip" data-testid="clear-board" onClick={() => updateDraft('')}>
                   {t('board.clear')}
                 </button>
               )}
@@ -165,15 +256,13 @@ export function BoardScreen() {
 
             <ReadbackPanel />
 
-            <AddToWorksheet source={source} />
-
             <div className="examples board__examples" role="group" aria-label={t('board.examples')}>
               {EXAMPLES.map((example) => (
                 <button
                   key={example.source}
                   type="button"
-                  className={`chip${source === example.source ? ' is-current' : ''}`}
-                  onClick={() => setSource(example.source)}
+                  className={`chip${draft === example.source ? ' is-current' : ''}`}
+                  onClick={() => updateDraft(example.source)}
                 >
                   {t(example.key)}
                 </button>
@@ -181,7 +270,14 @@ export function BoardScreen() {
             </div>
           </>
         ) : (
-          <RecognisePanel onSent={() => setTab('type')} />
+          <RecognisePanel
+            onSent={(recognised) => {
+              // The teacher pressed "put this on the board" after seeing and hearing the
+              // reading — that press is the confirmation the lesson store's type demands.
+              addLine(recognised, { kind: 'recognised', confirmed: true });
+              setTab('type');
+            }}
+          />
         )}
 
         {/* Keyed by position, not by text: "((((" genuinely produces four identical complaints,

@@ -24,9 +24,7 @@ const WIDTHS = [
  */
 const SCREENS = [
   { id: 'board', steps: [], heading: 'Write maths. Read it with your hands.' },
-  { id: 'practice', steps: ['nav-practice'], heading: 'Practice' },
   { id: 'recognise', steps: ['source-photo'], heading: 'Write maths. Read it with your hands.' },
-  { id: 'class', steps: ['nav-class'], heading: 'Your class' },
   { id: 'device', steps: ['nav-device'], heading: 'Hardware' },
   { id: 'atlas', steps: ['nav-device', 'device-atlas'], heading: 'Cell atlas' },
 ] as const;
@@ -74,27 +72,18 @@ test.describe('states worth capturing', () => {
     await page.screenshot({ path: `${SHOTS}/reader-exploring.png`, fullPage: true });
   });
 
-  test('a worksheet with real questions in it', async ({ page }) => {
+  test('a lesson with real questions on the board', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/');
     await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
-    await page.getByTestId('nav-class').click();
-    await page.getByTestId('new-worksheet').click();
-    await page.getByTestId('worksheet-title').fill('Tuesday, fractions');
     for (const source of ['2/3 + 1/6', 'sqrt(144) = 12', 'दो संख्याओं का योग 12 है']) {
-      await page.getByTestId('new-item').fill(source);
-      await page.getByTestId('add-item').click();
+      await page.getByTestId('latex-input').fill(source);
+      await page.getByTestId('commit-line').click();
     }
-    await expect(page.getByTestId('worksheet-items').locator('li')).toHaveCount(3);
+    await expect(page.getByTestId('lesson-rail').locator('li')).toHaveCount(3);
     await page.waitForTimeout(500);
-    await noSidewaysScroll(page, 'class with items');
-    await page.screenshot({ path: `${SHOTS}/class-worksheet.png`, fullPage: true });
-
-    // And the same worksheet being taught — the screen a class actually sees.
-    await page.getByTestId('teach').click();
-    await expect(page.getByTestId('teach-braille')).toContainText('⠹', { timeout: 10_000 });
-    await page.waitForTimeout(500);
-    await page.screenshot({ path: `${SHOTS}/teach-mode.png`, fullPage: true });
+    await noSidewaysScroll(page, 'the board with a lesson on it');
+    await page.screenshot({ path: `${SHOTS}/board-lesson.png`, fullPage: true });
   });
 
   test('the self-check, run', async ({ page }) => {
@@ -109,43 +98,21 @@ test.describe('states worth capturing', () => {
     await page.screenshot({ path: `${SHOTS}/help-selfcheck.png`, fullPage: true });
   });
 
-  test('the practice writing drill, mid-chord', async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto('/');
-    await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
-    await page.getByTestId('nav-practice').click();
-    await page.getByTestId('drill-write').click();
-    await page.getByRole('heading', { name: 'Practice', level: 1 }).click();
-
-    await page.keyboard.down('s');
-    await page.keyboard.down('j');
-    await page.keyboard.down('k');
-    await page.keyboard.down('l');
-    await page.waitForTimeout(200);
-    await page.screenshot({ path: `${SHOTS}/practice-chord.png`, fullPage: true });
-    await page.keyboard.up('s');
-    await page.keyboard.up('j');
-    await page.keyboard.up('k');
-    await page.keyboard.up('l');
-  });
 });
 
 /**
  * Long text does not push the page sideways.
  *
- * Found during a QA pass, not by reasoning: a worksheet titled with a two-hundred-character
- * sentence and an item three hundred characters long gave the Class screen 1,762 pixels of
- * horizontal overflow. Both are things a teacher does — they paste a question out of a textbook —
- * and neither is an attack.
- *
- * Wide *mathematics* is allowed to scroll inside its own box. The page is not.
+ * Found during a QA pass, not by reasoning: a three-hundred-character question — a thing a
+ * teacher genuinely does when pasting out of a textbook — once gave a screen 1,762 pixels of
+ * horizontal overflow. Wide *mathematics* is allowed to scroll inside its own box. The page
+ * is not, and neither is the lesson rail.
  */
 test.describe('nothing overflows, however long the words are', () => {
   const MONSTER = 'x'.repeat(300);
-  const LONG_TITLE = 'A very long worksheet name that a teacher might genuinely type '.repeat(3);
 
   for (const size of WIDTHS) {
-    test(`${size.name}: a long question and a long title stay inside the page`, async ({ page }) => {
+    test(`${size.name}: a long question stays inside the page, in the box and on the board`, async ({ page }) => {
       await page.setViewportSize({ width: size.width, height: size.height });
       await page.goto('/');
       await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
@@ -154,19 +121,11 @@ test.describe('nothing overflows, however long the words are', () => {
       await page.waitForTimeout(400);
       await noSidewaysScroll(page, `board at ${size.width}px`);
 
-      await page.getByTestId('nav-class').click();
-      await page.getByTestId('new-worksheet').click();
-      await page.getByTestId('worksheet-title').fill(LONG_TITLE);
-      await page.getByTestId('new-item').fill(MONSTER);
-      await page.getByTestId('add-item').click();
-      await page.getByTestId('new-item').fill('दो संख्याओं का योग बहुत लंबा प्रश्न है '.repeat(4));
-      await page.getByTestId('add-item').click();
+      await page.getByTestId('commit-line').click();
+      await page.getByTestId('latex-input').fill('दो संख्याओं का योग बहुत लंबा प्रश्न है '.repeat(4));
+      await page.getByTestId('commit-line').click();
       await page.waitForTimeout(600);
-      await noSidewaysScroll(page, `class at ${size.width}px`);
-
-      await page.getByTestId('teach').click();
-      await page.waitForTimeout(600);
-      await noSidewaysScroll(page, `teaching at ${size.width}px`);
+      await noSidewaysScroll(page, `the lesson rail at ${size.width}px`);
     });
   }
 });

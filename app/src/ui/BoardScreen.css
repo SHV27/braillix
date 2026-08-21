@@ -24,3 +24,11 @@
 .board__examples {
   margin-top: var(--s4);
 }
+
+/* The commit row: one obvious primary action under the box, exactly like a send button. */
+.board__commit {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  margin: var(--s3) 0 var(--s5);
+}

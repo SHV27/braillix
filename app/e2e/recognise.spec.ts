@@ -89,11 +89,15 @@ test.describe('reading handwriting — with the model installed', () => {
     // It reports a quality judgement with reasons, never a bare number.
     await expect(page.getByTestId('rec-quality')).toBeVisible();
 
-    // Nothing reached the display until a human said so.
+    // Nothing reached the display until a human said so. Pressing the button IS the
+    // confirmation, and the confirmed line lands on the board — the lesson rail — not
+    // back in the typing box, which stays empty for the teacher's next line.
     await page.getByTestId('send-to-display').click();
-    // Sending it lands back on the typing tab, where it can be corrected and read.
-    await expect(page.getByTestId('latex-input')).toBeVisible();
-    await expect(page.getByTestId('latex-input')).toHaveValue(latex);
+    await expect(page.getByTestId('lesson-rail')).toBeVisible();
+    await expect(page.getByTestId('lesson-rail')).toContainText(latex.trim().slice(0, 12));
+    // The typing box keeps whatever draft the teacher had; the recognised maths does not
+    // hijack it on its way to the board.
+    await expect(page.getByTestId('latex-input')).not.toHaveValue(latex);
   });
 
   test('a correction by hand is what actually gets read', async ({ page }) => {

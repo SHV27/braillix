@@ -39,7 +39,7 @@ test.describe('with the network unplugged', () => {
     expect(blocked, `blocked external requests:\n${blocked.join('\n')}`).toEqual([]);
   });
 
-  test('the reader, practice and atlas all work offline', async ({ page }) => {
+  test('the reader and the atlas both work offline', async ({ page }) => {
     const blocked = await goOffline(page);
     await page.goto('/');
     await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 25_000 });
@@ -51,11 +51,6 @@ test.describe('with the network unplugged', () => {
     await expect(page.getByTestId('breadcrumb')).toHaveText('Fraction');
     await page.getByTestId('go-in').click();
     await expect(page.getByTestId('breadcrumb')).toHaveText('Fraction ▸ Numerator');
-
-    await page.getByTestId('nav-practice').click();
-    await page.getByTestId('answer-input').fill('1');
-    await page.getByTestId('check-answer').click();
-    await expect(page.getByTestId('verdict')).toContainText('Correct');
 
     await page.getByTestId('nav-device').click();
     await page.getByTestId('device-atlas').click();

@@ -1,0 +1,138 @@
+/*
+ * The blackboard. A darker plate than the panel around it — chalk on slate — with the amber
+ * chalk-marker carrying the only colour. Rows are machined: hairline separations, no cards.
+ */
+
+.rail {
+  background: var(--ink-000);
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  margin-bottom: var(--s5);
+}
+
+.rail--empty {
+  padding: var(--s5) var(--s5);
+}
+
+.rail__empty-word {
+  color: var(--text-200);
+  font-size: var(--t-body);
+  margin: 0 0 var(--s2);
+}
+
+.rail__empty-hint {
+  color: var(--text-300);
+  font-size: var(--t-small);
+  margin: 0;
+}
+
+.rail__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rail__row {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--edge);
+}
+
+.rail__row:last-child {
+  border-bottom: 0;
+}
+
+.rail__line {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: var(--s3);
+  padding: var(--s3) var(--s4);
+  background: none;
+  border: 0;
+  color: var(--text-100);
+  font-size: var(--t-body);
+  text-align: left;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.rail__line:hover {
+  background: var(--ink-100);
+}
+
+.rail__line:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: -2px;
+}
+
+/* The chalk: a 3px amber edge on the current line, nothing anywhere else. */
+.rail__marker {
+  align-self: stretch;
+  width: 3px;
+  margin: calc(-1 * var(--s3)) 0 calc(-1 * var(--s3)) calc(-1 * var(--s4));
+  flex: none;
+}
+
+.rail__row.is-current .rail__marker {
+  background: var(--signal);
+}
+
+.rail__index {
+  color: var(--text-300);
+  font-family: var(--font-mono);
+  font-size: var(--t-small);
+  font-variant-numeric: tabular-nums;
+  flex: none;
+  min-width: 1.5ch;
+}
+
+.rail__row.is-current .rail__index {
+  color: var(--signal);
+}
+
+.rail__source {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.rail__busy {
+  color: var(--text-300);
+  font-size: var(--t-tiny);
+  flex: none;
+}
+
+.rail__tools {
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+  padding-right: var(--s3);
+}
+
+.rail__tool {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-300);
+  font-size: var(--t-body);
+  line-height: 1;
+  padding: var(--s1) var(--s2);
+  cursor: pointer;
+}
+
+.rail__tool:hover {
+  color: var(--text-100);
+  border-color: var(--edge-strong);
+}
+
+.rail__tool:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 1px;
+}
+
+.rail__foot {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--s2) var(--s3);
+  border-top: 1px solid var(--edge);
+}

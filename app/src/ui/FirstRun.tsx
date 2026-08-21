@@ -63,11 +63,15 @@ const STEPS: Step[] = [
   },
 ];
 
-export function FirstRun() {
+export function FirstRun({ onDemo }: { onDemo?: (text: string) => void }) {
   const t = useT();
-  const setSource = useBraillix((s) => s.setSource);
+  const storeSetSource = useBraillix((s) => s.setSource);
   const setMode = useBraillix((s) => s.setMode);
   const setView = useBraillix((s) => s.setView);
+
+  // The demo fills the teacher's own box when the board offers one, so "now try changing it"
+  // is one keystroke away — the display alone would be a magic trick with no handle.
+  const setSource = onDemo ?? storeSetSource;
 
   const [dismissed, setDismissed] = useState(alreadySeen);
   const [done, setDone] = useState<string[]>([]);

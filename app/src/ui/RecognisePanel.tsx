@@ -22,13 +22,16 @@ const recogniser = new OnDeviceRecogniser();
 type Source = { url: string; label: string } | null;
 
 export interface RecognisePanelProps {
-  /** Called once the recognised maths has been put on the board, so the caller can show it. */
-  onSent: () => void;
+  /**
+   * Called with the teacher-approved reading when they press "put this on the board".
+   * That press IS the confirm gate: the caller records the line as recognised-and-confirmed.
+   * Nothing in this panel touches the display directly.
+   */
+  onSent: (source: string) => void;
 }
 
 export function RecognisePanel({ onSent }: RecognisePanelProps) {
   const t = useT();
-  const setLatex = useBraillix((s) => s.setLatex);
   const setCapability = useBraillix((s) => s.setCapability);
 
   const [status, setStatus] = useState<ProviderStatus>({ state: 'unavailable', reason: 'checking…' });
@@ -150,8 +153,7 @@ export function RecognisePanel({ onSent }: RecognisePanelProps) {
 
   function sendToDisplay() {
     if (!draft.trim()) return;
-    setLatex(draft);
-    onSent();
+    onSent(draft);
   }
 
   const warning = prepared ? imageWarning(prepared) : null;

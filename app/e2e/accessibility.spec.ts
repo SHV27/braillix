@@ -13,9 +13,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 const SCREENS = [
   { tab: 'board', steps: [], heading: 'Write maths. Read it with your hands.' },
-  { tab: 'practice', steps: ['nav-practice'], heading: 'Practice' },
   { tab: 'photo', steps: ['source-photo'], heading: 'Write maths. Read it with your hands.' },
-  { tab: 'class', steps: ['nav-class'], heading: 'Your class' },
   { tab: 'device', steps: ['nav-device'], heading: 'Hardware' },
   { tab: 'atlas', steps: ['nav-device', 'device-atlas'], heading: 'Cell atlas' },
 ] as const;
@@ -182,43 +180,5 @@ test.describe('keyboard only', () => {
       getComputedStyle(document.documentElement).getPropertyValue('--dur-cam').trim(),
     );
     expect(duration).toBe('1ms');
-  });
-});
-
-/**
- * Teaching is modal, and modal has to mean it.
- *
- * A dialog that looks like it covers the page but lets Tab walk out into what is behind it is
- * useless to the one person who most needs it to be a dialog: somebody who cannot see that the
- * page behind is gone.
- */
-test.describe('the lesson is a real dialog', () => {
-  test('takes focus, keeps it, and gives it back', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.getByTestId('braille-unicode')).toContainText('⠭', { timeout: 20_000 });
-    await page.getByTestId('nav-class').click();
-    await page.getByTestId('new-worksheet').click();
-    await page.getByTestId('new-item').fill('1/2');
-    await page.getByTestId('add-item').click();
-
-    const teachButton = page.getByTestId('teach');
-    await teachButton.click();
-    const dialog = page.getByTestId('teach-mode');
-    await expect(dialog).toBeVisible();
-
-    // Focus moved into the lesson rather than staying on the button behind it.
-    const inside = await dialog.evaluate((node) => node.contains(document.activeElement));
-    expect(inside, 'focus should be inside the lesson').toBe(true);
-
-    // Tab all the way round: it must never land on anything outside.
-    for (let i = 0; i < 15; i += 1) {
-      await page.keyboard.press('Tab');
-      const stillInside = await dialog.evaluate((node) => node.contains(document.activeElement));
-      expect(stillInside, `focus escaped after ${i + 1} tabs`).toBe(true);
-    }
-
-    await page.keyboard.press('Escape');
-    await expect(dialog).toBeHidden();
-    await expect(teachButton).toBeFocused();
   });
 });

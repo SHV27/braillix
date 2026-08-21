@@ -69,7 +69,7 @@ const INITIAL_CAPABILITIES: CapabilityMap = {
 
 /* ------------------------------------------------------------------ view + settings */
 
-export type ViewId = 'board' | 'practice' | 'class' | 'device' | 'help';
+export type ViewId = 'board' | 'device' | 'help';
 
 /**
  * How the display is being driven.
