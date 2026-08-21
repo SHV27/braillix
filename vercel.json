@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node tools/fetch-model.mjs && node tools/fetch-tesseract-langs.mjs && node app/scripts/copy-sre-assets.mjs && node app/scripts/copy-tesseract-assets.mjs && BRAILLIX_DEPLOY=1 npm run build",
+  "buildCommand": "node tools/fetch-model.mjs && node tools/fetch-tesseract-langs.mjs && node app/scripts/copy-sre-assets.mjs && node app/scripts/copy-tesseract-assets.mjs && npm run build",
   "outputDirectory": "app/dist",
   "installCommand": "npm install",
   "framework": null,

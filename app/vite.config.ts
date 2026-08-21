@@ -1,7 +1,7 @@
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { createHash } from 'node:crypto';
-import { readdirSync, rmSync, statSync, writeFileSync, existsSync } from 'node:fs';
+import { readdirSync, statSync, writeFileSync, existsSync } from 'node:fs';
 import { join, posix, relative, sep } from 'node:path';
 
 /** Every file under `dir`, as paths relative to it, with forward slashes. */
@@ -40,8 +40,11 @@ function serviceWorker(): Plugin {
         (file) =>
           // The weights themselves are far too big to precache; the one-line file that says
           // whether they are here is not, and the recognition badge has to be right offline too.
+          // (They still SHIP — the browser caches them on first use via the Cache API; precache
+          // is only about what downloads before the app is usable at all.)
           (!file.startsWith('models/') || file === 'models/status.json') &&
           !file.startsWith('ort/') &&
+          !file.startsWith('tesseract/') &&
           !file.endsWith('.wasm') &&
           !file.endsWith('.map') &&
           file !== 'sw.js',
@@ -122,35 +125,17 @@ self.addEventListener('fetch', (event) => {
   };
 }
 
-/**
- * A build for the public web leaves out what only a local install can use.
- *
- * The handwriting model (77 MB) and the ONNX runtime (74 MB) are downloaded by `npm run
- * fetch:model` and are useless without each other. Shipping 150 MB to a school's connection to
- * deliver a feature that cannot run would be worse than not shipping it: Braillix reports
- * recognition as unavailable, with the command to enable it, which is the honest state.
+/*
+ * v1 had a "slimForDeploy" plugin here that STRIPPED the recognition model and ONNX runtime
+ * out of public builds. That policy is exactly how the founder met a dead scan button in
+ * front of his team, and it is reversed for good (DECISIONS D-V2.12): the deployed artifact
+ * carries everything its buttons promise, and assert-assets.mjs fails the build otherwise.
+ * The service worker still precaches none of the big files — they download on first use and
+ * are cached by the browser from then on.
  */
-function slimForDeploy(): Plugin {
-  return {
-    name: 'braillix-slim-for-deploy',
-    apply: 'build',
-    closeBundle() {
-      if (!process.env.BRAILLIX_DEPLOY) return;
-      const outDir = join(import.meta.dirname, 'dist');
-      // models/status.json stays: it is how the app knows the model is absent without asking for
-      // a file that is not there and logging a 404 in everybody's console.
-      rmSync(join(outDir, 'models', 'formulanet'), { recursive: true, force: true });
-      rmSync(join(outDir, 'ort'), { recursive: true, force: true });
-      for (const file of walk(join(outDir, 'assets'))) {
-        if (file.endsWith('.wasm')) rmSync(join(outDir, 'assets', file), { force: true });
-      }
-      this.info?.('deploy build: model, runtime and wasm left out');
-    },
-  };
-}
 
 export default defineConfig({
-  plugins: [react(), slimForDeploy(), serviceWorker()],
+  plugins: [react(), serviceWorker()],
   // Relative base so a built bundle runs from a file server, a subpath, or a USB stick.
   base: './',
   build: {

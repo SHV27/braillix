@@ -20,6 +20,9 @@ const REQUIRED = [
   { path: 'models/formulanet/onnx/encoder_model.onnx', minBytes: 10_000_000 },
   { path: 'models/formulanet/onnx/decoder_model_merged.onnx', minBytes: 5_000_000 },
   { path: 'models/formulanet/tokenizer.json', minBytes: 1_000 },
+  // The ONNX runtime the model runs on — useless apart, dead button together-less.
+  { path: 'ort/ort-wasm-simd-threaded.wasm', minBytes: 5_000_000 },
+  { path: 'ort/ort-wasm-simd-threaded.mjs', minBytes: 10_000 },
   // Word reading for full questions — English and Hindi.
   { path: 'tesseract/worker.min.js', minBytes: 10_000 },
   { path: 'tesseract/core/tesseract-core-simd-lstm.wasm', minBytes: 1_000_000 },

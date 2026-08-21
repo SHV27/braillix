@@ -65,14 +65,23 @@ try {
     report(asset.ok, `icon ${icon.src} is served`, `HTTP ${asset.status}`);
   }
 
-  // The model is deliberately absent from the public build; what matters is that the app is TOLD
-  // so, rather than finding out from a 404 in everybody's console.
+  // v2 policy — REVERSED from v1, which died of exactly this: the recognition assets SHIP.
+  // A deployed Braillix whose scan buttons cannot work is a defective artifact, full stop.
   const status = await get('/models/status.json');
   report(status.response.ok, 'the model status file is served');
-  report(status.text.includes('"formulanet": false'), 'and it says the model is not installed here');
+  report(status.text.includes('"formulanet": true'), 'and it says the model is installed', status.text.trim());
 
-  const missing = await fetch(`${BASE}/models/formulanet/config.json`);
-  report(!missing.ok, 'the model itself is not shipped to the public build', `HTTP ${missing.status}`);
+  const model = await fetch(`${BASE}/models/formulanet/config.json`);
+  report(model.ok, 'the formula model ships with the build', `HTTP ${model.status}`);
+  const encoder = await fetch(`${BASE}/models/formulanet/onnx/encoder_model.onnx`, { method: 'HEAD' });
+  report(encoder.ok, 'the encoder weights are served', `HTTP ${encoder.status}`);
+
+  const tessWorker = await fetch(`${BASE}/tesseract/worker.min.js`, { method: 'HEAD' });
+  report(tessWorker.ok, 'the word-reading worker is served', `HTTP ${tessWorker.status}`);
+  for (const lang of ['eng', 'hin']) {
+    const data = await fetch(`${BASE}/tesseract/lang/${lang}.traineddata.gz`, { method: 'HEAD' });
+    report(data.ok, `the ${lang} language file is served`, `HTTP ${data.status}`);
+  }
 } catch (error) {
   failures += 1;
   console.log(`  FAIL  could not reach the site — ${error instanceof Error ? error.message : String(error)}`);
