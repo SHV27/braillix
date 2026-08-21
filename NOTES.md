@@ -104,3 +104,10 @@ arc plan first.
   we hold, and guessing them would break the rule this project runs on: dot patterns follow the
   published standard or they do not ship. Whoever has the printed Nemeth code can close this in an
   afternoon; the seam is `core/mixed.ts`, where a run of underscores is currently classified as text.
+
+## V2 parked (unbuilt, by order of the arc plan)
+- Multi-actor pending markers (student pod explores while teacher writes; "new line on the
+  board" spoken marker with explicit rejoin) — needs per-pod cursor state in the protocol.
+- Texo model swap (20M in-browser math OCR, AGPL; CDM 0.90 handwritten) — evaluate vs formulanet.
+- Line-number announcements when paging across lines ("Line 2 of 5: ...").
+- Grade-2 contractions · auto page-layout detection · MathCAT WASM · SRE 5 upgrade.

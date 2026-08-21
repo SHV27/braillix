@@ -129,8 +129,14 @@ interface BraillixState {
   flipSegment: (text: string) => void;
   translating: boolean;
   /** Put an expression on the board, in whatever notation it was written. */
-  setSource: (text: string) => void;
+  setSource: (text: string, options?: SetSourceOptions) => void;
   setLatex: (latex: string) => void;
+  /**
+   * Page the reading window: through the panes of the current line first, and past its edge
+   * into the neighbouring lesson line (via the registered edge pager). The ONE paging path —
+   * pod buttons, on-screen arrows and keyboard all come here, so they cannot disagree.
+   */
+  page: (direction: -1 | 1) => void;
   /** Re-check which voice the current language has. Called when the language changes. */
   refreshSpeech: () => void;
 
@@ -192,11 +198,35 @@ interface BraillixState {
   bootstrap: () => Promise<void>;
 }
 
+export interface SetSourceOptions {
+  /** Speak the line once it is translated — a committed line lands on ears as well as fingers. */
+  say?: boolean;
+  /** Open on the LAST pane instead of the first — paging backwards into a line reads its end. */
+  landAtEnd?: boolean;
+}
+
 /**
  * The link is not reactive state: it is a live connection with listeners and a belief about
  * physical hardware. The store holds exactly one, and replaces it when the transport changes.
  */
 let link: DisplayLink | null = null;
+
+/**
+ * What paging past the edge of the current line does. The lesson store registers itself here
+ * (dependency inversion — this store must not know the lesson exists, or the import cycles).
+ * Returns true if it moved somewhere.
+ */
+let edgePager: ((direction: -1 | 1) => boolean) | null = null;
+
+export function registerEdgePager(pager: (direction: -1 | 1) => boolean): void {
+  edgePager = pager;
+}
+
+/** The window start that shows the final pane of a run of `total` cells. */
+function lastPaneStart(total: number, cellCount: number): number {
+  if (total <= cellCount) return 0;
+  return Math.floor((total - 1) / cellCount) * cellCount;
+}
 
 const NO_CELLS: DotMask[] = [];
 
@@ -297,12 +327,10 @@ export const useBraillix = create<BraillixState>((set, get) => {
   function handlePodButton(event: ButtonEvent): void {
     const { mode } = get();
     if (mode !== 'explore') {
-      // In whole-expression mode the buttons page the display, which is the conventional behaviour.
-      const { windowStart, profile, activeCells } = get();
-      if (event.button === 'prev') get().setWindowStart(Math.max(0, windowStart - profile.cellCount));
-      if (event.button === 'next') {
-        get().setWindowStart(Math.min(windowStart + profile.cellCount, Math.max(0, activeCells.length - 1)));
-      }
+      // In whole-line mode the buttons walk the lesson the way a finger walks a blackboard:
+      // through the panes of this line, then on to the next line of the working.
+      if (event.button === 'prev') get().page(-1);
+      if (event.button === 'next') get().page(1);
       if (event.button === 'select') get().sayCurrent();
       return;
     }
@@ -495,7 +523,7 @@ export const useBraillix = create<BraillixState>((set, get) => {
      * so that natural maths and LaTeX cannot diverge into two pipelines with two sets of bugs.
      * `toLatex` passes LaTeX through untouched, so this is safe for callers that already have it.
      */
-    setSource: (text) => {
+    setSource: (text, options = {}) => {
       /*
        * A line with words in it is a textbook question, not an expression: it needs two braille
        * codes and a visible boundary between them (core/mixed.ts). A line without words takes
@@ -514,6 +542,7 @@ export const useBraillix = create<BraillixState>((set, get) => {
       if (words) {
         void translateMixed(text, get().segmentOverrides).then((line) => {
           if (get().source !== text) return;
+          const start = options.landAtEnd ? lastPaneStart(line.cells.length, get().profile.cellCount) : 0;
           set({
             translating: false,
             mixedLine: line,
@@ -532,14 +561,18 @@ export const useBraillix = create<BraillixState>((set, get) => {
             mode: 'whole',
             announcement: translate('say.cells', { count: line.cells.length }),
             cellCodes: line.codes,
-            ...project({ activeCells: line.cells, windowStart: 0, cursor: null }),
+            ...project({ activeCells: line.cells, windowStart: start, cursor: null }),
           });
+          if (options.say) get().sayCurrent();
         });
         return;
       }
 
       void translateLatex(parsed.latex).then((translation) => {
         if (get().source !== text) return; // a newer keystroke already won
+        const start = options.landAtEnd
+          ? lastPaneStart(translation.cells.length, get().profile.cellCount)
+          : 0;
 
         const tree = buildTree(translation.enriched);
         const rootId = tree?.rootId ?? null;
@@ -570,17 +603,33 @@ export const useBraillix = create<BraillixState>((set, get) => {
             ? translate('board.parseFailed')
             : translate('say.cells', { count: translation.cells.length }),
           cellCodes: null,
-          ...project({ activeCells: translation.cells, windowStart: 0, cursor: null }),
+          ...project({ activeCells: translation.cells, windowStart: start, cursor: null }),
         });
 
         if (get().mode === 'explore' && tree && rootId) {
           void showNode(tree.nodes.get(rootId)!, { announce: false });
+        } else if (options.say) {
+          get().sayCurrent();
         }
       });
     },
 
     /** LaTeX is just one of the notations `setSource` understands. */
     setLatex: (latex) => get().setSource(latex),
+
+    page: (direction) => {
+      const { windowStart, profile, activeCells } = get();
+      if (direction === -1 && windowStart > 0) {
+        get().setWindowStart(Math.max(0, windowStart - profile.cellCount));
+        return;
+      }
+      if (direction === 1 && windowStart + profile.cellCount < activeCells.length) {
+        get().setWindowStart(windowStart + profile.cellCount);
+        return;
+      }
+      // Past the edge of this line: on to the neighbouring line of the lesson, if there is one.
+      edgePager?.(direction);
+    },
 
     /* --- the reader --- */
     mode: 'whole',

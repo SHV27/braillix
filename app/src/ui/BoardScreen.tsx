@@ -138,6 +138,21 @@ export function BoardScreen() {
     setDraft('');
   }
 
+  /*
+   * PageUp/PageDown read the board from anywhere on the screen — the keyboard twin of the
+   * pod's Prev/Next buttons. Deliberately NOT the arrow keys, which belong to the caret in
+   * the box and to the structure reader.
+   */
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (event.key !== 'PageUp' && event.key !== 'PageDown') return;
+      event.preventDefault();
+      useBraillix.getState().page(event.key === 'PageUp' ? -1 : 1);
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   const issues = translation?.issues ?? [];
   const parseIssue = issues.find((issue) => issue.kind === 'parse');
 

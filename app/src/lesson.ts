@@ -15,7 +15,7 @@
  */
 
 import { create } from 'zustand';
-import { useBraillix } from './store';
+import { registerEdgePager, useBraillix } from './store';
 
 export type LineOrigin =
   | { readonly kind: 'typed' }
@@ -85,11 +85,11 @@ interface LessonState {
 
 export const useLesson = create<LessonState>((set, get) => {
   /** The one hand-off to the display pipeline. */
-  function show(index: number): void {
+  function show(index: number, options: { say?: boolean; landAtEnd?: boolean } = {}): void {
     const line = get().lines[index];
     if (!line) return;
     set({ currentIndex: index });
-    useBraillix.getState().setSource(line.source);
+    useBraillix.getState().setSource(line.source, options);
   }
 
   return {
@@ -102,7 +102,8 @@ export const useLesson = create<LessonState>((set, get) => {
       const lines = [...get().lines, { id: makeId(), source: trimmed, origin }];
       set({ lines });
       persist(lines);
-      show(lines.length - 1);
+      // A new line lands on fingers AND ears — the chalk stroke a sighted class hears narrated.
+      show(lines.length - 1, { say: true });
     },
 
     selectLine: (index) => {
@@ -149,7 +150,23 @@ export const useLesson = create<LessonState>((set, get) => {
       const from = currentIndex ?? (direction === 1 ? -1 : lines.length);
       const next = Math.min(Math.max(from + direction, 0), lines.length - 1);
       if (next === currentIndex) return;
-      show(next);
+      // Stepping backwards opens a line at its LAST pane, so paging feels like one long
+      // continuous reading of the board rather than a series of jumps to line-starts.
+      show(next, { landAtEnd: direction === -1 });
     },
   };
+});
+
+/*
+ * Paging past the edge of a line continues into the lesson. Registered here, consumed by the
+ * main store's `page()` — the lesson knows about the display pipeline, never the reverse.
+ */
+registerEdgePager((direction) => {
+  const { lines, currentIndex } = useLesson.getState();
+  if (lines.length === 0) return false;
+  const from = currentIndex ?? (direction === 1 ? -1 : lines.length);
+  const target = from + direction;
+  if (target < 0 || target >= lines.length) return false;
+  useLesson.getState().step(direction);
+  return true;
 });

@@ -8,6 +8,7 @@
  */
 
 import { useBraillix } from '../store';
+import { useLesson } from '../lesson';
 import { SIMULATOR_MAX_CELLS, SIMULATOR_MIN_CELLS } from '../config';
 import { FULL_CELL } from '../core/braille';
 import { BrailleCell } from './BrailleCell';
@@ -37,15 +38,23 @@ export function DisplayDock({
   const setCellCount = useBraillix((s) => s.setCellCount);
   const frame = useBraillix((s) => s.frame);
   const windowStart = useBraillix((s) => s.windowStart);
-  const setWindowStart = useBraillix((s) => s.setWindowStart);
+  const page = useBraillix((s) => s.page);
   const activeCells = useBraillix((s) => s.activeCells);
+  const lessonLines = useLesson((s) => s.lines);
+  const lessonIndex = useLesson((s) => s.currentIndex);
   const foldedChildCells = useBraillix((s) => s.foldedChildCells);
   const enterFoldAt = useBraillix((s) => s.enterFoldAt);
   const mode = useBraillix((s) => s.mode);
 
   const total = activeCells.length;
-  const canScroll = total > profile.cellCount;
   const simulated = profile.source === 'simulated';
+
+  // The arrows read the whole lesson, not just this line: past a line's edge they continue
+  // into the neighbouring line of the board — the same walk the pod's own buttons take.
+  const canPrev = windowStart > 0 || (lessonIndex !== null && lessonIndex > 0);
+  const canNext =
+    windowStart + profile.cellCount < total ||
+    (lessonIndex !== null && lessonIndex < lessonLines.length - 1);
 
   return (
     <section className="dock" aria-labelledby="dock-heading">
@@ -106,8 +115,9 @@ export function DisplayDock({
           <button
             type="button"
             className="btn"
-            disabled={!canScroll || windowStart === 0}
-            onClick={() => setWindowStart(Math.max(0, windowStart - profile.cellCount))}
+            data-testid="page-prev"
+            disabled={!canPrev}
+            onClick={() => page(-1)}
           >
             ← {t('display.previous')}
           </button>
@@ -117,8 +127,9 @@ export function DisplayDock({
           <button
             type="button"
             className="btn"
-            disabled={!canScroll || windowStart + profile.cellCount >= total}
-            onClick={() => setWindowStart(windowStart + profile.cellCount)}
+            data-testid="page-next"
+            disabled={!canNext}
+            onClick={() => page(1)}
           >
             {t('display.next')} →
           </button>

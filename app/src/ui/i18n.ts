@@ -287,8 +287,8 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
     '`npm install` दोबारा चलाइए। इनके बिना ब्रेलिक्स को इंटरनेट चाहिए, जो कक्षा में शायद न हो।',
   ],
   'check.storageOk': [
-    'Worksheets and student records will be kept on this laptop.',
-    'वर्कशीट और विद्यार्थियों के रिकॉर्ड इसी लैपटॉप पर रहेंगे।',
+    'The lesson on the board will still be here when this laptop is opened tomorrow.',
+    'बोर्ड पर लिखा पाठ कल लैपटॉप खोलने पर भी यहीं मिलेगा।',
   ],
   'check.storageBad': ['This browser will not let Braillix save anything.', 'यह ब्राउज़र ब्रेलिक्स को कुछ भी सहेजने नहीं देता।'],
   'check.storageFix': [
@@ -323,16 +323,15 @@ const STRINGS: Readonly<Record<string, readonly [en: string, hi: string]>> = {
 
   'help.howTo': ['How to use it in a lesson', 'कक्षा में कैसे चलाएँ'],
   'help.step1': ['Write the question on the Board. Two things check it for you: it is shown in print, and “What the dots say” reads the braille back and tells you whether it matches.', 'बोर्ड पर सवाल लिखिए। दो चीज़ें उसे जाँचती हैं: वह छपाई में दिखता है, और “डॉट्स क्या कह रहे हैं” ब्रेल को वापस पढ़कर बताता है कि वह मेल खाती है या नहीं।'],
-  'help.step2': ['Keep it in a worksheet, so tomorrow you press one button instead of typing again. A whole numbered exercise can be pasted in at once — each line becomes a question.', 'उसे वर्कशीट में रख लीजिए, ताकि कल दोबारा लिखने के बजाय एक बटन दबाना पड़े। पूरा नंबर वाला अभ्यास एक साथ चिपकाया जा सकता है — हर पंक्ति एक प्रश्न बन जाती है।'],
-  'help.step3': ['Press Teach. The arrow keys move through the questions; each one goes onto the display.', '“पढ़ाइए” दबाइए। तीर बटन सवालों में चलते हैं; हर सवाल डिस्प्ले पर चला जाता है।'],
+  'help.step2': ['Press Enter and the line goes on the board. Teach the way you write on a blackboard — the question, then the working, line by line. Every line stays on the board, and one press shows any of them again.', 'Enter दबाइए और पंक्ति बोर्ड पर चली जाती है। जैसे ब्लैकबोर्ड पर लिखकर पढ़ाते हैं वैसे ही पढ़ाइए — पहले सवाल, फिर हल, पंक्ति दर पंक्ति। हर पंक्ति बोर्ड पर बनी रहती है, और एक दबाने से फिर दिख जाती है।'],
+  'help.step3': ['The display’s arrows — and the Prev/Next buttons on the pod itself — walk the whole lesson: through a long line first, then on to the next line of the working. PageUp and PageDown do the same from the keyboard.', 'डिस्प्ले के तीर — और पॉड के अपने Prev/Next बटन — पूरा पाठ चलकर पढ़ते हैं: पहले लंबी पंक्ति के भीतर, फिर हल की अगली पंक्ति पर। कीबोर्ड से PageUp और PageDown यही करते हैं।'],
   'help.step4': ['With one cell, use Explore structure — a long expression folds into a few cells you can step into.', 'एक ही सेल हो तो “रचना देखिए” चलाइए — लंबा व्यंजक कुछ सेल में सिमट जाता है, जिनमें अंदर जाया जा सकता है।'],
-  'help.step5': ['Choose who is at the display on the Class screen, and their practice is kept against their name.', 'कक्षा स्क्रीन पर चुनिए कि डिस्प्ले पर कौन है, फिर उनका अभ्यास उन्हीं के नाम से रखा जाएगा।'],
+  'help.step5': ['Scan a question straight out of the textbook with “Photograph it”. Check the reading it shows you — in print and read aloud — and only then put it on the board. Nothing reaches the display until you approve it.', '“फ़ोटो लीजिए” से सवाल सीधे किताब से स्कैन कीजिए। जो पढ़ाई वह दिखाए उसे जाँचिए — छपाई में और बोलकर — और तभी बोर्ड पर भेजिए। आपकी मंज़ूरी के बिना कुछ भी डिस्प्ले तक नहीं पहुँचता।'],
 
   'help.keys': ['Keys worth knowing', 'काम के बटन'],
   'help.keysReader': ['move through the expression', 'व्यंजक में चलिए'],
   'help.keysSay': ['say the part you are on', 'जिस हिस्से पर हैं वह बोलिए'],
-  'help.keysWrite': ['write braille, six keys like a Perkins', 'ब्रेल लिखिए, पर्किन्स जैसे छह बटन'],
-  'help.keysTeach': ['next and previous question while teaching', 'पढ़ाते समय अगला और पिछला सवाल'],
+  'help.keysTeach': ['walk the lesson, line by line', 'पाठ में चलिए, पंक्ति दर पंक्ति'],
 
   'help.about': ['About Braillix', 'ब्रेलिक्स के बारे में'],
   'help.aboutText': [

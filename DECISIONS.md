@@ -745,3 +745,12 @@ Run before calling this shipped. Result: **nothing to rotate, nothing to hide, n
   misfiring hook blocks all shell work. Enforcement layer = npm run verify + type constraints.
 - D-V2.6: CLAUDE.md updated surgically (blackboard product, confirm-gate law, founder cut list);
   seven laws + gates + structure unchanged. Line count stays ~60.
+- D-V2.7: Pending-marker/explore-rejoin from ARCHITECTURE simplified: one shared display state
+  (that IS the hardware reality); Prev/Next roam the lesson, a new committed line always takes
+  the display (the chalk wins), Select speaks. Multi-actor pending markers cut to NOTES.md.
+- D-V2.8: Paging backwards enters a line at its LAST pane (continuous reading, like a book);
+  proven by pager.test.ts. One paging path (store.page) serves pod buttons, on-screen arrows,
+  and PageUp/PageDown.
+- D-V2.9: Committed lines are spoken as they land (sayCurrent after translation) — the chalk
+  stroke a sighted class hears narrated. Key caps (Enter/PageUp/PageDown) whitelisted as names
+  in the Hindi-purity i18n test.

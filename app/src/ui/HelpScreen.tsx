@@ -37,8 +37,7 @@ const STEPS: StringKey[] = ['help.step1', 'help.step2', 'help.step3', 'help.step
 const KEYS: { keys: string[]; what: StringKey }[] = [
   { keys: ['←', '→', '↑', '↓'], what: 'help.keysReader' },
   { keys: ['space'], what: 'help.keysSay' },
-  { keys: ['S', 'D', 'F', 'J', 'K', 'L'], what: 'help.keysWrite' },
-  { keys: ['←', '→'], what: 'help.keysTeach' },
+  { keys: ['PgUp', 'PgDn'], what: 'help.keysTeach' },
 ];
 
 export function HelpScreen() {
