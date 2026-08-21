@@ -9,6 +9,16 @@ This repository is the **software half** of the Braillix capstone. The hardware 
 ESP32 "brain pod" and the motorised "muscle cells") lives with the hardware team; this app
 drives it over the wire protocol in `docs/PROTOCOL.md`, and is complete without it.
 
+## The team
+
+Braillix is a capstone project built by:
+
+- **Shaurya Verma** — project lead, software
+- **Harshita** — software
+- **Aniket** — software
+- **Atishay** — hardware
+- **Mridul** — hardware
+
 ## What a lesson looks like
 
 1. **The board.** The teacher types a line the way she would say it — `2x + 3 = 11`, or
