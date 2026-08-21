@@ -11,6 +11,20 @@
  * difference between "works offline" and "works offline until the first cold start".
  */
 
+/*
+ * transformers.js warns "Unable to determine content-length from response headers" for every
+ * model file a server ships without that header — chunked or compressed responses, which is
+ * most static hosts. It is informational (the buffer grows fine), it fires three times per
+ * load, and since the model now warms at app start it would land on every single page view.
+ * This project's gates treat a console warning as a defect, so exactly that message is
+ * filtered; everything else the library says still comes through.
+ */
+const nativeWarn = console.warn.bind(console);
+console.warn = (...args: unknown[]) => {
+  if (String(args[0] ?? '').startsWith('Unable to determine content-length')) return;
+  nativeWarn(...args);
+};
+
 import {
   cat,
   env,
