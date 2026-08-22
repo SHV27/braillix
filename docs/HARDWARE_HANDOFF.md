@@ -5,6 +5,11 @@ What the hardware team needs from the software side, and the three things we nee
 This is the mirror of your `SOFTWARE_TEAM_README`. Everything below is implemented and tested; the
 protocol is not a proposal.
 
+**Credit where the physics lives:** the hardware architecture this seam is built against — the
+brain-pod/muscle-cell split, the I2C chain, the 64-position cam, the homing behaviour — is the
+hardware team's design (Atishay, lead · Mridul), stated in their `SOFTWARE_TEAM_README` and
+implemented faithfully here. The software half drives their machine; it did not invent it.
+
 ---
 
 ## 1 · What the software already does
