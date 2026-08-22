@@ -10,6 +10,7 @@
 
 import { useEffect } from 'react';
 import { useBraillix } from '../store';
+import { useDraft } from '../draft';
 import { APP_NAME } from '../config';
 import { StatusStrip } from './StatusStrip';
 import { UpdateNotice } from './UpdateNotice';
@@ -25,6 +26,7 @@ export function App() {
   const t = useT();
   const view = useBraillix((s) => s.view);
   const setView = useBraillix((s) => s.setView);
+  const writing = useDraft((s) => s.writing);
   const bootstrap = useBraillix((s) => s.bootstrap);
   const announcement = useBraillix((s) => s.announcement);
 
@@ -98,7 +100,10 @@ export function App() {
           {/* The board needs no visible title — it looks like what it is. The heading exists
               for the document outline a screen reader navigates by. */}
           <h1 className="visually-hidden">{t('board.h1')}</h1>
-          <div className="hall__lines">
+          {/* Writing mode restructures this region by LAYOUT, not by content: the recent lines
+              become a slim scrolling band and the ink surface takes everything else, so opening
+              the pencil moves nothing below it and nothing after it (v5.1: "unstable na hon"). */}
+          <div className={`hall__lines${writing ? ' is-writing' : ''}`}>
             <Blackboard />
           </div>
           <CellsStrip />

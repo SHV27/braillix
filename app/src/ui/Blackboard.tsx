@@ -42,12 +42,15 @@ export function Blackboard() {
   useEffect(() => {
     if (currentIndex === null) return;
     const list = listRef.current;
-    const surface = list?.parentElement; // .hall__lines, the scroll container
+    const surface = list?.parentElement; // .hall__lines — the scroller, except while writing
     const row = list?.children[currentIndex] as HTMLElement | undefined;
     if (!list || !surface || !row) return;
-    const top = row.offsetTop - surface.clientHeight / 2 + row.clientHeight / 2;
-    surface.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-  }, [currentIndex, lines.length]);
+    // While writing, the recent-lines band is its own scroller and the current line is almost
+    // always the newest — keep it in view at the band's foot, under the teacher's eye.
+    const scroller = writing ? list : surface;
+    const top = row.offsetTop - scroller.clientHeight / 2 + row.clientHeight / 2;
+    scroller.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  }, [currentIndex, lines.length, writing]);
 
   if (lines.length === 0) {
     return (

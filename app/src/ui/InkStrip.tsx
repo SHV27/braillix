@@ -80,15 +80,44 @@ export function InkStrip() {
     }
   }, []);
 
+  /*
+   * The canvas follows its box — on mount, on window resize, on a tablet rotating mid-lesson.
+   * The strokes are rescaled proportionally so the writing stays exactly where the hand left
+   * it. Sizing once on mount was an instability the v5.1 brief is about: after any layout
+   * change the pointer coordinates silently stopped matching the pixels.
+   */
+  const lastSize = useRef<{ w: number; h: number } | null>(null);
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ratio = Math.min(window.devicePixelRatio || 1, 2);
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = Math.round(rect.width * ratio);
-    canvas.height = Math.round(rect.height * ratio);
-    canvas.getContext('2d')?.scale(ratio, ratio);
-    redraw();
+
+    const fit = () => {
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width < 1 || rect.height < 1) return;
+      const previous = lastSize.current;
+      if (previous && (previous.w !== rect.width || previous.h !== rect.height)) {
+        const sx = rect.width / previous.w;
+        const sy = rect.height / previous.h;
+        for (const stroke of strokes.current) {
+          for (const point of stroke) {
+            point.x *= sx;
+            point.y *= sy;
+          }
+        }
+      }
+      lastSize.current = { w: rect.width, h: rect.height };
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(rect.width * ratio);
+      canvas.height = Math.round(rect.height * ratio);
+      const ctx = canvas.getContext('2d');
+      ctx?.setTransform(ratio, 0, 0, ratio, 0, 0);
+      redraw();
+    };
+
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(canvas);
+    return () => observer.disconnect();
   }, [redraw]);
 
   /* A committed line means this ink now lives on the board — the strip starts the next one. */
@@ -288,12 +317,11 @@ export function InkStrip() {
         onPointerCancel={end}
       />
 
-      {note && (
-        <p className="inkstrip__note" data-testid="ink-note" role="status">
-          {note}
-        </p>
-      )}
-      <p className="inkstrip__hint">{t('ink.hint')}</p>
+      {/* One reserved line, always in the layout: a note appearing must never resize the
+          canvas under a moving hand. Empty = the hint; occupied = the warning. */}
+      <p className={note ? 'inkstrip__note' : 'inkstrip__hint'} data-testid={note ? 'ink-note' : undefined} role={note ? 'status' : undefined}>
+        {note ?? t('ink.hint')}
+      </p>
     </div>
   );
 }

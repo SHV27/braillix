@@ -1,7 +1,11 @@
 /* The board's writable next line. Ruled like the empty run under the last chalk line. */
 
 .inkstrip {
-  margin: var(--s2) var(--s4) var(--s4);
+  /* The writing surface owns the board region: sized by the viewport split in app.css,
+     never by its own content — the one guarantee that opening it shifts nothing. */
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: var(--s2) var(--s4) var(--s2);
   border: 1px dashed var(--board-edge);
   border-radius: var(--radius);
   background: var(--board-050);
@@ -72,21 +76,10 @@
 
 .inkstrip__canvas {
   width: 100%;
-  height: clamp(140px, 24vh, 260px);
-}
-
-/* A finger is wider than a mouse: on touch-first devices the writing line is taller, the way
-   a board's line spacing grows for chalk (v5: "tablet pe blackboard bahut ache se kaam kare"). */
-@media (pointer: coarse) and (min-height: 541px) {
-  .inkstrip__canvas {
-    height: clamp(220px, 34vh, 380px);
-  }
-}
-
-@media (max-height: 540px) {
-  .inkstrip__canvas {
-    height: clamp(110px, 34vh, 200px);
-  }
+  /* All the height the layout hands down, floor kept for the worst small screen. The old
+     clamp() heights are gone: the board region is the writing surface now. */
+  flex: 1 1 auto;
+  min-height: 110px;
 }
 
 .inkstrip__canvas {
@@ -99,16 +92,23 @@
   cursor: crosshair;
 }
 
-.inkstrip__note {
+/* One reserved line under the canvas — hint or warning, same box, zero layout shift. */
+.inkstrip__note,
+.inkstrip__hint {
   margin: 0;
-  color: var(--warn);
+  min-height: 1.5em;
   font-size: var(--t-small);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inkstrip__note {
+  color: var(--warn);
 }
 
 .inkstrip__hint {
-  margin: 0;
   color: var(--chalk-300);
-  font-size: var(--t-tiny);
 }
 
 .inkstrip--off {

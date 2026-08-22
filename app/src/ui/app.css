@@ -35,6 +35,53 @@
   margin: 0 auto;
 }
 
+/* Writing mode: the board region stops scrolling as a page and splits by LAYOUT — a slim
+   band of recent lines above, the ink surface owning the rest. Sized by the viewport, never
+   by content, so opening the pencil cannot shift the cells, the tray, or anything else. */
+.hall__lines.is-writing {
+  overflow-y: hidden;
+}
+
+.hall__lines.is-writing .board__lines {
+  flex: 0 1 auto;
+  max-height: 24%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.hall__lines.is-writing .board__foot {
+  display: none; /* wiping the whole board is not a mid-writing act */
+}
+
+.hall__lines.is-writing .board__empty {
+  flex: 0 0 auto;
+  padding: var(--s3);
+}
+
+/* While the pencil is open the hand deserves the height: the symbol rail folds to one
+   sliding row and the tray hint yields — every key still reachable, nothing hidden. */
+.hall__lines.is-writing ~ .tray .tray__rail {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+.hall__lines.is-writing ~ .tray .tray__help {
+  display: none;
+}
+
+/* A phone held sideways with the pencil open: the writing hand takes priority over the
+   recent-lines band and the rail — the reading box and the cells still tell the truth,
+   and closing the pencil brings everything back. */
+@media (max-height: 540px) {
+  .hall__lines.is-writing .board__lines {
+    display: none;
+  }
+
+  .hall__lines.is-writing ~ .tray .tray__rail {
+    display: none;
+  }
+}
+
 .skip-link {
   position: absolute;
   left: var(--s4);
